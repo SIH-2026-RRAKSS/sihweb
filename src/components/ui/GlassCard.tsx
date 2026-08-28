@@ -29,7 +29,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
 }) => {
   return (
     <motion.div
-      className={`bg-tactical-surface border border-tactical-border rounded-2xl shadow-saas-card ${paddingMap[padding]} ${className}`}
+      className={`bg-white border border-slate-200 rounded-2xl shadow-saas-card ${paddingMap[padding]} ${className}`}
       whileHover={hover ? { y: -2, transition: { duration: 0.15 }, boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.25), 0 4px 6px -4px rgba(0, 0, 0, 0.1)' } : undefined}
       {...motionProps}
     >

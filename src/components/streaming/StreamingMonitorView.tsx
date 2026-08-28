@@ -81,13 +81,13 @@ export const StreamingMonitorView: React.FC = () => {
   return (
     <div className="space-y-6 pb-8">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-cyber-700 pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
         <div>
-          <h2 className="text-base font-bold font-mono text-slate-100 uppercase tracking-wide flex items-center gap-2">
+          <h2 className="text-base font-bold font-sans text-slate-900 uppercase tracking-wide flex items-center gap-2">
             <Zap className="w-5 h-5 text-amber-400" />
             Real-Time Streaming Ingestion & Dynamic SLA Monitor
           </h2>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500">
             Sliding-window temporal graph accumulator maintaining 72h transaction horizons with sub-second dynamic GraphSAGE inference.
           </p>
         </div>
@@ -95,7 +95,7 @@ export const StreamingMonitorView: React.FC = () => {
         <button
           onClick={handleRunSimulation}
           disabled={isSimulating}
-          className="flex items-center gap-2 px-3.5 py-2 text-xs font-mono font-bold bg-amber-500 text-cyber-950 hover:bg-amber-400 rounded-2xl transition-all disabled:opacity-50"
+          className="flex items-center gap-2 px-3.5 py-2 text-xs font-sans font-bold bg-amber-500 text-cyber-950 hover:bg-amber-400 rounded-2xl transition-all disabled:opacity-50"
         >
           <Play className={`w-3.5 h-3.5 ${isSimulating ? 'animate-spin' : ''}`} />
           <span>{isSimulating ? 'Injecting Stream Burst...' : 'Trigger 1.2k Tx Stream Burst'}</span>
@@ -104,55 +104,55 @@ export const StreamingMonitorView: React.FC = () => {
 
       {/* SLA Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="cyber-card p-4">
-          <div className="flex items-center justify-between text-slate-400 mb-1.5">
-            <span className="text-[10px] font-mono uppercase tracking-wider">Ingestion Throughput</span>
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4">
+          <div className="flex items-center justify-between text-slate-500 mb-1.5">
+            <span className="text-[10px] font-sans uppercase tracking-wider">Ingestion Throughput</span>
             <Activity className="w-4 h-4 text-cyber-cyan animate-pulse" />
           </div>
-          <div className="text-2xl font-bold font-mono text-cyber-cyan">
-            {liveRate.toFixed(1)} <span className="text-xs font-normal text-slate-400">Tx/sec</span>
+          <div className="text-2xl font-bold font-sans text-cyber-cyan">
+            {liveRate.toFixed(1)} <span className="text-xs font-normal text-slate-500">Tx/sec</span>
           </div>
-          <div className="text-[11px] text-emerald-400 font-mono mt-1.5 flex items-center gap-1">
+          <div className="text-[11px] text-emerald-400 font-sans mt-1.5 flex items-center gap-1">
             <CheckCircle className="w-3.5 h-3.5" />
             <span>Exceeds Target (1,000 Tx/s)</span>
           </div>
         </div>
 
-        <div className="cyber-card p-4">
-          <div className="flex items-center justify-between text-slate-400 mb-1.5">
-            <span className="text-[10px] font-mono uppercase tracking-wider">Total Streamed Ledger</span>
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4">
+          <div className="flex items-center justify-between text-slate-500 mb-1.5">
+            <span className="text-[10px] font-sans uppercase tracking-wider">Total Streamed Ledger</span>
             <Database className="w-4 h-4 text-purple-400" />
           </div>
-          <div className="text-2xl font-bold font-mono text-purple-300">
-            {streamedTxCount.toLocaleString()} <span className="text-xs font-normal text-slate-400">Tx</span>
+          <div className="text-2xl font-bold font-sans text-purple-300">
+            {streamedTxCount.toLocaleString()} <span className="text-xs font-normal text-slate-500">Tx</span>
           </div>
-          <div className="text-[11px] text-slate-400 font-mono mt-1.5">
+          <div className="text-[11px] text-slate-500 font-sans mt-1.5">
             750 Nodes • 5,000 Multi-Hop Edges
           </div>
         </div>
 
-        <div className="cyber-card p-4">
-          <div className="flex items-center justify-between text-slate-400 mb-1.5">
-            <span className="text-[10px] font-mono uppercase tracking-wider">p50 Inference Latency</span>
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4">
+          <div className="flex items-center justify-between text-slate-500 mb-1.5">
+            <span className="text-[10px] font-sans uppercase tracking-wider">p50 Inference Latency</span>
             <Clock className="w-4 h-4 text-emerald-400" />
           </div>
-          <div className="text-2xl font-bold font-mono text-emerald-400">
-            {bench?.p50_latency_ms || 2.14} <span className="text-xs font-normal text-slate-400">ms</span>
+          <div className="text-2xl font-bold font-sans text-emerald-400">
+            {bench?.p50_latency_ms || 2.14} <span className="text-xs font-normal text-slate-500">ms</span>
           </div>
-          <div className="text-[11px] text-slate-400 font-mono mt-1.5">
+          <div className="text-[11px] text-slate-500 font-sans mt-1.5">
             Sub-5ms Temporal Dual-Head
           </div>
         </div>
 
-        <div className="cyber-card p-4">
-          <div className="flex items-center justify-between text-slate-400 mb-1.5">
-            <span className="text-[10px] font-mono uppercase tracking-wider">SLA Verification</span>
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4">
+          <div className="flex items-center justify-between text-slate-500 mb-1.5">
+            <span className="text-[10px] font-sans uppercase tracking-wider">SLA Verification</span>
             <ShieldCheck className="w-4 h-4 text-amber-400" />
           </div>
-          <div className="text-2xl font-bold font-mono text-amber-400">
+          <div className="text-2xl font-bold font-sans text-amber-400">
             COMPLIANT
           </div>
-          <div className="text-[11px] text-emerald-400 font-mono mt-1.5 font-bold">
+          <div className="text-[11px] text-emerald-400 font-sans mt-1.5 font-bold">
             100% Sub-5ms Target Met
           </div>
         </div>
@@ -161,13 +161,13 @@ export const StreamingMonitorView: React.FC = () => {
       {/* Latency Percentiles & Degradation Curve */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Latency Percentile Histogram */}
-        <div className="cyber-card p-5 space-y-3">
-          <div className="flex items-center justify-between border-b border-cyber-700 pb-2.5">
-            <h3 className="text-xs font-bold font-mono text-slate-200 uppercase flex items-center gap-2">
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
+            <h3 className="text-xs font-bold font-sans text-slate-800 uppercase flex items-center gap-2">
               <Clock className="w-4 h-4 text-cyber-cyan" />
               Dynamic Subgraph Inference Latency Percentiles (ms)
             </h3>
-            <span className="text-[10px] font-mono text-emerald-400 font-bold">SLA: &lt; 5.00ms</span>
+            <span className="text-[10px] font-sans text-emerald-400 font-bold">SLA: &lt; 5.00ms</span>
           </div>
 
           <div className="h-56 mt-2">
@@ -188,19 +188,19 @@ export const StreamingMonitorView: React.FC = () => {
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <div className="text-[10px] text-slate-500 font-mono text-center">
+          <div className="text-[10px] text-slate-500 font-sans text-center">
             Includes multi-hop BFS extraction, feature vector encoding, and PyTorch Geometric forward pass.
           </div>
         </div>
 
         {/* Temporal Window Degradation Analysis */}
-        <div className="cyber-card p-5 space-y-3">
-          <div className="flex items-center justify-between border-b border-cyber-700 pb-2.5">
-            <h3 className="text-xs font-bold font-mono text-slate-200 uppercase flex items-center gap-2">
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
+            <h3 className="text-xs font-bold font-sans text-slate-800 uppercase flex items-center gap-2">
               <Gauge className="w-4 h-4 text-purple-400" />
               Temporal Window Horizon vs Model F1-Score (%)
             </h3>
-            <span className="text-[10px] font-mono text-emerald-400">72h Peak</span>
+            <span className="text-[10px] font-sans text-emerald-400">72h Peak</span>
           </div>
 
           <div className="h-56 mt-2">
@@ -217,27 +217,27 @@ export const StreamingMonitorView: React.FC = () => {
               </LineChart>
             </ResponsiveContainer>
           </div>
-          <div className="text-[10px] text-slate-500 font-mono text-center">
+          <div className="text-[10px] text-slate-500 font-sans text-center">
             Model detection accuracy improves monotonically as sliding transaction horizon reaches 72 hours.
           </div>
         </div>
       </div>
 
       {/* Live On-Demand Subgraph Extraction Tester */}
-      <div className="cyber-card p-5 space-y-4">
-        <div className="flex items-center justify-between border-b border-cyber-700 pb-3">
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
           <div className="flex items-center gap-2">
             <RotateCw className="w-4 h-4 text-cyber-cyan" />
-            <h3 className="text-xs font-bold font-mono text-slate-200 uppercase">
+            <h3 className="text-xs font-bold font-sans text-slate-800 uppercase">
               Live In-Memory Subgraph Ingestion & GNN Scoring Sandbox
             </h3>
           </div>
-          <span className="text-[10px] font-mono text-slate-400">Interactive Test Rig</span>
+          <span className="text-[10px] font-sans text-slate-500">Interactive Test Rig</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
           <div className="md:col-span-2 space-y-1.5">
-            <label className="text-[10px] font-mono text-slate-400 uppercase">
+            <label className="text-[10px] font-sans text-slate-500 uppercase">
               Enter Entity ID to extract ≤3 hop dynamic neighborhood:
             </label>
             <input
@@ -245,13 +245,13 @@ export const StreamingMonitorView: React.FC = () => {
               value={testSeed}
               onChange={(e) => setTestSeed(e.target.value)}
               placeholder="e.g. ENT_000185, ENT_000513, ENT_000047, ACC_TEST..."
-              className="w-full px-3 py-2 text-xs bg-cyber-950 border border-cyber-700 rounded-2xl text-cyber-cyan font-mono focus:outline-none focus:border-cyber-cyan"
+              className="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-2xl text-cyber-cyan font-sans focus:outline-none focus:border-cyber-cyan"
             />
           </div>
 
           <button
             onClick={handleTestLiveSeed}
-            className="w-full py-2 bg-cyber-cyan text-cyber-950 font-mono font-bold text-xs rounded-2xl hover:bg-cyber-cyan/90 transition-all flex items-center justify-center gap-2"
+            className="w-full py-2 bg-cyber-cyan text-cyber-950 font-sans font-bold text-xs rounded-2xl hover:bg-cyber-cyan/90 transition-all flex items-center justify-center gap-2"
           >
             <Zap className="w-3.5 h-3.5" />
             Extract & Score Subgraph
@@ -259,9 +259,9 @@ export const StreamingMonitorView: React.FC = () => {
         </div>
 
         {testResult && (
-          <div className="p-4 bg-cyber-950 rounded-xl border border-cyber-800 space-y-3 mt-2 animate-fadeIn font-mono text-xs">
+          <div className="p-4 bg-white rounded-xl border border-cyber-800 space-y-3 mt-2 animate-fadeIn font-sans text-xs">
             <div className="flex items-center justify-between border-b border-cyber-800 pb-2">
-              <span className="text-slate-300 font-bold">Dynamic GNN Inference Result:</span>
+              <span className="text-slate-700 font-bold">Dynamic GNN Inference Result:</span>
               <span className="text-emerald-400 font-bold flex items-center gap-1">
                 <Clock className="w-3.5 h-3.5" />
                 Query Executed in {testLatency || 58} ms
@@ -269,23 +269,23 @@ export const StreamingMonitorView: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="p-2.5 bg-cyber-900 rounded">
+              <div className="p-2.5 bg-white rounded">
                 <div className="text-[9px] text-slate-500 uppercase">Seed Entity</div>
                 <div className="text-xs font-bold text-cyber-cyan">{testResult.seed_entity_id}</div>
               </div>
-              <div className="p-2.5 bg-cyber-900 rounded">
+              <div className="p-2.5 bg-white rounded">
                 <div className="text-[9px] text-slate-500 uppercase">GNN Risk Score</div>
                 <div className={`text-xs font-bold ${testResult.risk_probability > 0.5 ? 'text-cyber-red' : 'text-emerald-400'}`}>
                   {(testResult.risk_probability * 100).toFixed(2)}%
                 </div>
               </div>
-              <div className="p-2.5 bg-cyber-900 rounded">
+              <div className="p-2.5 bg-white rounded">
                 <div className="text-[9px] text-slate-500 uppercase">Confidence Tier</div>
                 <div className="text-xs font-bold text-amber-400">{testResult.confidence_tier}</div>
               </div>
-              <div className="p-2.5 bg-cyber-900 rounded">
+              <div className="p-2.5 bg-white rounded">
                 <div className="text-[9px] text-slate-500 uppercase">Extracted Graph</div>
-                <div className="text-xs font-bold text-slate-200">{testResult.num_nodes} Nodes • {testResult.num_edges} Edges</div>
+                <div className="text-xs font-bold text-slate-800">{testResult.num_nodes} Nodes • {testResult.num_edges} Edges</div>
               </div>
             </div>
           </div>

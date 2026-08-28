@@ -107,28 +107,28 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
   };
 
   return (
-    <div className="bg-[#0C0E12] border border-white/10 rounded-2xl p-3.5 flex flex-col space-y-3.5 text-slate-200 overflow-y-auto shadow-industrial-sm h-full font-mono text-xs">
+    <div className="bg-white border border-slate-200 rounded-2xl p-3.5 flex flex-col space-y-3.5 text-slate-800 overflow-y-auto shadow-sm h-full font-sans text-xs">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
+      <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
         <div className="flex items-center gap-2">
           <Sliders className="w-3.5 h-3.5 text-[#FF5500]" />
           <div>
-            <div className="font-bold tracking-tight text-white text-xs">
+            <div className="font-bold tracking-tight text-slate-900 text-xs">
               SIMULATION CONTROLLER
             </div>
-            <div className="text-[9px] text-zinc-500">STAGE 0-8 REAL-TIME INFERENCE</div>
+            <div className="text-[9px] text-slate-500">STAGE 0-8 REAL-TIME INFERENCE</div>
           </div>
         </div>
 
-        <span className="text-[9px] bg-white/5 border border-white/10 text-zinc-400 px-2 py-0.5 rounded font-bold">
+        <span className="text-[9px] bg-slate-100 border border-slate-200 text-slate-500 px-2 py-0.5 rounded font-bold">
           {incidentsList.length} CASES
         </span>
       </div>
 
       {/* ── 1. COMPREHENSIVE SEED ENTITY SELECTOR ── */}
-      <div className="space-y-2 bg-[#060709] p-2.5 border border-white/10 rounded">
+      <div className="space-y-2 bg-slate-50 p-2.5 border border-slate-200 rounded">
         <div className="flex items-center justify-between">
-          <label className="text-[10px] text-zinc-300 font-bold flex items-center gap-1.5">
+          <label className="text-[10px] text-slate-700 font-bold flex items-center gap-1.5">
             <User className="w-3 h-3 text-[#FF5500]" />
             <span>INVESTIGATION SEED ENTITY:</span>
           </label>
@@ -137,7 +137,7 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
           <select
             value={tierFilter}
             onChange={(e) => setTierFilter(e.target.value)}
-            className="bg-[#12151B] border border-white/15 text-zinc-300 px-1.5 py-0.5 rounded text-[9px] font-bold focus:outline-none"
+            className="bg-white border border-white/15 text-slate-700 px-1.5 py-0.5 rounded text-[9px] font-bold focus:outline-none"
           >
             <option value="ALL">ALL TIERS</option>
             <option value="HIGH_CONFIDENCE">CRITICAL</option>
@@ -150,7 +150,7 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
         <select
           value={seedEntityId}
           onChange={(e) => handleSelectCase(e.target.value)}
-          className="w-full bg-[#12151B] border border-white/15 text-slate-100 px-2.5 py-1.5 rounded text-[11px] font-bold focus:border-[#FF5500] focus:outline-none"
+          className="w-full bg-white border border-white/15 text-slate-900 px-2.5 py-1.5 rounded text-[11px] font-bold focus:border-[#FF5500] focus:outline-none"
         >
           {filteredIncidents.slice(0, 100).map((inc) => (
             <option key={inc.complaint_id} value={inc.complaint_id}>
@@ -182,14 +182,14 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
 
         <button
           onClick={onReset}
-          className="py-2 bg-[#12151B] hover:bg-[#1A1E26] text-zinc-300 border border-white/10 rounded flex items-center justify-center gap-1 font-bold transition-all"
+          className="py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded flex items-center justify-center gap-1 font-bold transition-all"
         >
           <RotateCcw className="w-3 h-3" />
           <span>RESET</span>
         </button>
 
         {/* Speed Controls */}
-        <div className="flex border border-white/10 bg-[#060709] rounded p-0.5">
+        <div className="flex border border-slate-200 bg-slate-50 rounded p-0.5">
           {[1, 5, 20].map((s) => (
             <button
               key={s}
@@ -197,7 +197,7 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
               className={`flex-1 py-0.5 text-[10px] rounded font-bold ${
                 speed === s
                   ? 'bg-white text-black shadow-sm'
-                  : 'text-zinc-500 hover:text-zinc-200'
+                  : 'text-slate-500 hover:text-slate-800'
               }`}
             >
               {s}X
@@ -217,9 +217,9 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
 
       {/* ── 4. ATTACK SCENARIO SELECTOR ── */}
       <div className="space-y-1.5">
-        <div className="text-[10px] uppercase tracking-wider text-zinc-400 font-bold flex items-center justify-between">
+        <div className="text-[10px] uppercase tracking-wider text-slate-500 font-bold flex items-center justify-between">
           <span>Attack Typology</span>
-          <span className="text-white">6 PRESETS</span>
+          <span className="text-slate-900">6 PRESETS</span>
         </div>
         
         <div className="space-y-1 max-h-[130px] overflow-y-auto pr-1">
@@ -229,8 +229,8 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
               onClick={() => onScenarioChange(scen.id)}
               className={`p-2 border rounded cursor-pointer transition-all ${
                 scenario === scen.id
-                  ? 'bg-white/10 border-white/30 text-white shadow-sm'
-                  : 'bg-[#060709] border-white/5 text-zinc-400 hover:border-white/15'
+                  ? 'bg-slate-100 border-white/30 text-slate-900 shadow-sm'
+                  : 'bg-slate-50 border-slate-100 text-slate-500 hover:border-white/15'
               }`}
             >
               <div className="flex items-center justify-between text-[11px] font-bold">
@@ -239,7 +239,7 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
                   {scen.risk}
                 </span>
               </div>
-              <div className="text-[9px] text-zinc-500 truncate mt-0.5">
+              <div className="text-[9px] text-slate-500 truncate mt-0.5">
                 {scen.desc}
               </div>
             </div>
@@ -248,11 +248,11 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
       </div>
 
       {/* ── 5. PARAMETER SLIDERS ── */}
-      <div className="space-y-2.5 border-t border-white/10 pt-2.5 text-[10px]">
+      <div className="space-y-2.5 border-t border-slate-200 pt-2.5 text-[10px]">
         <div className="space-y-1">
           <div className="flex justify-between">
-            <span className="text-zinc-400">DISPUTED AMOUNT:</span>
-            <span className="text-white font-bold">₹{params.amount.toLocaleString('en-IN')}</span>
+            <span className="text-slate-500">DISPUTED AMOUNT:</span>
+            <span className="text-slate-900 font-bold">₹{params.amount.toLocaleString('en-IN')}</span>
           </div>
           <input
             type="range"
@@ -261,15 +261,15 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
             step="10000"
             value={params.amount}
             onChange={(e) => onParamsChange({ ...params, amount: Number(e.target.value) })}
-            className="w-full h-1 bg-[#1A1E26] rounded appearance-none accent-[#FF5500] cursor-pointer"
+            className="w-full h-1 bg-slate-100 rounded appearance-none accent-[#FF5500] cursor-pointer"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-2">
           <div className="space-y-1">
             <div className="flex justify-between">
-              <span className="text-zinc-400">HOPS (1-5):</span>
-              <span className="text-white font-bold">{params.hopCount}</span>
+              <span className="text-slate-500">HOPS (1-5):</span>
+              <span className="text-slate-900 font-bold">{params.hopCount}</span>
             </div>
             <input
               type="range"
@@ -277,14 +277,14 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
               max="5"
               value={params.hopCount}
               onChange={(e) => onParamsChange({ ...params, hopCount: Number(e.target.value) })}
-              className="w-full h-1 bg-[#1A1E26] rounded appearance-none accent-white cursor-pointer"
+              className="w-full h-1 bg-slate-100 rounded appearance-none accent-white cursor-pointer"
             />
           </div>
 
           <div className="space-y-1">
             <div className="flex justify-between">
-              <span className="text-zinc-400">MULES (1-8):</span>
-              <span className="text-white font-bold">{params.muleCount}</span>
+              <span className="text-slate-500">MULES (1-8):</span>
+              <span className="text-slate-900 font-bold">{params.muleCount}</span>
             </div>
             <input
               type="range"
@@ -292,14 +292,14 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
               max="8"
               value={params.muleCount}
               onChange={(e) => onParamsChange({ ...params, muleCount: Number(e.target.value) })}
-              className="w-full h-1 bg-[#1A1E26] rounded appearance-none accent-white cursor-pointer"
+              className="w-full h-1 bg-slate-100 rounded appearance-none accent-white cursor-pointer"
             />
           </div>
         </div>
 
         <div className="space-y-1">
           <div className="flex justify-between">
-            <span className="text-zinc-400">POLICY THRESHOLD (τ):</span>
+            <span className="text-slate-500">POLICY THRESHOLD (τ):</span>
             <span className="text-amber-400 font-bold">τ = {params.threshold.toFixed(2)}</span>
           </div>
           <input
@@ -309,7 +309,7 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
             step="0.05"
             value={params.threshold}
             onChange={(e) => onParamsChange({ ...params, threshold: Number(e.target.value) })}
-            className="w-full h-1 bg-[#1A1E26] rounded appearance-none accent-amber-400 cursor-pointer"
+            className="w-full h-1 bg-slate-100 rounded appearance-none accent-amber-400 cursor-pointer"
           />
         </div>
       </div>

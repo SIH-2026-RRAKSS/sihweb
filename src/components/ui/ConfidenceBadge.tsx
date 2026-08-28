@@ -34,7 +34,7 @@ const tierConfig = {
     label: 'UNCLASSIFIED ENTITY',
     shortLabel: 'UNCLASSIFIED',
     icon: HelpCircle,
-    className: 'rounded-full border bg-slate-800 text-slate-400 border-slate-700 font-bold',
+    className: 'rounded-full border bg-slate-800 text-slate-500 border-slate-700 font-bold',
     dot: 'bg-slate-500 rounded-full',
   },
 };
@@ -55,7 +55,7 @@ export const ConfidenceBadge: React.FC<ConfidenceBadgeProps> = ({
   const Icon = config.icon;
 
   return (
-    <span className={`inline-flex items-center gap-1.5 font-mono ${config.className} ${s.text} ${s.px}`}>
+    <span className={`inline-flex items-center gap-1.5 font-sans ${config.className} ${s.text} ${s.px}`}>
       <span className={`w-1.5 h-1.5 rounded-none ${config.dot}`} />
       {showIcon && <Icon className={s.icon} />}
       <span>{size === 'sm' ? config.shortLabel : config.label}</span>

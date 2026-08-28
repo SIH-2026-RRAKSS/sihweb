@@ -50,14 +50,14 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-sm font-bold text-slate-100 uppercase tracking-wider font-mono">
+              <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider font-sans">
                 Active Cybercrime Predictive Triage Operational Horizon
               </h2>
-              <span className="px-2 py-0.5 text-[10px] font-mono bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full">
+              <span className="px-2 py-0.5 text-[10px] font-sans bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full">
                 Live 72h Sliding Window
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-500 mt-0.5">
               Evaluating {activeDataset === 'A' ? 'Dataset A (Synthetic Domestic Cybercrime Incidents with ATM GPS)' : 'Dataset B (IBM AML Multi-Bank Transfer Subgraphs)'} using inductive GraphSAGE embeddings.
             </p>
           </div>
@@ -66,14 +66,14 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({
         <div className="flex items-center gap-2 w-full md:w-auto">
           <button
             onClick={() => onNavigateTab('incidents')}
-            className="flex-1 md:flex-initial flex items-center justify-center gap-2 px-3.5 py-2 text-xs font-mono font-semibold bg-cyber-cyan text-cyber-950 hover:bg-cyber-cyan/90 rounded-2xl transition-all shadow-md shadow-cyber-cyan/20"
+            className="flex-1 md:flex-initial flex items-center justify-center gap-2 px-3.5 py-2 text-xs font-sans font-semibold bg-cyber-cyan text-cyber-950 hover:bg-cyber-cyan/90 rounded-2xl transition-all shadow-md shadow-cyber-cyan/20"
           >
             <ShieldAlert className="w-3.5 h-3.5" />
             Inspect Incident Queue
           </button>
           <button
             onClick={() => onNavigateTab('map')}
-            className="flex-1 md:flex-initial flex items-center justify-center gap-2 px-3.5 py-2 text-xs font-mono font-semibold bg-cyber-800 hover:bg-cyber-700 text-slate-200 border border-cyber-600 rounded-2xl transition-all"
+            className="flex-1 md:flex-initial flex items-center justify-center gap-2 px-3.5 py-2 text-xs font-sans font-semibold bg-slate-50 hover:bg-slate-100 text-slate-800 border border-slate-200 rounded-2xl transition-all"
           >
             <MapPin className="w-3.5 h-3.5 text-amber-400" />
             Cash-Out Map
@@ -84,51 +84,51 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({
       {/* KPI Metric Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Metric 1 */}
-        <div className="cyber-card p-4">
-          <div className="flex items-center justify-between text-slate-400 mb-2">
-            <span className="text-xs font-mono uppercase tracking-wider">Total Evaluated Incidents</span>
-            <div className="w-8 h-8 rounded-2xl bg-cyber-800 flex items-center justify-center text-cyber-cyan">
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4">
+          <div className="flex items-center justify-between text-slate-500 mb-2">
+            <span className="text-xs font-sans uppercase tracking-wider">Total Evaluated Incidents</span>
+            <div className="w-8 h-8 rounded-2xl bg-slate-50 flex items-center justify-center text-cyber-cyan">
               <TrendingUp className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-bold font-mono text-slate-100">
+          <div className="text-2xl font-bold font-sans text-slate-900">
             {stats?.total_incidents_monitored || 1000}
           </div>
-          <div className="flex items-center gap-1.5 mt-2 text-[11px] text-emerald-400 font-mono">
+          <div className="flex items-center gap-1.5 mt-2 text-[11px] text-emerald-400 font-sans">
             <CheckCircle className="w-3.5 h-3.5" />
             <span>100% Calibrated with GNN Risk</span>
           </div>
         </div>
 
         {/* Metric 2 */}
-        <div className="cyber-card p-4 border-cyber-red/40 glow-red">
-          <div className="flex items-center justify-between text-slate-400 mb-2">
-            <span className="text-xs font-mono uppercase tracking-wider">High-Confidence Alerts</span>
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 border-cyber-red/40 glow-red">
+          <div className="flex items-center justify-between text-slate-500 mb-2">
+            <span className="text-xs font-sans uppercase tracking-wider">High-Confidence Alerts</span>
             <div className="w-8 h-8 rounded-2xl bg-cyber-red/10 border border-cyber-red/30 flex items-center justify-center text-cyber-red">
               <ShieldAlert className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-bold font-mono text-cyber-red">
+          <div className="text-2xl font-bold font-sans text-cyber-red">
             {stats?.tier_breakdown?.HIGH_CONFIDENCE || highConfIncidents.length || 142}
           </div>
-          <div className="flex items-center gap-1.5 mt-2 text-[11px] text-slate-300 font-mono">
+          <div className="flex items-center gap-1.5 mt-2 text-[11px] text-slate-700 font-sans">
             <span className="text-cyber-red font-bold">94.12% Precision</span>
             <span className="text-slate-500">• Peak F1: 91.43%</span>
           </div>
         </div>
 
         {/* Metric 3 */}
-        <div className="cyber-card p-4">
-          <div className="flex items-center justify-between text-slate-400 mb-2">
-            <span className="text-xs font-mono uppercase tracking-wider">Terminal Exit Hit Rate</span>
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4">
+          <div className="flex items-center justify-between text-slate-500 mb-2">
+            <span className="text-xs font-sans uppercase tracking-wider">Terminal Exit Hit Rate</span>
             <div className="w-8 h-8 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
               <Target className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-bold font-mono text-amber-400">
+          <div className="text-2xl font-bold font-sans text-amber-400">
             {stats?.model_comparison?.Top1_CashOut_Accuracy || "100.0%"}
           </div>
-          <div className="flex items-center gap-1.5 mt-2 text-[11px] text-slate-400 font-mono">
+          <div className="flex items-center gap-1.5 mt-2 text-[11px] text-slate-500 font-sans">
             <span>MRR = {stats?.model_comparison?.Terminal_Prediction_MRR || "1.0000"}</span>
             <span className="text-slate-600">|</span>
             <span>15 Indian Cities</span>
@@ -136,17 +136,17 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({
         </div>
 
         {/* Metric 4 */}
-        <div className="cyber-card p-4">
-          <div className="flex items-center justify-between text-slate-400 mb-2">
-            <span className="text-xs font-mono uppercase tracking-wider">GraphSAGE Test PR-AUC</span>
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4">
+          <div className="flex items-center justify-between text-slate-500 mb-2">
+            <span className="text-xs font-sans uppercase tracking-wider">GraphSAGE Test PR-AUC</span>
             <div className="w-8 h-8 rounded-2xl bg-cyber-purple/10 border border-cyber-purple/30 flex items-center justify-center text-cyber-purple">
               <Share2 className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-bold font-mono text-purple-300">
+          <div className="text-2xl font-bold font-sans text-purple-300">
             0.9680
           </div>
-          <div className="flex items-center gap-1.5 mt-2 text-[11px] text-emerald-400 font-mono">
+          <div className="flex items-center gap-1.5 mt-2 text-[11px] text-emerald-400 font-sans">
             <span>+3.69% F1 gain over XGBoost</span>
           </div>
         </div>
@@ -155,17 +155,17 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({
       {/* Center Row: Interactive Chart & Quick Action Matrix */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left 2 Cols: Priority Alert Incidents */}
-        <div className="lg:col-span-2 cyber-card p-5 space-y-4">
-          <div className="flex items-center justify-between border-b border-cyber-700 pb-3">
+        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl shadow-sm p-5 space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-3">
             <div className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-cyber-red" />
-              <h3 className="text-sm font-bold text-slate-200 font-mono uppercase">
+              <h3 className="text-sm font-bold text-slate-800 font-sans uppercase">
                 High-Risk Laundering Chains Requiring Triage
               </h3>
             </div>
             <button
               onClick={() => onNavigateTab('incidents')}
-              className="text-xs text-cyber-cyan hover:underline flex items-center gap-1 font-mono"
+              className="text-xs text-cyber-cyan hover:underline flex items-center gap-1 font-sans"
             >
               View all ({incidents.length})
               <ArrowRight className="w-3 h-3" />
@@ -177,21 +177,21 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({
               <div
                 key={inc.complaint_id}
                 onClick={() => onSelectIncident(inc.complaint_id)}
-                className="p-3.5 bg-cyber-950/70 border border-cyber-700/60 hover:border-cyber-cyan/50 rounded-2xl cursor-pointer transition-all flex items-center justify-between group"
+                className="p-3.5 bg-white border border-slate-200 hover:border-cyber-cyan/50 rounded-2xl cursor-pointer transition-all flex items-center justify-between group"
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono font-bold text-cyber-cyan">
+                    <span className="text-xs font-sans font-bold text-cyber-cyan">
                       {inc.complaint_id}
                     </span>
-                    <span className="px-2 py-0.5 text-[9px] font-mono font-bold bg-cyber-red/20 text-cyber-red border border-cyber-red/40 rounded">
+                    <span className="px-2 py-0.5 text-[9px] font-sans font-bold bg-cyber-red/20 text-cyber-red border border-cyber-red/40 rounded">
                       RISK: {(inc.graphsage_risk_probability * 100).toFixed(2)}%
                     </span>
-                    <span className="text-xs font-medium text-slate-300">
+                    <span className="text-xs font-medium text-slate-700">
                       {inc.scam_category}
                     </span>
                   </div>
-                  <div className="text-[11px] text-slate-400 font-mono flex items-center gap-3">
+                  <div className="text-[11px] text-slate-500 font-sans flex items-center gap-3">
                     <span>Amount: ₹{(inc.reported_amount || 0).toLocaleString()}</span>
                     <span>•</span>
                     <span>Origin: {inc.district}, {inc.state}</span>
@@ -206,7 +206,7 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({
                       e.stopPropagation();
                       onSelectIncident(inc.complaint_id);
                     }}
-                    className="px-3 py-1.5 text-xs font-mono bg-cyber-800 hover:bg-cyber-cyan hover:text-cyber-950 text-slate-300 rounded border border-cyber-600 group-hover:border-cyber-cyan transition-all flex items-center gap-1"
+                    className="px-3 py-1.5 text-xs font-sans bg-slate-50 hover:bg-cyber-cyan hover:text-cyber-950 text-slate-700 rounded border border-slate-200 group-hover:border-cyber-cyan transition-all flex items-center gap-1"
                   >
                     <span>Dossier</span>
                     <ExternalLink className="w-3 h-3" />
@@ -218,13 +218,13 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({
         </div>
 
         {/* Right 1 Col: Confidence Tier Breakdown & Policy Dial */}
-        <div className="cyber-card p-5 space-y-4 flex flex-col justify-between">
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 space-y-4 flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between border-b border-cyber-700 pb-3">
-              <h3 className="text-sm font-bold text-slate-200 font-mono uppercase">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <h3 className="text-sm font-bold text-slate-800 font-sans uppercase">
                 Calibrated Confidence Tiers
               </h3>
-              <span className="text-[10px] font-mono text-slate-400">Holdout Set</span>
+              <span className="text-[10px] font-sans text-slate-500">Holdout Set</span>
             </div>
 
             <div className="h-44 mt-2">
@@ -252,12 +252,12 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({
 
             <div className="space-y-1.5 pt-2">
               {pieData.map((d) => (
-                <div key={d.name} className="flex items-center justify-between text-xs font-mono">
+                <div key={d.name} className="flex items-center justify-between text-xs font-sans">
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: d.color }}></span>
-                    <span className="text-slate-300">{d.name}</span>
+                    <span className="text-slate-700">{d.name}</span>
                   </div>
-                  <span className="font-bold text-slate-100">{d.value}</span>
+                  <span className="font-bold text-slate-900">{d.value}</span>
                 </div>
               ))}
             </div>
@@ -265,7 +265,7 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({
 
           <button
             onClick={() => onNavigateTab('policy')}
-            className="w-full py-2 bg-cyber-800 hover:bg-cyber-700 text-slate-200 border border-cyber-600 rounded-2xl text-xs font-mono flex items-center justify-center gap-2 transition-all mt-3"
+            className="w-full py-2 bg-slate-50 hover:bg-slate-100 text-slate-800 border border-slate-200 rounded-2xl text-xs font-sans flex items-center justify-center gap-2 transition-all mt-3"
           >
             <span>Tune Policy Thresholds (τ)</span>
             <ArrowRight className="w-3.5 h-3.5 text-cyber-cyan" />
@@ -277,48 +277,48 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div
           onClick={() => onNavigateTab('graph')}
-          className="p-4 cyber-card cursor-pointer hover:border-cyber-cyan/50 space-y-2 group"
+          className="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm cursor-pointer hover:border-cyber-cyan/50 space-y-2 group"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-cyber-cyan">
               <Share2 className="w-4 h-4" />
-              <span className="text-xs font-bold font-mono uppercase">Topology Graph Engine</span>
+              <span className="text-xs font-bold font-sans uppercase">Topology Graph Engine</span>
             </div>
             <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-cyber-cyan transition-colors" />
           </div>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500">
             Interactive physics-directed network visualization highlighting multi-hop accounts, transfer channels, and ATM cash exits.
           </p>
         </div>
 
         <div
           onClick={() => onNavigateTab('streaming')}
-          className="p-4 cyber-card cursor-pointer hover:border-cyber-cyan/50 space-y-2 group"
+          className="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm cursor-pointer hover:border-cyber-cyan/50 space-y-2 group"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-amber-400">
               <Clock className="w-4 h-4" />
-              <span className="text-xs font-bold font-mono uppercase">Streaming & SLA Latency</span>
+              <span className="text-xs font-bold font-sans uppercase">Streaming & SLA Latency</span>
             </div>
             <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-amber-400 transition-colors" />
           </div>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500">
             1,450+ Tx/sec sliding window temporal graph ingestion with sub-second dynamic $k$-hop subgraph extraction.
           </p>
         </div>
 
         <div
           onClick={() => onNavigateTab('benchmark')}
-          className="p-4 cyber-card cursor-pointer hover:border-cyber-cyan/50 space-y-2 group"
+          className="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm cursor-pointer hover:border-cyber-cyan/50 space-y-2 group"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-purple-400">
               <Target className="w-4 h-4" />
-              <span className="text-xs font-bold font-mono uppercase">Global 3-Way Benchmark</span>
+              <span className="text-xs font-bold font-sans uppercase">Global 3-Way Benchmark</span>
             </div>
             <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-purple-400 transition-colors" />
           </div>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500">
             Rigorous cross-domain benchmark comparing Synthetic Subgraphs, IBM AML Ledgers, and Elliptic Bitcoin DAGs.
           </p>
         </div>

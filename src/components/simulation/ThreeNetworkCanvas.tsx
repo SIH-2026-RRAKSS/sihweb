@@ -973,18 +973,18 @@ export const ThreeNetworkCanvas: React.FC<ThreeNetworkCanvasProps> = ({
   };
 
   return (
-    <div className="relative w-full h-full min-h-[460px] bg-[#060709] border border-white/10 rounded-2xl overflow-hidden select-none font-mono">
+    <div className="relative w-full h-full min-h-[460px] bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden select-none font-sans">
       <div ref={containerRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
 
       {/* Top Overlay Controls Bar */}
       <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none text-xs">
-        <div className="flex items-center gap-2 bg-[#0C0E12]/90 border border-white/10 px-3.5 py-1.5 rounded  pointer-events-auto shadow-industrial-sm">
+        <div className="flex items-center gap-2 bg-white/90 border border-slate-200 px-3.5 py-1.5 rounded  pointer-events-auto shadow-sm">
           <span className="w-2 h-2 rounded-full bg-[#FF5500] animate-pulse" />
-          <span className="text-white font-bold text-[11px]">
+          <span className="text-slate-900 font-bold text-[11px]">
             SEED ENTITY: <span className="text-[#FF5500]">{seedEntityId}</span>
           </span>
           <span className="text-zinc-600">|</span>
-          <span className="text-zinc-300 text-[10px]">
+          <span className="text-slate-700 text-[10px]">
             {incidentDetail?.complaint.location ? incidentDetail.complaint.location : 'National Grid'}
           </span>
           <span className="text-zinc-600">|</span>
@@ -994,7 +994,7 @@ export const ThreeNetworkCanvas: React.FC<ThreeNetworkCanvasProps> = ({
         </div>
 
         {/* Camera Perspective Selector */}
-        <div className="flex items-center gap-1 bg-[#0C0E12]/90 border border-white/10 p-0.5 rounded  pointer-events-auto text-[10px] shadow-industrial-sm">
+        <div className="flex items-center gap-1 bg-white/90 border border-slate-200 p-0.5 rounded  pointer-events-auto text-[10px] shadow-sm">
           {(['PERSPECTIVE', 'TOP', 'ISOMETRIC'] as const).map((mode) => (
             <button
               key={mode}
@@ -1002,7 +1002,7 @@ export const ThreeNetworkCanvas: React.FC<ThreeNetworkCanvasProps> = ({
               className={`px-2.5 py-1 rounded font-bold transition-all ${
                 cameraMode === mode
                   ? 'bg-white text-black shadow-sm'
-                  : 'text-zinc-400 hover:text-zinc-200'
+                  : 'text-slate-500 hover:text-slate-800'
               }`}
             >
               {mode}
@@ -1011,7 +1011,7 @@ export const ThreeNetworkCanvas: React.FC<ThreeNetworkCanvasProps> = ({
 
           <button
             onClick={() => handleSetCamera('PERSPECTIVE')}
-            className="p-1 text-zinc-400 hover:text-white transition-colors"
+            className="p-1 text-slate-500 hover:text-slate-900 transition-colors"
             title="Reset Camera"
           >
             <RotateCcw className="w-3.5 h-3.5" />
@@ -1020,8 +1020,8 @@ export const ThreeNetworkCanvas: React.FC<ThreeNetworkCanvasProps> = ({
       </div>
 
       {/* Temporal Scrubber */}
-      <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 w-96 bg-[#0C0E12]/90 border border-white/10 p-2.5 rounded  pointer-events-auto font-mono shadow-industrial-sm flex flex-col gap-1">
-        <div className="flex justify-between text-[9px] font-bold text-zinc-400 uppercase">
+      <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 w-96 bg-white/90 border border-slate-200 p-2.5 rounded  pointer-events-auto font-sans shadow-sm flex flex-col gap-1">
+        <div className="flex justify-between text-[9px] font-bold text-slate-500 uppercase">
           <span>T₀ (Trigger)</span>
           <span className="text-cyan-400">T+{temporalScrubber}H FORWARD BFS</span>
           <span>Tₘₐₓ (72H)</span>
@@ -1033,45 +1033,45 @@ export const ThreeNetworkCanvas: React.FC<ThreeNetworkCanvasProps> = ({
           step="1"
           value={temporalScrubber}
           onChange={(e) => setTemporalScrubber(Number(e.target.value))}
-          className="w-full accent-cyan-400 h-1.5 bg-[#1A1E26] rounded-full appearance-none cursor-ew-resize"
+          className="w-full accent-cyan-400 h-1.5 bg-slate-100 rounded-full appearance-none cursor-ew-resize"
         />
       </div>
 
       {/* Floating Node Inspector Modal (When clicking any 3D node) */}
       {inspectedNode && (
-        <div className="absolute top-14 right-3 w-64 bg-[#0C0E12]/95 border border-[#FF5500]/40 rounded-2xl p-3  shadow-industrial-lg text-[10px] space-y-2 pointer-events-auto animate-in fade-in zoom-in-95">
-          <div className="flex items-center justify-between border-b border-white/10 pb-1.5">
+        <div className="absolute top-14 right-3 w-64 bg-white/95 border border-[#FF5500]/40 rounded-2xl p-3  shadow-industrial-lg text-[10px] space-y-2 pointer-events-auto animate-in fade-in zoom-in-95">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-1.5">
             <span className="text-[#FF5500] font-bold uppercase tracking-wider flex items-center gap-1">
               <Eye className="w-3 h-3" />
               <span>NODE INSPECTOR</span>
             </span>
             <button
               onClick={() => setInspectedNode(null)}
-              className="text-zinc-500 hover:text-white font-bold"
+              className="text-slate-500 hover:text-slate-900 font-bold"
             >
               ✕
             </button>
           </div>
 
-          <div className="space-y-1 text-zinc-300">
-            <div className="font-bold text-white text-xs truncate">{inspectedNode.label}</div>
-            <div className="flex justify-between text-zinc-400">
+          <div className="space-y-1 text-slate-700">
+            <div className="font-bold text-slate-900 text-xs truncate">{inspectedNode.label}</div>
+            <div className="flex justify-between text-slate-500">
               <span>Node Type:</span>
-              <span className="text-white font-bold">{inspectedNode.type}</span>
+              <span className="text-slate-900 font-bold">{inspectedNode.type}</span>
             </div>
-            <div className="flex justify-between text-zinc-400">
+            <div className="flex justify-between text-slate-500">
               <span>Location:</span>
-              <span className="text-zinc-200">{inspectedNode.city}</span>
+              <span className="text-slate-800">{inspectedNode.city}</span>
             </div>
-            <div className="flex justify-between text-zinc-400">
+            <div className="flex justify-between text-slate-500">
               <span>Transacted Volume:</span>
               <span className="text-emerald-400 font-bold">₹{inspectedNode.amount.toLocaleString('en-IN')}</span>
             </div>
-            <div className="flex justify-between text-zinc-400">
+            <div className="flex justify-between text-slate-500">
               <span>Hop Distance:</span>
-              <span className="text-white font-bold">Hop {inspectedNode.hopLevel}</span>
+              <span className="text-slate-900 font-bold">Hop {inspectedNode.hopLevel}</span>
             </div>
-            <div className="flex justify-between text-zinc-400">
+            <div className="flex justify-between text-slate-500">
               <span>GraphSAGE Risk:</span>
               <span className="text-[#FF5500] font-bold">{(inspectedNode.risk * 100).toFixed(1)}%</span>
             </div>
@@ -1080,18 +1080,18 @@ export const ThreeNetworkCanvas: React.FC<ThreeNetworkCanvasProps> = ({
       )}
 
       {/* Bottom Visual Legend */}
-      <div className="absolute bottom-3 left-3 flex items-center gap-4 bg-[#0C0E12]/90 border border-white/10 px-3.5 py-1.5 rounded text-[10px] text-zinc-400  pointer-events-auto font-mono shadow-industrial-sm">
+      <div className="absolute bottom-3 left-3 flex items-center gap-4 bg-white/90 border border-slate-200 px-3.5 py-1.5 rounded text-[10px] text-slate-500  pointer-events-auto font-sans shadow-sm">
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded bg-[#FF5500]" />
-          <span className="text-white font-bold">Victim Safe Vault</span>
+          <span className="text-slate-900 font-bold">Victim Safe Vault</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded bg-[#38BDF8]" />
-          <span className="text-white font-bold">Mobile UPI Mules</span>
+          <span className="text-slate-900 font-bold">Mobile UPI Mules</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded bg-zinc-300" />
-          <span className="text-white font-bold">Commercial Bank Clearing</span>
+          <span className="text-slate-900 font-bold">Commercial Bank Clearing</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded bg-[#F97316]" />

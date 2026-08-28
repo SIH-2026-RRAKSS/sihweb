@@ -48,7 +48,7 @@ export default {
       fontFamily: {
         sans: ['Montserrat', 'system-ui', 'sans-serif'],
         display: ['Montserrat', 'sans-serif'],
-        mono: ['"JetBrains Mono"', 'monospace'],
+        mono: ['Montserrat', 'monospace'],
       },
       borderRadius: {
         'xl': '1rem',        // Inner elements
