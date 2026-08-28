@@ -212,7 +212,7 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
         className="w-full py-2 bg-[#FF5500]/10 hover:bg-[#FF5500]/20 border border-[#FF5500]/40 text-[#FF5500] rounded text-[11px] font-bold tracking-wider flex items-center justify-center gap-1.5 transition-all"
       >
         <Zap className="w-3.5 h-3.5" />
-        <span>⚡ INJECT SUSPICIOUS TRANSACTION</span>
+        <span>INJECT SUSPICIOUS TRANSACTION</span>
       </button>
 
       {/* ── 4. ATTACK SCENARIO SELECTOR ── */}

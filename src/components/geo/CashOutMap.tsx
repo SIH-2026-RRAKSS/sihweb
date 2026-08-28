@@ -356,7 +356,7 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
             </div>
           </div>
           <div className="text-zinc-500">
-            ⚡ Animated Corridors Active
+            Animated Corridors Active
           </div>
         </div>
       </div>

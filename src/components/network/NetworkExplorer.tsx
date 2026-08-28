@@ -355,13 +355,13 @@ export const NetworkExplorer: React.FC = () => {
 
               {selectedNode.is_incident && (
                 <div className="p-2 bg-red-500/10 border border-crimson-alert text-crimson-alert text-[10px]">
-                  ⚠️ COMPLAINT ORIGIN SEED ACCOUNT // DISPUTED FUNDS ENTRY POINT
+                  COMPLAINT ORIGIN SEED ACCOUNT // DISPUTED FUNDS ENTRY POINT
                 </div>
               )}
 
               {selectedNode.is_terminal && (
                 <div className="p-2 bg-amber-500/10 border border-amber-cash text-amber-cash text-[10px]">
-                  ⚡ EXIT CASH-OUT TERMINAL // PHYSICAL ATM POINT
+                  EXIT CASH-OUT TERMINAL // PHYSICAL ATM POINT
                 </div>
               )}
             </div>
