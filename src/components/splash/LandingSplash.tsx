@@ -414,13 +414,12 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
               <span>72H TEMPORAL MULE SURVEILLANCE · INDUCTIVE GraphSAGE GNN</span>
             </div>
 
-            <h1 className="text-4xl sm:text-6xl font-bold font-sans tracking-tight text-white uppercase leading-[1.04]">
-              PREDICTIVE <span className="text-[#FF5500]">ANTI-MONEY LAUNDERING</span> & FRAUD RADAR
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold font-sans tracking-tight text-white uppercase leading-[1.05]">
+              CYBERCRIME PREDICTIVE ANALYTICS — <span className="text-[#FF5500]">AML & MULE-CHAIN</span> DETECTION PIPELINE
             </h1>
 
             <p className="text-sm sm:text-base text-zinc-300 max-w-xl leading-relaxed font-sans">
-              Autonomous graph intelligence dismantling high-velocity cybercrime syndicates, 
-              complex multi-hop layering rings, and predicting physical ATM cash-out exit destinations in real-time across Indian banking corridors.
+              An end-to-end, graph-native predictive analytics framework designed for financial cybercrime complaint resolution, multi-hop mule transaction graph extraction, inductive Graph Neural Network (GraphSAGE) laundering detection, terminal cash-out location prediction, uncertainty confidence calibration, and rule-based investigative explainability.
             </p>
 
             {/* CTAs */}

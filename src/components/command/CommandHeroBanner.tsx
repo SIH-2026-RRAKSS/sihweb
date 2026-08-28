@@ -32,12 +32,11 @@ export const CommandHeroBanner: React.FC<CommandHeroBannerProps> = ({ onNavigate
           </div>
 
           <h1 className="text-xl md:text-2xl font-bold font-sans text-white tracking-tight leading-tight uppercase">
-            SIH CYBERGUARD — <span className="text-[#FF5500]">AML MULE-CHAIN</span> PREDICTIVE INTELLIGENCE
+            CYBERCRIME PREDICTIVE ANALYTICS — <span className="text-[#FF5500]">AML & MULE-CHAIN</span> DETECTION PIPELINE
           </h1>
 
           <p className="text-xs text-zinc-400 leading-relaxed max-w-xl font-sans">
-            Inductive Graph Neural Network system monitoring high-velocity mule networks, 
-            layering topologies, and physical ATM cash-out exit destinations across Indian banking corridors.
+            An end-to-end graph-native framework for financial cybercrime complaint resolution, multi-hop mule graph extraction, inductive GraphSAGE detection, and terminal cash-out prediction.
           </p>
         </div>
 
