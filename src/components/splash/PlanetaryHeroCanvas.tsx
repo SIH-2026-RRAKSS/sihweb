@@ -7,24 +7,24 @@ interface PlanetaryHeroCanvasProps {
 
 // Major hubs across Indian and global financial corridors
 const NETWORK_HUBS = [
-  { name: 'Mumbai Hub', lat: 19.0760, lon: 72.8777, color: '#FF5500' },
-  { name: 'Bengaluru Node', lat: 12.9716, lon: 77.5946, color: '#10B981' },
-  { name: 'Delhi Core', lat: 28.6139, lon: 77.2090, color: '#38BDF8' },
-  { name: 'Kolkata Node', lat: 22.5726, lon: 88.3639, color: '#FF5500' },
-  { name: 'Bhopal Switch', lat: 23.2599, lon: 77.4126, color: '#FDE047' },
-  { name: 'Singapore Gateway', lat: 1.3521, lon: 103.8198, color: '#38BDF8' },
-  { name: 'London Node', lat: 51.5074, lon: -0.1278, color: '#B8FFD4' },
-  { name: 'Dubai Corridor', lat: 25.2048, lon: 55.2708, color: '#FDE047' },
+  { name: 'Mumbai Hub', lat: 19.0760, lon: 72.8777, color: '#EA580C' },
+  { name: 'Bengaluru Node', lat: 12.9716, lon: 77.5946, color: '#059669' },
+  { name: 'Delhi Core', lat: 28.6139, lon: 77.2090, color: '#2563EB' },
+  { name: 'Kolkata Node', lat: 22.5726, lon: 88.3639, color: '#DC2626' },
+  { name: 'Bhopal Switch', lat: 23.2599, lon: 77.4126, color: '#D97706' },
+  { name: 'Singapore Gateway', lat: 1.3521, lon: 103.8198, color: '#2563EB' },
+  { name: 'London Node', lat: 51.5074, lon: -0.1278, color: '#0D9488' },
+  { name: 'Dubai Corridor', lat: 25.2048, lon: 55.2708, color: '#D97706' },
 ];
 
 const HOP_CONNECTIONS = [
-  { from: 2, to: 0, color: '#FF5500' }, // Delhi -> Mumbai
-  { from: 0, to: 1, color: '#10B981' }, // Mumbai -> Bengaluru
-  { from: 3, to: 4, color: '#FDE047' }, // Kolkata -> Bhopal
-  { from: 4, to: 0, color: '#FF5500' }, // Bhopal -> Mumbai
-  { from: 0, to: 5, color: '#38BDF8' }, // Mumbai -> Singapore
-  { from: 0, to: 7, color: '#FDE047' }, // Mumbai -> Dubai
-  { from: 7, to: 6, color: '#B8FFD4' }, // Dubai -> London
+  { from: 2, to: 0, color: '#EA580C' }, // Delhi -> Mumbai
+  { from: 0, to: 1, color: '#059669' }, // Mumbai -> Bengaluru
+  { from: 3, to: 4, color: '#D97706' }, // Kolkata -> Bhopal
+  { from: 4, to: 0, color: '#EA580C' }, // Bhopal -> Mumbai
+  { from: 0, to: 5, color: '#2563EB' }, // Mumbai -> Singapore
+  { from: 0, to: 7, color: '#D97706' }, // Mumbai -> Dubai
+  { from: 7, to: 6, color: '#0D9488' }, // Dubai -> London
 ];
 
 function latLonToVector3(lat: number, lon: number, radius: number): THREE.Vector3 {
@@ -48,7 +48,7 @@ export const PlanetaryHeroCanvas: React.FC<PlanetaryHeroCanvasProps> = () => {
 
     // 1. Scene Setup
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x050807, 0.002);
+    scene.fog = new THREE.FogExp2(0xf8fafc, 0.0015);
 
     // 2. Camera Setup
     const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 1000);
@@ -60,22 +60,22 @@ export const PlanetaryHeroCanvas: React.FC<PlanetaryHeroCanvasProps> = () => {
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.35;
+    renderer.toneMappingExposure = 1.25;
     container.appendChild(renderer.domElement);
 
-    // 4. Lighting
-    const ambientLight = new THREE.AmbientLight(0x0f172a, 1.4);
+    // 4. Lighting System (Optimized for Crisp White Theme Contrast)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.8);
     scene.add(ambientLight);
 
-    const sunLight = new THREE.DirectionalLight(0xffffff, 2.8);
-    sunLight.position.set(45, 25, 40);
+    const sunLight = new THREE.DirectionalLight(0xffffff, 3.2);
+    sunLight.position.set(45, 30, 40);
     scene.add(sunLight);
 
-    const rimLight = new THREE.DirectionalLight(0x38bdf8, 2.4);
+    const rimLight = new THREE.DirectionalLight(0x38bdf8, 2.0);
     rimLight.position.set(-50, 20, -35);
     scene.add(rimLight);
 
-    const orangeFill = new THREE.PointLight(0xff5500, 1.8, 80);
+    const orangeFill = new THREE.PointLight(0xff6b00, 1.6, 80);
     orangeFill.position.set(20, -25, 30);
     scene.add(orangeFill);
 
@@ -97,9 +97,9 @@ export const PlanetaryHeroCanvas: React.FC<PlanetaryHeroCanvasProps> = () => {
 
     const earthGeo = new THREE.SphereGeometry(earthRadius, 64, 64);
     const earthMat = new THREE.MeshStandardMaterial({
-      color: 0xd4d4d8,
-      roughness: 0.65,
-      metalness: 0.1,
+      color: 0xffffff,
+      roughness: 0.6,
+      metalness: 0.05,
     });
 
     textureLoader.load(earthMapUrl, (tex) => {
@@ -125,8 +125,8 @@ export const PlanetaryHeroCanvas: React.FC<PlanetaryHeroCanvasProps> = () => {
     // Cloud Layer
     const cloudsMat = new THREE.MeshStandardMaterial({
       transparent: true,
-      opacity: 0.28,
-      blending: THREE.AdditiveBlending,
+      opacity: 0.35,
+      blending: THREE.NormalBlending,
       depthWrite: false,
     });
     textureLoader.load(earthCloudsUrl, (tex) => {
@@ -149,35 +149,35 @@ export const PlanetaryHeroCanvas: React.FC<PlanetaryHeroCanvasProps> = () => {
       fragmentShader: `
         varying vec3 vNormal;
         void main() {
-          float intensity = pow(0.7 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.8);
-          gl_FragColor = vec4(0.22, 0.74, 0.97, 1.0) * intensity * 1.5;
+          float intensity = pow(0.7 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.6);
+          gl_FragColor = vec4(0.14, 0.65, 0.95, 1.0) * intensity * 1.4;
         }
       `,
-      blending: THREE.AdditiveBlending,
+      blending: THREE.NormalBlending,
       side: THREE.BackSide,
       transparent: true,
     });
     const atmoMesh = new THREE.Mesh(atmoGeo, atmoMat);
     planetGroup.add(atmoMesh);
 
-    // ── 6. PINS & RADAR PULSES (COMPACT, CRISP) ──
+    // ── 6. PINS & RADAR PULSES (HIGH CONTRAST) ──
     const hubMarkers: { mesh: THREE.Mesh; ring: THREE.Mesh; pos: THREE.Vector3 }[] = [];
 
     NETWORK_HUBS.forEach((hub) => {
       const pos = latLonToVector3(hub.lat, hub.lon, earthRadius + 0.04);
 
-      const markerGeo = new THREE.SphereGeometry(0.12, 16, 16);
+      const markerGeo = new THREE.SphereGeometry(0.15, 16, 16);
       const markerMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(hub.color) });
       const markerMesh = new THREE.Mesh(markerGeo, markerMat);
       markerMesh.position.copy(pos);
       planetGroup.add(markerMesh);
 
-      const ringGeo = new THREE.RingGeometry(0.14, 0.28, 20);
+      const ringGeo = new THREE.RingGeometry(0.16, 0.34, 20);
       const ringMat = new THREE.MeshBasicMaterial({
         color: new THREE.Color(hub.color),
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.85,
+        opacity: 0.9,
       });
       const ringMesh = new THREE.Mesh(ringGeo, ringMat);
       ringMesh.position.copy(pos.clone().multiplyScalar(1.002));
@@ -204,17 +204,17 @@ export const PlanetaryHeroCanvas: React.FC<PlanetaryHeroCanvasProps> = () => {
 
       const midPoint = new THREE.Vector3().addVectors(fromPos, toPos).multiplyScalar(0.5);
       const distance = fromPos.distanceTo(toPos);
-      midPoint.normalize().multiplyScalar(earthRadius + Math.max(1.0, distance * 0.4));
+      midPoint.normalize().multiplyScalar(earthRadius + Math.max(1.1, distance * 0.42));
 
       const curve = new THREE.QuadraticBezierCurve3(fromPos, midPoint, toPos);
-      const curvePoints = curve.getPoints(40);
+      const curvePoints = curve.getPoints(45);
       const curveGeo = new THREE.BufferGeometry().setFromPoints(curvePoints);
       
       const curveMat = new THREE.LineBasicMaterial({
         color: new THREE.Color(conn.color),
         transparent: true,
-        opacity: 0.6,
-        linewidth: 1.5,
+        opacity: 0.75,
+        linewidth: 2,
       });
       const line = new THREE.Line(curveGeo, curveMat);
       planetGroup.add(line);
@@ -227,10 +227,9 @@ export const PlanetaryHeroCanvas: React.FC<PlanetaryHeroCanvasProps> = () => {
 
       const particleMat = new THREE.PointsMaterial({
         color: new THREE.Color(conn.color),
-        size: 0.24,
+        size: 0.32,
         transparent: true,
-        opacity: 0.95,
-        blending: THREE.AdditiveBlending,
+        opacity: 1.0,
       });
       const particles = new THREE.Points(particleGeo, particleMat);
       planetGroup.add(particles);
@@ -244,8 +243,8 @@ export const PlanetaryHeroCanvas: React.FC<PlanetaryHeroCanvasProps> = () => {
       });
     });
 
-    // ── 8. DRIFTING STARS PARTICLES ──
-    const starCount = 240;
+    // ── 8. SUBTLE PARTICLES ──
+    const starCount = 180;
     const starGeo = new THREE.BufferGeometry();
     const starPos = new Float32Array(starCount * 3);
     for (let i = 0; i < starCount * 3; i += 3) {
@@ -254,11 +253,11 @@ export const PlanetaryHeroCanvas: React.FC<PlanetaryHeroCanvasProps> = () => {
       starPos[i + 2] = (Math.random() - 0.5) * 60 - 10;
     }
     starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-    const starMat = new THREE.PointsMaterial({ color: 0x94a3b8, size: 0.14, transparent: true, opacity: 0.55 });
+    const starMat = new THREE.PointsMaterial({ color: 0x94a3b8, size: 0.12, transparent: true, opacity: 0.35 });
     const starField = new THREE.Points(starGeo, starMat);
     scene.add(starField);
 
-    // ── 9. SMOOTH CINEMATIC AUTO-ROTATION (SYNCHRONIZED WITH HOPPING WAVES) ──
+    // ── 9. SMOOTH CINEMATIC AUTO-ROTATION ──
     let clock = new THREE.Clock();
     let animId: number;
 
@@ -267,7 +266,6 @@ export const PlanetaryHeroCanvas: React.FC<PlanetaryHeroCanvasProps> = () => {
       const delta = clock.getDelta();
       const time = clock.getElapsedTime();
 
-      // Organic cinematic turning tracking signal hops across Indian and global corridors
       const targetRotY = 3.65 + Math.sin(time * 0.35) * 0.42;
       const targetRotX = 0.28 + Math.sin(time * 0.25) * 0.06;
       
@@ -279,7 +277,7 @@ export const PlanetaryHeroCanvas: React.FC<PlanetaryHeroCanvasProps> = () => {
       hubMarkers.forEach((hub, idx) => {
         const pulse = 1.0 + Math.sin(time * 3.5 + idx) * 0.3;
         hub.ring.scale.set(pulse, pulse, pulse);
-        (hub.ring.material as THREE.MeshBasicMaterial).opacity = 0.85 - (pulse - 1.0) * 0.7;
+        (hub.ring.material as THREE.MeshBasicMaterial).opacity = 0.9 - (pulse - 1.0) * 0.7;
       });
 
       // Animate Hopping Photons
