@@ -269,7 +269,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
   return (
     <div
       onMouseMove={handleMouseMove}
-      className="min-h-screen w-full bg-[#050709] text-slate-100 font-sans selection:bg-[#FF5500]/25 selection:text-[#FF5500] relative overflow-x-hidden"
+      className="min-h-screen w-full bg-tactical-void text-slate-100 font-sans selection:bg-[#FF5500]/25 selection:text-[#FF5500] relative overflow-x-hidden"
     >
       {/* Dynamic Cursor Spotlight Beam */}
       <motion.div
@@ -306,7 +306,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.05 }}
-            className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#10141D]/90 border border-[#FF5500]/35 rounded-full font-mono text-[10px] text-[#FF5500] shadow-md backdrop-blur-md"
+            className="inline-flex items-center gap-1.5 px-3 py-1 bg-tactical-surface border border-[#FF5500]/35 rounded-full font-mono text-[10px] text-[#FF5500] shadow-md "
           >
             <span className="w-1.5 h-1.5 rounded-full bg-[#FF5500] animate-pulse" />
             <span>72H TEMPORAL MULE SURVEILLANCE · INDUCTIVE GraphSAGE GNN</span>
@@ -339,7 +339,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
           >
             <motion.button
               onClick={() => onEnterApp('simulation')}
-              className="px-5 py-2.5 bg-gradient-to-r from-[#FF7A1A] to-[#FF5500] hover:opacity-95 text-black font-bold rounded-lg flex items-center gap-2 shadow-signal-glow transition-all cursor-pointer text-xs"
+              className="px-5 py-2.5 bg-gradient-to-r from-[#FF7A1A] to-[#FF5500] hover:opacity-95 text-black font-bold rounded-2xl flex items-center gap-2 shadow-signal-glow transition-all cursor-pointer text-xs"
               whileHover={{ scale: 1.03, boxShadow: '0 0 25px rgba(255, 85, 0, 0.55)' }}
               whileTap={{ scale: 0.97 }}
             >
@@ -350,7 +350,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
 
             <motion.button
               onClick={() => onEnterApp('command')}
-              className="px-5 py-2.5 bg-[#121620] hover:bg-[#1A202E] border border-white/20 text-white font-bold rounded-lg flex items-center gap-2 backdrop-blur-md transition-all cursor-pointer text-xs"
+              className="px-5 py-2.5 bg-tactical-surface hover:bg-tactical-surface border border-tactical-border text-white font-bold rounded-2xl flex items-center gap-2  transition-all cursor-pointer text-xs"
               whileHover={{ scale: 1.03, borderColor: 'rgba(255, 85, 0, 0.5)' }}
               whileTap={{ scale: 0.97 }}
             >
@@ -364,9 +364,9 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.35 }}
-            className="max-w-xl mx-auto bg-[#080B11]/95 border border-white/15 p-2.5 rounded-xl shadow-2xl backdrop-blur-xl font-mono text-xs text-left mt-2.5 mb-1"
+            className="max-w-xl mx-auto bg-tactical-surface border border-tactical-border p-2.5 rounded-2xl shadow-saas-floating  font-mono text-xs text-left mt-2.5 mb-1"
           >
-            <div className="flex items-center justify-between border-b border-white/10 pb-1 text-[9px]">
+            <div className="flex items-center justify-between border-b border-tactical-border pb-1 text-[9px]">
               <span className="flex items-center gap-1.5 text-zinc-400 font-bold">
                 <Radio className="w-3 h-3 text-[#FF5500] animate-pulse" />
                 <span>LIVE SURVEILLANCE TELEMETRY (INCIDENT FEED)</span>
@@ -429,7 +429,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
           {/* 2 Sleek Ambient Telemetry Badges (Positioned at outer perimeter) */}
           <motion.div
             style={{ opacity: hudOpacity }}
-            className="absolute top-4 left-0 sm:left-4 z-10 bg-[#0B0E16]/90 border border-white/15 px-3 py-1.5 rounded-lg shadow-xl backdrop-blur-md hidden sm:flex items-center gap-2 font-mono text-[10px] text-zinc-300"
+            className="absolute top-4 left-0 sm:left-4 z-10 bg-tactical-surface border border-tactical-border px-3 py-1.5 rounded-2xl shadow-saas-card  hidden sm:flex items-center gap-2 font-mono text-[10px] text-zinc-300"
           >
             <GitFork className="w-3 h-3 text-[#38BDF8]" />
             <span>±72H HORIZONS: <strong className="text-white">1,000 SUBGRAPHS</strong></span>
@@ -437,7 +437,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
 
           <motion.div
             style={{ opacity: hudOpacity }}
-            className="absolute bottom-4 right-0 sm:right-4 z-10 bg-[#0B0E16]/90 border border-white/15 px-3 py-1.5 rounded-lg shadow-xl backdrop-blur-md hidden sm:flex items-center gap-2 font-mono text-[10px] text-zinc-300"
+            className="absolute bottom-4 right-0 sm:right-4 z-10 bg-tactical-surface border border-tactical-border px-3 py-1.5 rounded-2xl shadow-saas-card  hidden sm:flex items-center gap-2 font-mono text-[10px] text-zinc-300"
           >
             <MapPin className="w-3 h-3 text-amber-400" />
             <span>ATM CASH-OUT MRR: <strong className="text-emerald-400">1.0000</strong></span>
@@ -455,7 +455,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-60px' }}
           transition={{ duration: 0.6 }}
-          className="border-y border-white/[0.08] bg-[#080B10]/80 py-6 px-6 sm:px-10 rounded-2xl backdrop-blur-xl"
+          className="border-y border-tactical-border bg-tactical-surface py-6 px-6 sm:px-10 rounded-2xl "
         >
           <div className="flex flex-wrap items-center justify-between gap-6 font-mono text-xs">
             <div className="text-zinc-400 text-[11px] tracking-wider uppercase font-bold flex items-center gap-2">
@@ -500,11 +500,11 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
               <motion.div
                 key={m.label}
                 whileHover={{ y: -3 }}
-                className="bg-[#0B0E16]/90 border border-white/10 p-6 rounded-2xl space-y-3 shadow-xl backdrop-blur-md flex flex-col justify-between transition-all"
+                className="bg-tactical-surface border border-tactical-border p-6 rounded-2xl space-y-3 shadow-saas-card  flex flex-col justify-between transition-all"
               >
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-[10px]">
-                    <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-zinc-400 font-bold">
+                    <span className="px-2 py-0.5 rounded bg-white/5 border border-tactical-border text-zinc-400 font-bold">
                       {m.badge}
                     </span>
                     <span className="text-zinc-500 font-mono text-[9px]">{m.script}</span>
@@ -549,11 +549,11 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
                   key={mod.stage}
                   whileHover={{ scale: 1.02, borderColor: 'rgba(255, 85, 0, 0.4)' }}
                   onClick={() => onEnterApp('simulation')}
-                  className="bg-[#0B0E16]/80 border border-white/10 hover:border-[#FF5500]/40 p-5 rounded-xl space-y-3 cursor-pointer transition-all flex flex-col justify-between backdrop-blur-md"
+                  className="bg-tactical-surface border border-tactical-border hover:border-[#FF5500]/40 p-5 rounded-2xl space-y-3 cursor-pointer transition-all flex flex-col justify-between "
                 >
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-[10px]">
-                      <div className="p-1.5 rounded-lg bg-white/5 border border-white/10" style={{ color: mod.accent }}>
+                      <div className="p-1.5 rounded-2xl bg-white/5 border border-tactical-border" style={{ color: mod.accent }}>
                         <Icon className="w-4 h-4" />
                       </div>
                       <span className="font-bold text-[#FF5500]">{mod.stage}</span>
@@ -591,16 +591,16 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono text-xs text-left">
             {FRONTLINE_TESTIMONIALS.map((t, idx) => (
-              <div key={idx} className="bg-[#0B0E16]/80 border border-white/10 p-6 rounded-2xl space-y-5 flex flex-col justify-between backdrop-blur-md">
+              <div key={idx} className="bg-tactical-surface border border-tactical-border p-6 rounded-2xl space-y-5 flex flex-col justify-between ">
                 <div>
-                  <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-zinc-400 text-[9px] font-bold">
+                  <span className="px-2 py-0.5 rounded bg-white/5 border border-tactical-border text-zinc-400 text-[9px] font-bold">
                     {t.badge}
                   </span>
                   <p className="text-zinc-300 font-sans text-xs leading-relaxed italic mt-3">
                     "{t.quote}"
                   </p>
                 </div>
-                <div className="pt-3 border-t border-white/10">
+                <div className="pt-3 border-t border-tactical-border">
                   <div className="font-bold text-white text-xs font-sans">{t.officer}</div>
                   <div className="text-[10px] text-zinc-400">{t.role}</div>
                   <div className="text-[9px] text-[#FF5500]">{t.dept}</div>
@@ -636,7 +636,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
             <div className="flex flex-wrap items-center justify-center gap-4 pt-3 font-mono text-xs">
               <motion.button
                 onClick={() => onEnterApp('simulation')}
-                className="px-8 py-4 bg-gradient-to-r from-[#FF7A1A] to-[#FF5500] hover:opacity-95 text-black font-bold rounded-lg shadow-signal-glow flex items-center gap-2 text-sm transition-all cursor-pointer"
+                className="px-8 py-4 bg-gradient-to-r from-[#FF7A1A] to-[#FF5500] hover:opacity-95 text-black font-bold rounded-2xl shadow-signal-glow flex items-center gap-2 text-sm transition-all cursor-pointer"
                 whileHover={{ scale: 1.03, boxShadow: '0 0 35px rgba(255, 85, 0, 0.6)' }}
                 whileTap={{ scale: 0.97 }}
               >
@@ -647,7 +647,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
 
               <motion.button
                 onClick={() => onEnterApp('command')}
-                className="px-8 py-4 bg-[#1A202E] hover:bg-[#252D3E] border border-white/20 text-white font-bold rounded-lg text-sm backdrop-blur-md transition-all cursor-pointer"
+                className="px-8 py-4 bg-tactical-surface hover:bg-tactical-surface border border-tactical-border text-white font-bold rounded-2xl text-sm  transition-all cursor-pointer"
                 whileHover={{ scale: 1.03, borderColor: 'rgba(255, 85, 0, 0.5)' }}
                 whileTap={{ scale: 0.97 }}
               >
@@ -659,7 +659,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
         </motion.section>
 
         {/* ── SECTION 6: COMPREHENSIVE FOOTER ── */}
-        <footer className="border-t border-white/[0.08] pt-12 font-mono text-xs">
+        <footer className="border-t border-tactical-border pt-12 font-mono text-xs">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 text-left">
             {/* Expanded Team Trinetra Brand Showcase (2 Cols) */}
             <div className="lg:col-span-2 space-y-4">
