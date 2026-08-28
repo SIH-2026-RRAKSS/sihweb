@@ -45,7 +45,7 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({
       {/* Top Banner Alert Notice */}
       <div className="p-4 bg-gradient-to-r from-cyber-900 via-cyber-850 to-cyber-900 border border-cyber-cyan/30 rounded-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-lg glow-cyan">
         <div className="flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-lg bg-cyber-cyan/10 border border-cyber-cyan/40 flex items-center justify-center text-cyber-cyan flex-shrink-0">
+          <div className="w-10 h-10 rounded-2xl bg-cyber-cyan/10 border border-cyber-cyan/40 flex items-center justify-center text-cyber-cyan flex-shrink-0">
             <Zap className="w-5 h-5 animate-pulse" />
           </div>
           <div>
@@ -66,14 +66,14 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({
         <div className="flex items-center gap-2 w-full md:w-auto">
           <button
             onClick={() => onNavigateTab('incidents')}
-            className="flex-1 md:flex-initial flex items-center justify-center gap-2 px-3.5 py-2 text-xs font-mono font-semibold bg-cyber-cyan text-cyber-950 hover:bg-cyber-cyan/90 rounded-lg transition-all shadow-md shadow-cyber-cyan/20"
+            className="flex-1 md:flex-initial flex items-center justify-center gap-2 px-3.5 py-2 text-xs font-mono font-semibold bg-cyber-cyan text-cyber-950 hover:bg-cyber-cyan/90 rounded-2xl transition-all shadow-md shadow-cyber-cyan/20"
           >
             <ShieldAlert className="w-3.5 h-3.5" />
             Inspect Incident Queue
           </button>
           <button
             onClick={() => onNavigateTab('map')}
-            className="flex-1 md:flex-initial flex items-center justify-center gap-2 px-3.5 py-2 text-xs font-mono font-semibold bg-cyber-800 hover:bg-cyber-700 text-slate-200 border border-cyber-600 rounded-lg transition-all"
+            className="flex-1 md:flex-initial flex items-center justify-center gap-2 px-3.5 py-2 text-xs font-mono font-semibold bg-cyber-800 hover:bg-cyber-700 text-slate-200 border border-cyber-600 rounded-2xl transition-all"
           >
             <MapPin className="w-3.5 h-3.5 text-amber-400" />
             Cash-Out Map
@@ -87,7 +87,7 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({
         <div className="cyber-card p-4">
           <div className="flex items-center justify-between text-slate-400 mb-2">
             <span className="text-xs font-mono uppercase tracking-wider">Total Evaluated Incidents</span>
-            <div className="w-8 h-8 rounded-lg bg-cyber-800 flex items-center justify-center text-cyber-cyan">
+            <div className="w-8 h-8 rounded-2xl bg-cyber-800 flex items-center justify-center text-cyber-cyan">
               <TrendingUp className="w-4 h-4" />
             </div>
           </div>
@@ -104,7 +104,7 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({
         <div className="cyber-card p-4 border-cyber-red/40 glow-red">
           <div className="flex items-center justify-between text-slate-400 mb-2">
             <span className="text-xs font-mono uppercase tracking-wider">High-Confidence Alerts</span>
-            <div className="w-8 h-8 rounded-lg bg-cyber-red/10 border border-cyber-red/30 flex items-center justify-center text-cyber-red">
+            <div className="w-8 h-8 rounded-2xl bg-cyber-red/10 border border-cyber-red/30 flex items-center justify-center text-cyber-red">
               <ShieldAlert className="w-4 h-4" />
             </div>
           </div>
@@ -121,7 +121,7 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({
         <div className="cyber-card p-4">
           <div className="flex items-center justify-between text-slate-400 mb-2">
             <span className="text-xs font-mono uppercase tracking-wider">Terminal Exit Hit Rate</span>
-            <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+            <div className="w-8 h-8 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
               <Target className="w-4 h-4" />
             </div>
           </div>
@@ -139,7 +139,7 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({
         <div className="cyber-card p-4">
           <div className="flex items-center justify-between text-slate-400 mb-2">
             <span className="text-xs font-mono uppercase tracking-wider">GraphSAGE Test PR-AUC</span>
-            <div className="w-8 h-8 rounded-lg bg-cyber-purple/10 border border-cyber-purple/30 flex items-center justify-center text-cyber-purple">
+            <div className="w-8 h-8 rounded-2xl bg-cyber-purple/10 border border-cyber-purple/30 flex items-center justify-center text-cyber-purple">
               <Share2 className="w-4 h-4" />
             </div>
           </div>
@@ -177,7 +177,7 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({
               <div
                 key={inc.complaint_id}
                 onClick={() => onSelectIncident(inc.complaint_id)}
-                className="p-3.5 bg-cyber-950/70 border border-cyber-700/60 hover:border-cyber-cyan/50 rounded-lg cursor-pointer transition-all flex items-center justify-between group"
+                className="p-3.5 bg-cyber-950/70 border border-cyber-700/60 hover:border-cyber-cyan/50 rounded-2xl cursor-pointer transition-all flex items-center justify-between group"
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
@@ -265,7 +265,7 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({
 
           <button
             onClick={() => onNavigateTab('policy')}
-            className="w-full py-2 bg-cyber-800 hover:bg-cyber-700 text-slate-200 border border-cyber-600 rounded-lg text-xs font-mono flex items-center justify-center gap-2 transition-all mt-3"
+            className="w-full py-2 bg-cyber-800 hover:bg-cyber-700 text-slate-200 border border-cyber-600 rounded-2xl text-xs font-mono flex items-center justify-center gap-2 transition-all mt-3"
           >
             <span>Tune Policy Thresholds (τ)</span>
             <ArrowRight className="w-3.5 h-3.5 text-cyber-cyan" />

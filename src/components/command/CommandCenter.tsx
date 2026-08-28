@@ -118,7 +118,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
 
       {/* ── TOP KPI STRIP (5 METRIC TILES) ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 font-mono">
-        <div className="bg-[#0C0E12] border border-white/10 p-3.5 rounded-lg space-y-1 shadow-industrial-sm">
+        <div className="bg-[#0C0E12] border border-white/10 p-3.5 rounded-2xl space-y-1 shadow-industrial-sm">
           <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider flex items-center justify-between">
             <span>HIGH-RISK ALERTS</span>
             <span className="text-[#FF5500] font-bold">+14% VEL</span>
@@ -129,7 +129,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
           <div className="text-[10px] text-zinc-400">ACTIVE SUSPECT CHAINS</div>
         </div>
 
-        <div className="bg-[#0C0E12] border border-white/10 p-3.5 rounded-lg space-y-1 shadow-industrial-sm">
+        <div className="bg-[#0C0E12] border border-white/10 p-3.5 rounded-2xl space-y-1 shadow-industrial-sm">
           <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider flex items-center justify-between">
             <span>MULE SYNDICATES</span>
             <span className="text-amber-400 font-bold">72H WIN</span>
@@ -140,7 +140,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
           <div className="text-[10px] text-zinc-400">COORDINATED GRAPH TOPOLOGY</div>
         </div>
 
-        <div className="bg-[#0C0E12] border border-white/10 p-3.5 rounded-lg space-y-1 shadow-industrial-sm">
+        <div className="bg-[#0C0E12] border border-white/10 p-3.5 rounded-2xl space-y-1 shadow-industrial-sm">
           <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider flex items-center justify-between">
             <span>CASH-OUT EXPOSURE</span>
             <span className="text-amber-400 font-bold">PRIORITY</span>
@@ -151,7 +151,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
           <div className="text-[10px] text-zinc-400">ESTIMATED LAUNDERED SUM</div>
         </div>
 
-        <div className="bg-[#0C0E12] border border-white/10 p-3.5 rounded-lg space-y-1 shadow-industrial-sm">
+        <div className="bg-[#0C0E12] border border-white/10 p-3.5 rounded-2xl space-y-1 shadow-industrial-sm">
           <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider flex items-center justify-between">
             <span>TRIAGE QUEUE</span>
             <span className="text-zinc-300 font-bold">SLA &lt; 2H</span>
@@ -162,7 +162,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
           <div className="text-[10px] text-zinc-400">AWAITING INVESTIGATOR</div>
         </div>
 
-        <div className="bg-[#0C0E12] border border-white/10 p-3.5 rounded-lg space-y-1 shadow-industrial-sm">
+        <div className="bg-[#0C0E12] border border-white/10 p-3.5 rounded-2xl space-y-1 shadow-industrial-sm">
           <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider flex items-center justify-between">
             <span>GNN F1 ACCURACY</span>
             <span className="text-emerald-400 font-bold">MRR 1.0</span>
@@ -178,7 +178,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 min-h-[500px]">
         
         {/* LEFT COLUMN: PRIORITY INCIDENT FEED (7 COLS) */}
-        <div className="lg:col-span-7 flex flex-col bg-[#0C0E12] border border-white/10 rounded-lg p-3.5 shadow-industrial-sm">
+        <div className="lg:col-span-7 flex flex-col bg-[#0C0E12] border border-white/10 rounded-2xl p-3.5 shadow-industrial-sm">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3 mb-2 font-mono">
             <div>
               <h2 className="text-xs font-bold tracking-tight text-white uppercase flex items-center gap-2">
@@ -267,8 +267,19 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-0.5">
-                        <span className="font-bold text-white text-[11px]">
+                        <span className="font-bold text-white text-[11px] relative">
                           {incident.complaint_id}
+                          {incident.intercepted_in_flight && (
+                            <span className="absolute -top-1 -right-1 flex h-1.5 w-1.5">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-indigo-500"></span>
+                            </span>
+                          )}
+                        </span>
+                        <span className={`text-[9px] px-1 py-0.2 rounded font-bold border ${
+                          incident.trigger_source === 'DYNAMIC_ANOMALY' ? 'bg-amber-500/10 text-amber-500 border-amber-500/30' : 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30'
+                        }`}>
+                          {incident.trigger_source === 'DYNAMIC_ANOMALY' ? 'AUTO' : 'CITIZEN'}
                         </span>
                         <span className={`text-[9px] px-1.5 py-0.2 rounded border font-bold ${
                           isHigh ? 'bg-[#FF5500]/15 text-[#FF5500] border-[#FF5500]/30' : isMedium ? 'bg-amber-500/15 text-amber-400 border-amber-500/30' : 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
@@ -323,7 +334,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
         </div>
 
         {/* RIGHT COLUMN: "WHY FLAGGED?" EXPLAINABILITY PANEL (5 COLS) */}
-        <div className="lg:col-span-5 flex flex-col bg-[#0C0E12] border border-white/10 rounded-lg p-3.5 shadow-industrial-sm font-mono text-xs">
+        <div className="lg:col-span-5 flex flex-col bg-[#0C0E12] border border-white/10 rounded-2xl p-3.5 shadow-industrial-sm font-mono text-xs">
           <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-3">
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4 text-[#FF5500]" />

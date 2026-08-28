@@ -34,7 +34,7 @@ export const SimulationOutputs: React.FC<SimulationOutputsProps> = ({
   const terminalCity = results?.terminalPrediction.city || incidentDetail?.model_prediction.top_terminal_city || (isNormal ? 'Legitimate Direct Settlement' : 'Bengaluru (Indiranagar)');
 
   return (
-    <div className="bg-[#0C0E12] border border-white/10 rounded-lg p-4 flex flex-col space-y-3.5 text-slate-200 overflow-y-auto shadow-industrial-sm h-full font-mono text-xs select-none">
+    <div className="bg-[#0C0E12] border border-white/10 rounded-2xl p-4 flex flex-col space-y-3.5 text-slate-200 overflow-y-auto shadow-industrial-sm h-full font-mono text-xs select-none">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
         <div className="flex items-center gap-2">

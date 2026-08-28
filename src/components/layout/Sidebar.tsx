@@ -37,7 +37,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'dashboard', label: 'Command Center', icon: LayoutDashboard },
     { id: 'incidents', label: 'Incident Queue', icon: ShieldAlert, badge: highRiskCount > 0 ? `${highRiskCount} Alerts` : undefined },
     { id: 'graph', label: 'Network Visualizer', icon: Share2 },
-    { id: 'map', label: 'Geospatial Cash-Out', icon: MapPin },
     { id: 'streaming', label: 'Streaming & SLA', icon: Zap },
     { id: 'policy', label: 'Threshold Policy', icon: Sliders },
     { id: 'benchmark', label: '3-Way Benchmark', icon: BarChart3 },
@@ -58,7 +57,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <button
               key={item.id}
               onClick={() => onTabChange(item.id)}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-all ${
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-2xl text-xs font-medium transition-all ${
                 isActive
                   ? 'bg-cyber-cyan/15 text-cyber-cyan font-bold border border-cyber-cyan/30 glow-cyan'
                   : 'text-slate-300 hover:text-slate-100 hover:bg-cyber-800/80 border border-transparent'

@@ -105,7 +105,7 @@ export const LiveEntitySandboxView: React.FC<LiveEntitySandboxProps> = ({
               value={seedEntity}
               onChange={(e) => setSeedEntity(e.target.value)}
               placeholder="e.g. ENT_000185, ENT_000513, ACC_998124501..."
-              className="w-full px-4 py-2.5 bg-cyber-950 border border-cyber-700 rounded-lg text-cyber-cyan text-sm font-bold focus:outline-none focus:border-cyber-cyan"
+              className="w-full px-4 py-2.5 bg-cyber-950 border border-cyber-700 rounded-2xl text-cyber-cyan text-sm font-bold focus:outline-none focus:border-cyber-cyan"
             />
           </div>
 
@@ -116,7 +116,7 @@ export const LiveEntitySandboxView: React.FC<LiveEntitySandboxProps> = ({
             <select
               value={maxHops}
               onChange={(e) => setMaxHops(parseInt(e.target.value))}
-              className="w-full px-3 py-2.5 bg-cyber-950 border border-cyber-700 rounded-lg text-slate-200 focus:outline-none focus:border-cyber-cyan"
+              className="w-full px-3 py-2.5 bg-cyber-950 border border-cyber-700 rounded-2xl text-slate-200 focus:outline-none focus:border-cyber-cyan"
             >
               <option value="1">1-Hop (Direct Counterparties)</option>
               <option value="2">2-Hops (Layering Accounts)</option>

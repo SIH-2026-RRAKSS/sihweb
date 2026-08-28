@@ -73,7 +73,7 @@ export const AppShell: React.FC<AppShellProps> = ({
   }, []);
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-[#060709] text-slate-100 font-sans antialiased overflow-hidden select-none">
+    <div className="flex flex-col h-screen w-screen bg-tactical-void text-slate-100 font-sans antialiased overflow-hidden select-none">
       
       {/* ── 1. TOP COMMAND BAR ── */}
       <header className="h-12 bg-[#0C0E12] border-b border-white/10 px-4 flex items-center justify-between font-mono text-xs z-50 flex-shrink-0">
@@ -206,7 +206,7 @@ export const AppShell: React.FC<AppShellProps> = ({
         </aside>
 
         {/* Central Viewport Content */}
-        <main className="flex-1 bg-[#060709] p-3 overflow-y-auto min-w-0">
+        <main className="flex-1 bg-tactical-void p-3 overflow-y-auto min-w-0">
           {children}
         </main>
       </div>

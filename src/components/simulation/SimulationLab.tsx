@@ -175,7 +175,7 @@ export const SimulationLab: React.FC = () => {
   return (
     <div className="h-full flex flex-col gap-3 overflow-hidden font-mono text-xs select-none">
       {/* ── TOP TACTICAL BAR: SEED ENTITY SWITCHER & QUICK PRESETS ── */}
-      <div className="bg-[#0C0E12] border border-white/10 rounded-lg p-3 flex flex-wrap items-center justify-between gap-3 shadow-industrial-sm flex-shrink-0">
+      <div className="bg-[#0C0E12] border border-white/10 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 shadow-industrial-sm flex-shrink-0">
         
         {/* Left: Active Seed Entity Pill */}
         <div className="flex items-center gap-2.5">
@@ -250,7 +250,7 @@ export const SimulationLab: React.FC = () => {
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: -10 }}
                   transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-                  className="absolute right-0 top-full mt-2 w-96 max-h-96 bg-[#0C0E12]/98 border border-white/20 rounded-lg shadow-industrial-lg z-50 p-3.5 flex flex-col space-y-2.5 backdrop-blur-xl"
+                  className="absolute right-0 top-full mt-2 w-96 max-h-96 bg-[#0C0E12]/98 border border-white/20 rounded-2xl shadow-industrial-lg z-50 p-3.5 flex flex-col space-y-2.5 "
                 >
                   <div className="flex items-center justify-between border-b border-white/10 pb-2">
                     <span className="font-bold text-white text-xs">SELECT COMPLAINT SEED ENTITY</span>
@@ -335,7 +335,7 @@ export const SimulationLab: React.FC = () => {
         <div className="lg:col-span-4 h-full flex flex-col gap-3 overflow-hidden">
           
           {/* Execution Control Deck */}
-          <div className="bg-[#0C0E12] border border-white/10 rounded-lg p-3.5 space-y-3 shadow-industrial-sm flex-shrink-0">
+          <div className="bg-[#0C0E12] border border-white/10 rounded-2xl p-3.5 space-y-3 shadow-industrial-sm flex-shrink-0">
             <div className="flex items-center justify-between border-b border-white/10 pb-2">
               <span className="font-bold text-white text-xs flex items-center gap-1.5">
                 <Zap className="w-3.5 h-3.5 text-[#FF5500]" />

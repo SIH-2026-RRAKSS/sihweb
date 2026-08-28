@@ -107,7 +107,7 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
   };
 
   return (
-    <div className="bg-[#0C0E12] border border-white/10 rounded-lg p-3.5 flex flex-col space-y-3.5 text-slate-200 overflow-y-auto shadow-industrial-sm h-full font-mono text-xs">
+    <div className="bg-[#0C0E12] border border-white/10 rounded-2xl p-3.5 flex flex-col space-y-3.5 text-slate-200 overflow-y-auto shadow-industrial-sm h-full font-mono text-xs">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
         <div className="flex items-center gap-2">

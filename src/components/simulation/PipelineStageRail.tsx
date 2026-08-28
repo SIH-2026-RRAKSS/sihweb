@@ -38,7 +38,7 @@ export const PipelineStageRail: React.FC<PipelineStageRailProps> = ({
   const progressPercent = Math.min(100, (currentStage / 8) * 100);
 
   return (
-    <div className="relative bg-[#0C0E12] border border-white/10 rounded-lg p-2.5 flex flex-col space-y-2 font-mono text-xs shadow-industrial-sm overflow-hidden select-none">
+    <div className="relative bg-[#0C0E12] border border-white/10 rounded-2xl p-2.5 flex flex-col space-y-2 font-mono text-xs shadow-industrial-sm overflow-hidden select-none">
       
       {/* Top Track & Status */}
       <div className="flex items-center justify-between">

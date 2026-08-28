@@ -32,6 +32,8 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase }) =>
   const [sortMode, setSortMode] = useState<SortMode>('SERIAL');
 
   useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
     const fetchIncidents = async () => {
       try {
         setLoading(true);
@@ -68,6 +70,9 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase }) =>
     };
 
     fetchIncidents();
+    intervalId = setInterval(fetchIncidents, 2000); // Poll every 2 seconds
+
+    return () => clearInterval(intervalId);
   }, [page, pageSize, tierFilter, search, sortMode]);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
@@ -75,7 +80,7 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase }) =>
   return (
     <div className="space-y-4 font-mono text-xs">
       {/* ── SEARCH, FILTER & SORTING HEADER ── */}
-      <div className="bg-[#0C0E12] border border-white/10 p-3.5 rounded-lg flex flex-wrap items-center justify-between gap-3 shadow-industrial-sm">
+      <div className="bg-tactical-surface border border-tactical-border p-3.5 rounded-2xl flex flex-wrap items-center justify-between gap-3 shadow-saas-card">
         <div className="flex items-center gap-2.5">
           <div className="p-1.5 bg-[#FF5500]/10 border border-[#FF5500]/30 rounded text-[#FF5500]">
             <ShieldAlert className="w-4 h-4" />
@@ -176,12 +181,13 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase }) =>
       </div>
 
       {/* ── INCIDENTS TABLE ── */}
-      <div className="bg-[#0C0E12] border border-white/10 rounded-lg overflow-hidden shadow-industrial-sm">
+      <div className="bg-tactical-surface border border-tactical-border rounded-2xl overflow-hidden shadow-saas-card">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs font-mono">
-            <thead className="bg-[#060709] border-b border-white/10 text-[10px] text-zinc-400">
+            <thead className="bg-slate-800/50 border-b border-tactical-border text-[10px] text-zinc-400">
               <tr>
                 <th className="p-3">COMPLAINT ID</th>
+                <th className="p-3">INTAKE ORIGIN</th>
                 <th className="p-3">SCAM CATEGORY</th>
                 <th className="p-3 text-right">DISPUTED AMOUNT</th>
                 <th className="p-3">JURISDICTION</th>
@@ -194,13 +200,13 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase }) =>
             <tbody className="divide-y divide-white/5 bg-[#0C0E12]">
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="p-6">
+                  <td colSpan={9} className="p-6">
                     <LoadingSkeleton variant="table-row" count={8} />
                   </td>
                 </tr>
               ) : incidents.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="p-8 text-center">
+                  <td colSpan={9} className="p-8 text-center">
                     <EmptyState
                       title="No incidents found"
                       description="No records match your selected tier or search criteria."
@@ -211,6 +217,7 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase }) =>
                 incidents.map((incident) => {
                   const isHigh = incident.confidence_tier === 'HIGH_CONFIDENCE';
                   const isMedium = incident.confidence_tier === 'MEDIUM_CONFIDENCE';
+                  const isAuto = incident.trigger_source === 'DYNAMIC_ANOMALY';
 
                   return (
                     <tr
@@ -218,8 +225,25 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase }) =>
                       onClick={() => onSelectCase(incident.complaint_id)}
                       className="hover:bg-white/[0.03] transition-colors cursor-pointer"
                     >
-                      <td className="p-3 font-bold text-white">
+                      <td className="p-3 font-bold text-white relative">
                         {incident.complaint_id}
+                        {incident.intercepted_in_flight && (
+                          <div className="absolute -top-1 -right-2 text-[8px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 px-1 py-0.5 rounded shadow whitespace-nowrap">
+                            Intercepted In-Flight
+                          </div>
+                        )}
+                      </td>
+                      <td className="p-3">
+                        <div className="flex flex-col gap-1">
+                          <span className={`text-[9px] px-1.5 py-0.5 w-fit rounded font-bold border ${isAuto ? 'bg-amber-500/10 text-amber-500 border-amber-500/30' : 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30'}`}>
+                            {isAuto ? '[AUTO-SPAWNED ANOMALY]' : '[CITIZEN COMPLAINT]'}
+                          </span>
+                          {isAuto && incident.anomaly_reason && (
+                            <span className="text-[9px] text-zinc-500 leading-tight">
+                              {incident.anomaly_reason}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="p-3 text-zinc-300 max-w-[200px] truncate">
                         {incident.scam_category || 'Commercial Transfer Flow'}

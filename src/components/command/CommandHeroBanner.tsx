@@ -31,7 +31,7 @@ export const CommandHeroBanner: React.FC<CommandHeroBannerProps> = ({ onNavigate
   return (
     <div
       onMouseMove={handleMouseMove}
-      className="relative bg-[#0C0E12] border border-white/10 p-5 rounded-lg shadow-industrial-md overflow-hidden select-none"
+      className="relative bg-[#0C0E12] border border-white/10 p-5 rounded-2xl shadow-industrial-md overflow-hidden select-none"
     >
       {/* Motion Spotlight Beam */}
       <motion.div

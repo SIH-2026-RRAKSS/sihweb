@@ -11,6 +11,9 @@ export interface IncidentSummary {
   confidence_tier: ConfidenceTier;
   top_terminal_id?: string;
   top_terminal_city?: string;
+  trigger_source?: 'CITIZEN_COMPLAINT' | 'DYNAMIC_ANOMALY';
+  anomaly_reason?: string;
+  intercepted_in_flight?: boolean;
 }
 
 export interface ComplaintDetail {
@@ -40,15 +43,31 @@ export interface TerminalPredictionDetails {
 }
 
 export interface IncidentDetail {
-  complaint: ComplaintDetail;
-  resolved_canonical_entity: ResolvedEntity;
+  complaint: {
+    complaint_id: string;
+    complaint_date: string;
+    complainant_name: string;
+    reported_account_number: string;
+    reported_ifsc: string;
+    reported_amount: number;
+    scam_category: string;
+    location: string;
+  };
+  resolved_canonical_entity: {
+    entity_id: string;
+    canonical_holder_name: string;
+    bank_name: string;
+    coordinates: [number, number];
+  };
   model_prediction: {
-    graphsage_risk_probability: number;
+    graphsage_risk_probability: number; // Head 1: Macro Ring Risk
+    node_mule_probability_head2?: number; // Head 2: Micro Node Risk
     confidence_tier: ConfidenceTier;
-    top_terminal_id?: string;
-    top_terminal_score?: number;
-    top_terminal_city?: string;
-    executive_summary?: string;
+    top_terminal_id: string;
+    top_terminal_score: number;
+    top_terminal_city: string;
+    top_terminals?: Array<{ id: string; city: string; score: number; distance_km: number }>;
+    executive_summary: string;
   };
   investigative_evidence_bullets: string[];
   top_terminal_details?: TerminalPredictionDetails;

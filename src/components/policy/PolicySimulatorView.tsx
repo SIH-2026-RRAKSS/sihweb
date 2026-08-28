@@ -17,13 +17,15 @@ import { ApiService } from '../../services/api';
 import { MOCK_POLICY_TABLE } from '../../services/mockData';
 
 export const PolicySimulatorView: React.FC = () => {
-  const [threshold, setThreshold] = useState<number>(0.50);
+  const [tauGraph, setTauGraph] = useState<number>(0.70); // Filter ring-level alerts
+  const [tauNode, setTauNode] = useState<number>(0.85); // Immediate account freezing
   const [activeDataset, setActiveDataset] = useState<string>('synthetic');
   const [policyResult, setPolicyResult] = useState<PolicyTuneResult | null>(null);
 
   useEffect(() => {
-    ApiService.tunePolicy(threshold, activeDataset).then(setPolicyResult);
-  }, [threshold, activeDataset]);
+    // API tune endpoint drives macro queue alerts (tauGraph)
+    ApiService.tunePolicy(tauGraph, activeDataset).then(setPolicyResult);
+  }, [tauGraph, activeDataset]);
 
   // Curve data
   const prCurveData = MOCK_POLICY_TABLE.map(p => ({
@@ -55,7 +57,7 @@ export const PolicySimulatorView: React.FC = () => {
           <select
             value={activeDataset}
             onChange={(e) => setActiveDataset(e.target.value)}
-            className="px-3 py-1.5 text-xs font-mono bg-cyber-950 border border-cyber-700 rounded-lg text-cyber-cyan focus:border-cyber-cyan focus:outline-none"
+            className="px-3 py-1.5 text-xs font-mono bg-cyber-950 border border-cyber-700 rounded-2xl text-cyber-cyan focus:border-cyber-cyan focus:outline-none"
           >
             <option value="synthetic">Dataset A: Synthetic Domestic (200 Holdout)</option>
             <option value="ibm">Dataset B: IBM AML Multi-Bank (200 Holdout)</option>
@@ -68,10 +70,10 @@ export const PolicySimulatorView: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="text-xs font-mono uppercase text-slate-400">
-              Investigator Decision Cutoff (τ)
+              Graph Alert Threshold (τ_graph)
             </div>
             <div className="text-3xl font-black font-mono text-cyber-cyan mt-1 flex items-baseline gap-2">
-              τ = {threshold.toFixed(2)}
+              τ_g = {tauGraph.toFixed(2)}
               <span className="text-xs font-semibold px-2 py-0.5 rounded bg-cyber-cyan/10 text-cyber-cyan border border-cyber-cyan/30">
                 {policyResult?.policy_tier_name || 'BALANCED_TRIAGE'}
               </span>
@@ -79,13 +81,13 @@ export const PolicySimulatorView: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4 text-xs font-mono">
-            <div className="p-3 bg-cyber-950 rounded-lg border border-cyber-800 text-center min-w-[120px]">
+            <div className="p-3 bg-cyber-950 rounded-2xl border border-cyber-800 text-center min-w-[120px]">
               <div className="text-[10px] text-slate-500 uppercase">Alert Caseload</div>
               <div className="text-lg font-bold text-amber-400">{policyResult?.alerts_generated || 44} / 200</div>
               <div className="text-[9px] text-slate-400">({policyResult?.alert_rate_percent || 22.0}% Rate)</div>
             </div>
 
-            <div className="p-3 bg-cyber-950 rounded-lg border border-cyber-800 text-center min-w-[120px]">
+            <div className="p-3 bg-cyber-950 rounded-2xl border border-cyber-800 text-center min-w-[120px]">
               <div className="text-[10px] text-slate-500 uppercase">Expected F1-Score</div>
               <div className="text-lg font-bold text-emerald-400">{policyResult?.f1_score_percent.toFixed(2) || '88.89'}%</div>
               <div className="text-[9px] text-slate-400">Harmonic Mean</div>
@@ -93,21 +95,48 @@ export const PolicySimulatorView: React.FC = () => {
           </div>
         </div>
 
-        {/* Big Slider */}
-        <div className="space-y-2 pt-2">
-          <input
-            type="range"
-            min="0.10"
-            max="0.90"
-            step="0.05"
-            value={threshold}
-            onChange={(e) => setThreshold(parseFloat(e.target.value))}
-            className="w-full h-3 bg-cyber-950 rounded-lg appearance-none cursor-pointer accent-cyber-cyan"
-          />
-          <div className="flex justify-between text-[10px] font-mono text-slate-500">
-            <span>0.10 (High Sensitivity / Catch All)</span>
-            <span>0.50 (Balanced Operational Triage)</span>
-            <span>0.90 (High Precision / Low False Alerts)</span>
+        {/* Dual Sliders */}
+        <div className="space-y-6 pt-2">
+          {/* Tau Graph Slider */}
+          <div className="space-y-2">
+            <div className="flex justify-between text-xs font-mono font-bold text-cyber-cyan">
+              <span>Macro Alert Cutoff (τ_graph)</span>
+              <span>{tauGraph.toFixed(2)}</span>
+            </div>
+            <input
+              type="range"
+              min="0.10"
+              max="0.90"
+              step="0.05"
+              value={tauGraph}
+              onChange={(e) => setTauGraph(parseFloat(e.target.value))}
+              className="w-full h-2 bg-cyber-950 rounded-2xl appearance-none cursor-pointer accent-cyber-cyan"
+            />
+            <div className="flex justify-between text-[10px] font-mono text-slate-500">
+              <span>0.10 (High Sensitivity)</span>
+              <span>0.90 (High Precision)</span>
+            </div>
+          </div>
+
+          {/* Tau Node Slider */}
+          <div className="space-y-2">
+            <div className="flex justify-between text-xs font-mono font-bold text-amber-400">
+              <span>Account Freeze Cutoff (τ_node)</span>
+              <span>{tauNode.toFixed(2)}</span>
+            </div>
+            <input
+              type="range"
+              min="0.50"
+              max="0.99"
+              step="0.01"
+              value={tauNode}
+              onChange={(e) => setTauNode(parseFloat(e.target.value))}
+              className="w-full h-2 bg-cyber-950 rounded-2xl appearance-none cursor-pointer accent-amber-400"
+            />
+            <div className="flex justify-between text-[10px] font-mono text-slate-500">
+              <span>0.50 (Aggressive Freezing)</span>
+              <span>0.99 (Conservative / Sure Bets)</span>
+            </div>
           </div>
         </div>
       </div>
@@ -207,7 +236,7 @@ export const PolicySimulatorView: React.FC = () => {
             </thead>
             <tbody className="divide-y divide-cyber-800">
               {MOCK_POLICY_TABLE.map((row) => {
-                const isSelected = Math.abs(row.threshold - threshold) < 0.04;
+                const isSelected = Math.abs(row.threshold - tauGraph) < 0.04;
                 return (
                   <tr
                     key={row.threshold}

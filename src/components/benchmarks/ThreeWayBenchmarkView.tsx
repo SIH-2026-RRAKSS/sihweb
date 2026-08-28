@@ -28,7 +28,7 @@ export const ThreeWayBenchmarkView: React.FC = () => {
           </p>
         </div>
 
-        <span className="px-3 py-1 text-xs font-mono font-bold bg-purple-500/10 text-purple-300 border border-purple-500/30 rounded-lg">
+        <span className="px-3 py-1 text-xs font-mono font-bold bg-purple-500/10 text-purple-300 border border-purple-500/30 rounded-2xl">
           Inductive GraphSAGE vs XGBoost
         </span>
       </div>
@@ -74,9 +74,9 @@ export const ThreeWayBenchmarkView: React.FC = () => {
         <div className="cyber-card p-5 space-y-3.5 border-purple-500/40">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/30">
-              Dataset B (IBM AML)
+              Dataset B (IBM AML HI-Small)
             </span>
-            <span className="text-[10px] font-mono text-emerald-400 font-bold">p = 0.0032 &lt; 0.01</span>
+            <span className="text-[10px] font-mono text-emerald-400 font-bold">Latency: 3.40ms</span>
           </div>
 
           <div>
@@ -84,24 +84,27 @@ export const ThreeWayBenchmarkView: React.FC = () => {
               Multi-Bank Ledger Transactions
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">
-              Real-world multi-bank payment rails (1M transactions, 1,000 subgraphs).
+              Empirical GraphSAGE benchmark on IBM AML HI-Small dataset.
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-2 pt-2 border-t border-cyber-800 font-mono text-center">
             <div className="p-2 bg-cyber-950 rounded">
-              <div className="text-[9px] text-slate-500 uppercase">XGBoost Baseline</div>
-              <div className="text-xs font-bold text-slate-300">73.93% ± 3.37%</div>
+              <div className="text-[9px] text-slate-500 uppercase">ROC-AUC</div>
+              <div className="text-xs font-bold text-slate-300">0.9456</div>
             </div>
             <div className="p-2 bg-cyber-950 rounded border border-purple-500/30">
-              <div className="text-[9px] text-purple-300 uppercase">GraphSAGE GNN</div>
-              <div className="text-xs font-bold text-purple-300">77.70% ± 2.57%</div>
+              <div className="text-[9px] text-purple-300 uppercase">F1-Score</div>
+              <div className="text-xs font-bold text-purple-300">62.92%</div>
             </div>
           </div>
 
-          <div className="p-2.5 bg-purple-500/10 border border-purple-500/30 rounded text-[11px] font-mono text-purple-300 flex items-center gap-1.5">
-            <Award className="w-3.5 h-3.5 flex-shrink-0" />
-            <span>F1 Gain: +3.76% (Statistically Significant)</span>
+          <div className="p-2.5 bg-purple-500/10 border border-purple-500/30 rounded text-[11px] font-mono text-purple-300 flex items-center gap-1.5 justify-between">
+            <div className="flex items-center gap-1.5">
+              <Award className="w-3.5 h-3.5 flex-shrink-0" />
+              <span>Precision: 58.14%</span>
+            </div>
+            <span>Recall: 68.56%</span>
           </div>
         </div>
 

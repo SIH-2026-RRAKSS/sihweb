@@ -58,8 +58,8 @@ export const KPICard: React.FC<KPICardProps> = ({
 
   return (
     <motion.div
-      className={`cyber-panel p-3.5 hud-bracket ${c.border} ${onClick ? 'cursor-pointer' : ''}`}
-      whileHover={onClick ? { scale: 1.02, y: -2 } : { y: -1 }}
+      className={`bg-tactical-surface border border-tactical-border rounded-2xl shadow-saas-card p-4 ${onClick ? 'cursor-pointer' : ''}`}
+      whileHover={onClick ? { scale: 1.02, y: -2, boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.25), 0 4px 6px -4px rgba(0, 0, 0, 0.1)' } : { y: -1 }}
       transition={{ duration: 0.15 }}
       onClick={onClick}
     >

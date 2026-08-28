@@ -66,7 +66,7 @@ export const GeospatialMapView: React.FC<GeospatialMapProps> = () => {
           <select
             value={selectedCity}
             onChange={(e) => setSelectedCity(e.target.value)}
-            className="px-3 py-1.5 text-xs font-mono bg-cyber-950 border border-cyber-700 rounded-lg text-cyber-cyan focus:border-cyber-cyan focus:outline-none"
+            className="px-3 py-1.5 text-xs font-mono bg-cyber-950 border border-cyber-700 rounded-2xl text-cyber-cyan focus:border-cyber-cyan focus:outline-none"
           >
             <option value="ALL">ALL 15 CITIES ({locations.length} Points)</option>
             {cities.map(c => (
@@ -181,7 +181,7 @@ export const GeospatialMapView: React.FC<GeospatialMapProps> = () => {
           </svg>
 
           {/* Map Legend Footer */}
-          <div className="absolute bottom-3 left-3 flex items-center gap-4 bg-cyber-950/90 border border-cyber-700/80 px-3 py-2 rounded-lg text-[10px] font-mono">
+          <div className="absolute bottom-3 left-3 flex items-center gap-4 bg-cyber-950/90 border border-cyber-700/80 px-3 py-2 rounded-2xl text-[10px] font-mono">
             <div className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 bg-amber-500 rounded-sm"></span>
               <span className="text-amber-400 font-bold">ATM Cash-Out Exit</span>
@@ -210,13 +210,13 @@ export const GeospatialMapView: React.FC<GeospatialMapProps> = () => {
 
             {selectedEntity ? (
               <div className="space-y-3 mt-3 text-xs font-mono">
-                <div className="p-3 bg-cyber-950 rounded-lg border border-cyber-800 space-y-1.5">
+                <div className="p-3 bg-cyber-950 rounded-2xl border border-cyber-800 space-y-1.5">
                   <div className="text-[10px] text-slate-500 uppercase">Selected Entity ID</div>
                   <div className="text-sm font-bold text-cyber-cyan">{selectedEntity.entity_id}</div>
                   <div className="text-[11px] text-slate-300 font-sans">{selectedEntity.holder_name}</div>
                 </div>
 
-                <div className="p-3 bg-cyber-950 rounded-lg border border-cyber-800 space-y-1.5">
+                <div className="p-3 bg-cyber-950 rounded-2xl border border-cyber-800 space-y-1.5">
                   <div className="flex justify-between">
                     <span className="text-slate-500">Jurisdiction:</span>
                     <span className="text-slate-200 font-bold">{selectedEntity.city}, {selectedEntity.state}</span>
@@ -237,7 +237,7 @@ export const GeospatialMapView: React.FC<GeospatialMapProps> = () => {
                   </div>
                 </div>
 
-                <div className="p-3 bg-cyber-950 rounded-lg border border-cyber-800 space-y-1">
+                <div className="p-3 bg-cyber-950 rounded-2xl border border-cyber-800 space-y-1">
                   <div className="text-[10px] text-slate-500 uppercase">GNN Risk Assessment</div>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-200">Probability:</span>

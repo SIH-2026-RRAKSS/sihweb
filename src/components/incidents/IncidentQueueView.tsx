@@ -120,7 +120,7 @@ export const IncidentQueueView: React.FC<IncidentQueueProps> = ({
               setSelectedTier(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full px-3 py-1.5 text-xs bg-cyber-950 border border-cyber-700 rounded-lg text-slate-200 focus:border-cyber-cyan focus:outline-none font-mono"
+            className="w-full px-3 py-1.5 text-xs bg-cyber-950 border border-cyber-700 rounded-2xl text-slate-200 focus:border-cyber-cyan focus:outline-none font-mono"
           >
             <option value="ALL">ALL TIERS ({incidents.length})</option>
             <option value="HIGH_CONFIDENCE">HIGH CONFIDENCE (Alert)</option>
@@ -145,7 +145,7 @@ export const IncidentQueueView: React.FC<IncidentQueueProps> = ({
               setMinRisk(parseFloat(e.target.value));
               setCurrentPage(1);
             }}
-            className="w-full h-1.5 bg-cyber-950 rounded-lg appearance-none cursor-pointer accent-cyber-cyan"
+            className="w-full h-1.5 bg-cyber-950 rounded-2xl appearance-none cursor-pointer accent-cyber-cyan"
           />
         </div>
 
@@ -164,7 +164,7 @@ export const IncidentQueueView: React.FC<IncidentQueueProps> = ({
                 setCurrentPage(1);
               }}
               placeholder="Search e.g. C000047, ACC_998124501, Mumbai, Crypto..."
-              className="w-full pl-9 pr-4 py-1.5 text-xs bg-cyber-950 border border-cyber-700 rounded-lg text-slate-200 focus:border-cyber-cyan focus:outline-none font-mono placeholder:text-slate-600"
+              className="w-full pl-9 pr-4 py-1.5 text-xs bg-cyber-950 border border-cyber-700 rounded-2xl text-slate-200 focus:border-cyber-cyan focus:outline-none font-mono placeholder:text-slate-600"
             />
           </div>
         </div>

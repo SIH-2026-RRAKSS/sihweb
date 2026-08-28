@@ -120,12 +120,12 @@ ${detail.investigative_evidence_bullets.map((b, i) => `${i + 1}. ${b}`).join('\n
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80  overflow-y-auto">
       <div className="relative w-full max-w-4xl bg-cyber-900 border border-cyber-700/80 rounded-2xl shadow-2xl overflow-hidden my-8 max-h-[90vh] flex flex-col">
         {/* Modal Header */}
         <div className="px-6 py-4 bg-cyber-950 border-b border-cyber-700/80 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-cyber-red/10 border border-cyber-red/30 flex items-center justify-center text-cyber-red">
+            <div className="w-9 h-9 rounded-2xl bg-cyber-red/10 border border-cyber-red/30 flex items-center justify-center text-cyber-red">
               <ShieldAlert className="w-5 h-5" />
             </div>
             <div>
@@ -145,7 +145,7 @@ ${detail.investigative_evidence_bullets.map((b, i) => `${i + 1}. ${b}`).join('\n
 
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-100 hover:bg-cyber-800 rounded-lg transition-colors"
+            className="p-1.5 text-slate-400 hover:text-slate-100 hover:bg-cyber-800 rounded-2xl transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -162,7 +162,7 @@ ${detail.investigative_evidence_bullets.map((b, i) => `${i + 1}. ${b}`).join('\n
             <>
               {/* Alert Notification Toast */}
               {actionNotice && (
-                <div className="p-3 bg-cyber-red/20 border border-cyber-red/50 text-red-300 rounded-lg text-xs font-mono flex items-center gap-2">
+                <div className="p-3 bg-cyber-red/20 border border-cyber-red/50 text-red-300 rounded-2xl text-xs font-mono flex items-center gap-2">
                   <AlertOctagon className="w-4 h-4 text-cyber-red flex-shrink-0" />
                   <span>{actionNotice}</span>
                 </div>
@@ -319,7 +319,7 @@ ${detail.investigative_evidence_bullets.map((b, i) => `${i + 1}. ${b}`).join('\n
                 onClose();
                 onViewGraph(incidentId);
               }}
-              className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-mono bg-cyber-cyan text-cyber-950 font-bold hover:bg-cyber-cyan/90 rounded-lg transition-all"
+              className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-mono bg-cyber-cyan text-cyber-950 font-bold hover:bg-cyber-cyan/90 rounded-2xl transition-all"
             >
               <Share2 className="w-3.5 h-3.5" />
               Open Interactive Topology Graph
@@ -327,7 +327,7 @@ ${detail.investigative_evidence_bullets.map((b, i) => `${i + 1}. ${b}`).join('\n
 
             <button
               onClick={handleFreezeNotice}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono bg-cyber-red/20 text-cyber-red border border-cyber-red/40 hover:bg-cyber-red/30 rounded-lg transition-all"
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono bg-cyber-red/20 text-cyber-red border border-cyber-red/40 hover:bg-cyber-red/30 rounded-2xl transition-all"
               title="Issue Freeze Advisory Notice"
             >
               <Ban className="w-3.5 h-3.5" />
@@ -338,21 +338,21 @@ ${detail.investigative_evidence_bullets.map((b, i) => `${i + 1}. ${b}`).join('\n
           <div className="flex items-center gap-2">
             <button
               onClick={handleDownloadMarkdown}
-              className="flex items-center gap-1 px-3 py-2 text-xs font-mono bg-cyber-800 hover:bg-cyber-700 text-slate-200 border border-cyber-600 rounded-lg transition-all"
+              className="flex items-center gap-1 px-3 py-2 text-xs font-mono bg-cyber-800 hover:bg-cyber-700 text-slate-200 border border-cyber-600 rounded-2xl transition-all"
             >
               <FileText className="w-3.5 h-3.5 text-cyber-cyan" />
               Markdown
             </button>
             <button
               onClick={handleDownloadJSON}
-              className="flex items-center gap-1 px-3 py-2 text-xs font-mono bg-cyber-800 hover:bg-cyber-700 text-slate-200 border border-cyber-600 rounded-lg transition-all"
+              className="flex items-center gap-1 px-3 py-2 text-xs font-mono bg-cyber-800 hover:bg-cyber-700 text-slate-200 border border-cyber-600 rounded-2xl transition-all"
             >
               <Download className="w-3.5 h-3.5 text-purple-400" />
               JSON
             </button>
             <button
               onClick={() => window.print()}
-              className="flex items-center gap-1 px-3 py-2 text-xs font-mono bg-cyber-800 hover:bg-cyber-700 text-slate-200 border border-cyber-600 rounded-lg transition-all"
+              className="flex items-center gap-1 px-3 py-2 text-xs font-mono bg-cyber-800 hover:bg-cyber-700 text-slate-200 border border-cyber-600 rounded-2xl transition-all"
             >
               <Printer className="w-3.5 h-3.5 text-amber-400" />
               Print

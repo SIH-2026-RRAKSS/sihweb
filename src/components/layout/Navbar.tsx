@@ -22,10 +22,10 @@ export const Navbar: React.FC<NavbarProps> = ({
   const isOnline = health?.database_connected ?? false;
 
   return (
-    <header className="sticky top-0 z-40 h-16 bg-cyber-900/95 border-b border-cyber-700/60 backdrop-blur-xl px-4 lg:px-6 flex items-center justify-between shadow-lg shadow-black/40">
+    <header className="sticky top-0 z-40 h-16 bg-cyber-900/95 border-b border-cyber-700/60  px-4 lg:px-6 flex items-center justify-between shadow-lg shadow-black/40">
       {/* Brand & Title */}
       <div className="flex items-center gap-3">
-        <div className="relative flex items-center justify-center w-10 h-10 rounded-lg bg-cyber-800 border border-cyber-cyan/40 glow-cyan">
+        <div className="relative flex items-center justify-center w-10 h-10 rounded-2xl bg-cyber-800 border border-cyber-cyan/40 glow-cyan">
           <Shield className="w-5 h-5 text-cyber-cyan animate-pulse" />
           <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyber-cyan opacity-75"></span>
@@ -56,7 +56,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search Complaint ID, Account Number, District, Scam Type..."
-            className="w-full pl-9 pr-4 py-1.5 text-xs bg-cyber-950/80 border border-cyber-700 rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyber-cyan focus:ring-1 focus:ring-cyber-cyan transition-all font-mono"
+            className="w-full pl-9 pr-4 py-1.5 text-xs bg-cyber-950/80 border border-cyber-700 rounded-2xl text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyber-cyan focus:ring-1 focus:ring-cyber-cyan transition-all font-mono"
           />
         </div>
       </div>
@@ -64,7 +64,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* Right Controls */}
       <div className="flex items-center gap-3">
         {/* Dataset Toggle */}
-        <div className="flex items-center p-0.5 bg-cyber-950 border border-cyber-700 rounded-lg text-xs font-mono">
+        <div className="flex items-center p-0.5 bg-cyber-950 border border-cyber-700 rounded-2xl text-xs font-mono">
           <button
             onClick={() => onDatasetChange('A')}
             className={`px-2.5 py-1 rounded transition-colors ${
@@ -92,7 +92,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Quick Sandbox Trigger */}
         <button
           onClick={onOpenSandbox}
-          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono bg-cyber-800 hover:bg-cyber-700 text-slate-200 border border-cyber-600 rounded-lg transition-all"
+          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono bg-cyber-800 hover:bg-cyber-700 text-slate-200 border border-cyber-600 rounded-2xl transition-all"
         >
           <Terminal className="w-3.5 h-3.5 text-cyber-cyan" />
           <span>Live GNN Sandbox</span>

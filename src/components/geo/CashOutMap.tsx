@@ -252,7 +252,7 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 h-[calc(100vh-6.5rem)] font-mono text-xs">
       
       {/* ── LEFT PANEL: ENTITY SELECTOR ROSTER (3 COLS) ── */}
-      <div className="lg:col-span-3 bg-[#0C0E12] border border-white/10 rounded-lg p-3 flex flex-col space-y-3 shadow-industrial-sm overflow-hidden">
+      <div className="lg:col-span-3 bg-[#0C0E12] border border-white/10 rounded-2xl p-3 flex flex-col space-y-3 shadow-industrial-sm overflow-hidden">
         <div className="flex items-center justify-between border-b border-white/10 pb-2 flex-shrink-0">
           <div className="flex items-center gap-2">
             <Radio className="w-3.5 h-3.5 text-[#FF5500] animate-pulse" />
@@ -336,11 +336,11 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
       </div>
 
       {/* ── CENTER: LEAFLET INTERACTIVE MAP (6 COLS) ── */}
-      <div className="lg:col-span-6 bg-[#0C0E12] border border-white/10 rounded-lg overflow-hidden relative shadow-industrial-sm flex flex-col">
+      <div className="lg:col-span-6 bg-[#0C0E12] border border-white/10 rounded-2xl overflow-hidden relative shadow-industrial-sm flex flex-col">
         <div ref={mapContainerRef} className="w-full h-full min-h-[400px]" />
 
         {/* Map Legend Floating Bar */}
-        <div className="absolute bottom-3 left-3 right-3 bg-[#0C0E12]/90 border border-white/15 p-2 rounded backdrop-blur-md flex flex-wrap items-center justify-between text-[10px] text-zinc-300 font-mono z-[1000]">
+        <div className="absolute bottom-3 left-3 right-3 bg-[#0C0E12]/90 border border-white/15 p-2 rounded  flex flex-wrap items-center justify-between text-[10px] text-zinc-300 font-mono z-[1000]">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-[#FF5500]" />
@@ -362,7 +362,7 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
       </div>
 
       {/* ── RIGHT PANEL: INSPECTOR DOSSIER (3 COLS) ── */}
-      <div className="lg:col-span-3 bg-[#0C0E12] border border-white/10 rounded-lg p-3.5 flex flex-col space-y-3.5 shadow-industrial-sm overflow-y-auto">
+      <div className="lg:col-span-3 bg-[#0C0E12] border border-white/10 rounded-2xl p-3.5 flex flex-col space-y-3.5 shadow-industrial-sm overflow-y-auto">
         <div className="flex items-center justify-between border-b border-white/10 pb-2">
           <div className="flex items-center gap-1.5 text-white font-bold">
             <Navigation className="w-3.5 h-3.5 text-[#38BDF8]" />

@@ -338,7 +338,7 @@ export const GraphVisualizerView: React.FC<GraphVisualizerProps> = ({
           <select
             value={selectedIncident}
             onChange={(e) => setSelectedIncident(e.target.value)}
-            className="px-3 py-1.5 text-xs font-mono bg-cyber-950 border border-cyber-700 rounded-lg text-cyber-cyan focus:border-cyber-cyan focus:outline-none"
+            className="px-3 py-1.5 text-xs font-mono bg-cyber-950 border border-cyber-700 rounded-2xl text-cyber-cyan focus:border-cyber-cyan focus:outline-none"
           >
             {availableIncidents.map(id => (
               <option key={id} value={id}>{id} (Sub-network)</option>
@@ -352,7 +352,7 @@ export const GraphVisualizerView: React.FC<GraphVisualizerProps> = ({
         {/* Left 3 Cols: Interactive Canvas Container */}
         <div className="lg:col-span-3 cyber-card relative overflow-hidden flex flex-col items-center justify-center min-h-[540px]">
           {/* Top Controls Overlay */}
-          <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 bg-cyber-950/90 border border-cyber-700/80 p-1 rounded-lg backdrop-blur-md">
+          <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 bg-cyber-950/90 border border-cyber-700/80 p-1 rounded-2xl ">
             <button
               onClick={() => setZoomLevel(z => Math.min(2.5, z + 0.15))}
               className="p-1.5 hover:bg-cyber-800 text-slate-300 rounded"
@@ -388,7 +388,7 @@ export const GraphVisualizerView: React.FC<GraphVisualizerProps> = ({
           </div>
 
           {/* Top Right Legend Overlay */}
-          <div className="absolute top-3 right-3 z-10 bg-cyber-950/90 border border-cyber-700/80 p-2.5 rounded-lg backdrop-blur-md font-mono text-[10px] space-y-1 hidden sm:block">
+          <div className="absolute top-3 right-3 z-10 bg-cyber-950/90 border border-cyber-700/80 p-2.5 rounded-2xl  font-mono text-[10px] space-y-1 hidden sm:block">
             <div className="font-bold text-slate-400 uppercase tracking-wider mb-1">Entity Roles</div>
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-cyber-red"></span>
@@ -446,7 +446,7 @@ export const GraphVisualizerView: React.FC<GraphVisualizerProps> = ({
                   <div className="text-[11px] text-slate-300 font-sans mt-0.5">{selectedNode.label}</div>
                 </div>
 
-                <div className="p-2.5 bg-cyber-950 rounded-lg border border-cyber-800 space-y-1.5">
+                <div className="p-2.5 bg-cyber-950 rounded-2xl border border-cyber-800 space-y-1.5">
                   <div className="flex justify-between">
                     <span className="text-slate-500">Node Type:</span>
                     <span className="font-bold text-slate-200">{selectedNode.node_type}</span>
@@ -461,7 +461,7 @@ export const GraphVisualizerView: React.FC<GraphVisualizerProps> = ({
                   </div>
                 </div>
 
-                <div className="p-2.5 bg-cyber-950 rounded-lg border border-cyber-800 space-y-1.5">
+                <div className="p-2.5 bg-cyber-950 rounded-2xl border border-cyber-800 space-y-1.5">
                   <div className="flex justify-between">
                     <span className="text-slate-500">In-Degree / Incoming:</span>
                     <span className="text-emerald-400 font-bold">{selectedNode.in_degree} (₹{selectedNode.total_incoming_amount.toLocaleString()})</span>
@@ -473,7 +473,7 @@ export const GraphVisualizerView: React.FC<GraphVisualizerProps> = ({
                 </div>
 
                 {selectedNode.is_terminal && (
-                  <div className="p-2.5 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-300 text-[11px]">
+                  <div className="p-2.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-amber-300 text-[11px]">
                     <div className="font-bold flex items-center gap-1 mb-1">
                       <Building className="w-3.5 h-3.5" />
                       Terminal Withdrawal Point
@@ -492,7 +492,7 @@ export const GraphVisualizerView: React.FC<GraphVisualizerProps> = ({
           <div className="space-y-2 pt-4 border-t border-cyber-700">
             <button
               onClick={() => onOpenDossier(selectedIncident)}
-              className="w-full py-2 bg-cyber-cyan text-cyber-950 font-mono font-bold text-xs rounded-lg hover:bg-cyber-cyan/90 transition-all flex items-center justify-center gap-2"
+              className="w-full py-2 bg-cyber-cyan text-cyber-950 font-mono font-bold text-xs rounded-2xl hover:bg-cyber-cyan/90 transition-all flex items-center justify-center gap-2"
             >
               <ShieldAlert className="w-4 h-4" />
               Open Full Case Dossier
