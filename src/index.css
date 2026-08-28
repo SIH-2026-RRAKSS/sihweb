@@ -1,0 +1,135 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    --bg-base: #060709;
+    --bg-surface: #0C0E12;
+    --border-hairline: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.16);
+    --signal-orange: #FF5500;
+  }
+
+  body {
+    background-color: #060709;
+    color: #E2E8F0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+}
+
+/* Subtle Film Noise Texture Overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 320 320' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.9'/></svg>");
+  background-size: 320px 320px;
+}
+
+@layer components {
+  /* Industrial Surface Panel */
+  .industrial-panel {
+    background: #0C0E12;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    position: relative;
+    transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .industrial-panel:hover {
+    border-color: rgba(255, 255, 255, 0.16);
+  }
+
+  /* Card Sheen Sweep */
+  .card-sheen {
+    position: relative;
+    overflow: hidden;
+  }
+  .card-sheen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.04) 50%, transparent 65%);
+    background-size: 250% 100%;
+    background-position: 130% 0;
+    opacity: 0;
+    transition: background-position 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+  }
+  .card-sheen:hover::after {
+    opacity: 1;
+    background-position: -30% 0;
+  }
+
+  /* Industrial Micro-Label */
+  .tag-label {
+    @apply font-mono text-[9px] uppercase tracking-widest px-1.5 py-0.5 border font-semibold;
+  }
+
+  .tag-signal {
+    @apply bg-orange-500/10 text-orange-400 border-orange-500/30;
+  }
+
+  .tag-amber {
+    @apply bg-amber-500/10 text-amber-400 border-amber-500/30;
+  }
+
+  .tag-emerald {
+    @apply bg-emerald-500/10 text-emerald-400 border-emerald-500/30;
+  }
+
+  .tag-neutral {
+    @apply bg-white/5 text-slate-300 border-white/10;
+  }
+}
+
+/* Custom Sleek Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #060709;
+}
+::-webkit-scrollbar-thumb {
+  background: #1F242E;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #323A4A;
+}
+
+/* Map Dark Tile Styling (OpenStreetMap No-Watermark Filter) */
+.leaflet-container {
+  background: #060709 !important;
+}
+.leaflet-tile {
+  filter: brightness(0.6) invert(1) contrast(2.2) hue-rotate(200deg) saturate(0.2) brightness(0.75);
+}
+
+/* Leaflet Custom DivIcon */
+.leaflet-div-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Animated Laundering Flow Corridor */
+@keyframes flowDash {
+  to {
+    stroke-dashoffset: -32;
+  }
+}
+.leaflet-interactive.flow-corridor-animated {
+  animation: flowDash 1.2s linear infinite;
+}
+
