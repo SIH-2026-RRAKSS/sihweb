@@ -72,7 +72,7 @@ export const CommandHeroBanner: React.FC<CommandHeroBannerProps> = ({ onNavigate
             whileTap={{ scale: 0.98 }}
           >
             <FlaskConical className="w-4 h-4 fill-current" />
-            <span>⚡ LAUNCH 3D SIMULATION LAB</span>
+            <span>LAUNCH 3D SIMULATION LAB</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </motion.button>
 

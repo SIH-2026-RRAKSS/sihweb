@@ -17,6 +17,8 @@ import {
   Database
 } from 'lucide-react';
 
+import { TrinetraLogo } from '../ui/TrinetraLogo';
+
 export type NavPage =
   | 'command'
   | 'simulation'
@@ -80,20 +82,13 @@ export const AppShell: React.FC<AppShellProps> = ({
         {/* Left: Brand Identity (Click to Splash) */}
         <div 
           onClick={() => onNavigate('splash')} 
-          className="flex items-center gap-3 cursor-pointer group"
-          title="Return to Splash Overview"
+          className="flex items-center gap-2.5 cursor-pointer group"
+          title="Return to Splash Overview (Team Trinetra)"
         >
-          <div className="w-7 h-7 rounded bg-[#FF5500] text-black font-bold flex items-center justify-center text-xs shadow-sm group-hover:scale-105 transition-transform">
-            <Shield className="w-4 h-4 fill-current" />
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span className="font-bold font-sans text-sm tracking-tight text-white group-hover:text-[#FF5500] transition-colors">
-              SIH CYBERGUARD
-            </span>
-            <span className="text-[10px] text-zinc-400 font-mono">
-              // AML SURVEILLANCE
-            </span>
-          </div>
+          <TrinetraLogo size="sm" showLangBadge={false} intervalMs={2800} />
+          <span className="text-[10px] text-zinc-400 font-mono hidden sm:inline-block border-l border-white/10 pl-2.5">
+            AML DEFCON-2
+          </span>
         </div>
 
         {/* Center: Live Status Badges */}
