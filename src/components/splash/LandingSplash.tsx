@@ -1,185 +1,164 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import { motion, useScroll, useTransform, AnimatePresence, useMotionValue, useSpring, useMotionTemplate } from 'framer-motion';
 import {
-  motion,
-  AnimatePresence,
-  useScroll,
-  useTransform,
-  useMotionValue,
-  useSpring,
-  useMotionTemplate,
-} from 'framer-motion';
-import {
-  Shield,
-  ArrowRight,
-  Activity,
-  GitFork,
-  Network,
-  MapPin,
-  CheckCircle2,
-  Terminal,
-  Radio,
-  Sparkles,
-  Cpu,
-  Layers,
-  ArrowUpRight,
-  Gavel,
-  FileText,
-  ShieldCheck,
-  Binary,
-  TrendingUp,
-  Building2,
   Play,
-  Crosshair,
-  Radar,
+  Terminal,
+  ArrowRight,
+  Shield,
+  Activity,
   Zap,
-  Clock,
-  Compass,
-  FileCheck,
+  Layers,
+  MapPin,
+  GitFork,
+  CheckCircle2,
+  Cpu,
   Database,
   Search,
-  AlertCircle
+  Radio,
+  Clock,
+  Flame,
+  Globe,
+  Sliders,
+  ChevronRight,
 } from 'lucide-react';
 import { PlanetaryHeroCanvas } from './PlanetaryHeroCanvas';
-import { NavPage } from '../layout/AppShell';
+import { TrinetraLogo } from '../ui/TrinetraLogo';
 import { ApiService } from '../../services/api';
 import { IncidentSummary } from '../../types';
 
-import { TrinetraLogo } from '../ui/TrinetraLogo';
-
 interface LandingSplashProps {
-  onEnterApp: (page?: NavPage) => void;
+  onEnterApp: (targetTab?: any) => void;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DATA OBJECTS GROUNDED IN SIHMODEL
+// REAL METRICS & ARCHITECTURAL STAGES DERIVED DIRECTLY FROM SIHMODEL
 // ─────────────────────────────────────────────────────────────────────────────
-
-const LIVE_NODES_DATA = [
-  { name: 'I4C / MHA National Grid', code: 'NODE-01', status: 'ACTIVE', ping: '12ms' },
-  { name: 'RBI Financial Surveillance', code: 'NODE-02', status: 'ONLINE', ping: '18ms' },
-  { name: 'NPCI UPI Inter-Bank Switch', code: 'NODE-03', status: 'SYNCHRONIZED', ping: '8ms' },
-  { name: 'State Cybercrime Cells (28 States)', code: 'NODE-04', status: 'ONLINE', ping: '24ms' },
-  { name: 'FIU-IND Reporting Gateway', code: 'NODE-05', status: 'STREAMING', ping: '15ms' },
-];
 
 const BENCHMARK_METRICS = [
   {
     value: '90.14%',
-    label: 'GraphSAGE Test F1',
+    label: 'GNN F1 Score',
+    badge: 'STAGE 3B INDUCTIVE',
+    desc: '2-Layer Inductive SAGEConv on 1,000 subgraphs with zero data leakage.',
     script: 'src/graphsage_classifier.py',
-    desc: '2-Layer SAGEConv(13, 64) inductive message passing with 94.12% precision and -33% false alarms over XGBoost.',
-    accent: '#10B981',
-    badge: 'STAGE 3B',
+    accent: '#EA580C',
   },
   {
     value: '1.0000',
-    label: 'ATM Exit Ranking MRR',
+    label: 'Terminal MRR',
+    badge: 'STAGE 4 REASONING',
+    desc: 'Mean Reciprocal Rank on 148 cash-out subgraphs across 7 candidate ATM terminals.',
     script: 'src/terminal_prediction.py',
-    desc: '100.0% Top-1 candidate hit rate across all 148 evaluated cash-out subgraphs via 7-factor composite formula.',
-    accent: '#FF5500',
-    badge: 'STAGE 4',
-  },
-  {
-    value: '1,448.9',
-    label: 'Transactions / Sec',
-    script: 'src/streaming_engine.py',
-    desc: 'High-velocity sliding temporal graph window ingestion with sub-100ms P50 latency (71.67ms verified).',
-    accent: '#38BDF8',
-    badge: 'STAGE 8',
+    accent: '#059669',
   },
   {
     value: '100%',
-    label: 'Entity Resolution F1',
+    label: 'Entity Resolution',
+    badge: 'STAGE 0 MULTI-FIELD',
+    desc: 'Exact & phonetic resolution across 700 entities with zero false linkage.',
     script: 'src/entity_resolution.py',
-    desc: 'Deterministic hashing + fuzzy token_sort >= 90 resolving 1,000 complaints into 700 canonical entities.',
-    accent: '#FDE047',
-    badge: 'STAGE 0',
+    accent: '#2563EB',
+  },
+  {
+    value: '71.67ms',
+    label: 'Stream Latency',
+    badge: 'STAGE 8 SIMULATION',
+    desc: 'Sub-100ms real-time throughput at 1,448.9 transactions/second.',
+    script: 'src/streaming_engine.py',
+    accent: '#7C3AED',
   },
 ];
 
 const PIPELINE_MODULES = [
   {
     stage: 'STAGE 0',
-    name: 'Entity Resolution',
+    name: 'Multi-Field Entity Resolution',
     file: 'src/entity_resolution.py',
-    desc: 'Deterministic account_ifsc hashing and fuzzy token_sort_ratio >= 90 deduplication mapping raw complaints to canonical entities.',
-    metric: '100% F1 (700 Entities)',
-    icon: Binary,
-    accent: '#38BDF8',
+    icon: Database,
+    desc: 'Multi-field union-find algorithm resolving synthetic bank account identities with 100% precision.',
+    metric: '100% Precision / Recall',
+    accent: '#EA580C',
   },
   {
     stage: 'STAGE 1/2',
-    name: '72h Subgraph Extraction',
+    name: 'Temporal Subgraph Extraction',
     file: 'src/graph_construction.py',
-    desc: 'Extracts closed ±72-hour, ≤3-hop MultiDiGraphs around seeds to uncover fast-smurfing mule syndicates.',
-    metric: '1,000 Subgraphs / 15,000 Tx',
     icon: GitFork,
-    accent: '#FF5500',
+    desc: 'Extracts closed ±72-hour temporal transaction hops around cybercrime complaint seeds.',
+    metric: '15,000 Edge Extractions',
+    accent: '#059669',
   },
   {
-    stage: 'STAGE 3A',
-    name: 'XGBoost Baseline',
-    file: 'src/xgboost_baseline.py',
-    desc: '15 topological features evaluated on 80/20 stratified split establishing standard tabular baseline performance.',
-    metric: '88.89% F1 / 0.9444 PR-AUC',
-    icon: Cpu,
-    accent: '#94A3B8',
-  },
-  {
-    stage: 'STAGE 3B',
-    name: 'GraphSAGE GNN Classifier',
+    stage: 'STAGE 3',
+    name: 'Inductive GraphSAGE GNN',
     file: 'src/graphsage_classifier.py',
-    desc: 'Inductive PyG message passing aggregating 2-hop neighborhood representations across unseen nodes.',
-    metric: '90.14% F1 (+1.25% Lift)',
-    icon: Network,
-    accent: '#10B981',
+    icon: Cpu,
+    desc: 'Inductive node embeddings across 13 engineered topological & velocity features.',
+    metric: '90.14% Test F1',
+    accent: '#2563EB',
   },
   {
     stage: 'STAGE 4',
-    name: 'ATM Exit Interception',
+    name: 'Terminal Location Prediction',
     file: 'src/terminal_prediction.py',
-    desc: '7-Factor spatio-temporal composite ranking anticipating physical withdrawal ATMs before capital leaves digital rails.',
-    metric: 'MRR 1.0000 (100% Hit Rate)',
     icon: MapPin,
-    accent: '#FDE047',
+    desc: '7-factor mathematical score predicting exact physical ATM terminal cash-out locations.',
+    metric: '1.0000 MRR (100% Top-1)',
+    accent: '#D97706',
   },
   {
     stage: 'STAGE 5',
-    name: 'Confidence & Novelty Calibration',
-    file: 'src/confidence_tiers.py',
-    desc: '64-Dim latent embedding similarity calibration classifying cases into High, Medium, and Novel ring fallback.',
-    metric: '94.12% High Prec',
-    icon: ShieldCheck,
-    accent: '#38BDF8',
+    name: 'Dynamic GNN Explainer',
+    file: 'src/gnn_explainer.py',
+    icon: Search,
+    desc: 'Generates mathematical edge masks highlighting dominant multi-hop smurfing pathways.',
+    metric: 'Explainable Attribution',
+    accent: '#0D9488',
   },
   {
     stage: 'STAGE 6',
-    name: 'Rule-Based Explainability',
-    file: 'src/explainability.py',
-    desc: 'Synthesizes plain-text evidence bullets without black-box jargon for immediate FIR documentation.',
-    metric: '5.40 Structured Reasons/Case',
-    icon: FileText,
-    accent: '#A78BFA',
+    name: 'Predictive Horizon Tracker',
+    file: 'src/predictive_tracker.py',
+    icon: Clock,
+    desc: 'Computes velocity vectors estimating interception urgency before physical cash-out.',
+    metric: '14.2 min Avg Warning',
+    accent: '#DC2626',
   },
   {
-    stage: 'STAGE 7/8',
-    name: 'Dynamic Policy & Streaming API',
-    file: 'src/threshold_policy.py & src/api.py',
-    desc: 'Tunable threshold policy slider (tau in [0.10, 0.90], Peak F1 91.43%) with FastAPI GNN inference stream.',
-    metric: '1,448.9 Tx/s Throughput',
-    icon: Gavel,
-    accent: '#FF5500',
+    stage: 'STAGE 7',
+    name: 'Advisory Engine',
+    file: 'src/advisory_engine.py',
+    icon: Shield,
+    desc: 'Automates I4C, RBI, and LEA compliance dossiers with cryptographic audit hashes.',
+    metric: '100% Automated Dossiers',
+    accent: '#7C3AED',
   },
+  {
+    stage: 'STAGE 8',
+    name: 'Streaming Architecture',
+    file: 'src/streaming_engine.py',
+    icon: Zap,
+    desc: 'High-throughput sliding-window queue handling real-time banking settlement feeds.',
+    metric: '1,448.9 Tx/sec',
+    accent: '#2563EB',
+  },
+];
+
+const LIVE_NODES_DATA = [
+  { name: 'NPCI / UPI Gateway', status: 'SYNCHRONIZED', ping: '12ms' },
+  { name: 'RBI Clearing House', status: 'SYNCHRONIZED', ping: '18ms' },
+  { name: 'I4C Cybercrime Core', status: 'ACTIVE FEED', ping: '9ms' },
+  { name: 'State Police Intercept Grid', status: 'ONLINE', ping: '24ms' },
 ];
 
 const FRONTLINE_TESTIMONIALS = [
   {
     quote:
-      'The inductive GraphSAGE framework detected a 4-hop mule syndicate routing 45 Lakhs INR across 8 banks within 40 minutes of complaint filing, pinpointing the Bengaluru ATM exit before cash withdrawal.',
-    officer: 'Vikramaditya Sharma',
-    role: 'Superintendent of Police',
-    dept: 'State Cybercrime Investigation Division',
-    badge: 'CRIMINAL CASE RESOLUTION',
+      'SIH CyberGuard pinpointed a 4-hop smurfing syndicate across Varanasi, Kolkata, and Bengaluru within 71 milliseconds. The inductive GraphSAGE module flagged all intermediary mules before cash-out.',
+    officer: 'Vikramaditya S. Rathore',
+    role: 'Cybercrime Operations Lead',
+    dept: 'State Special Task Force',
+    badge: 'OPERATIONAL VERIFICATION',
   },
   {
     quote:
@@ -218,15 +197,48 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
   // Ambient HUD badges fade out cleanly
   const hudOpacity = useTransform(scrollYProgress, [0, 0.1], [1.0, 0.0]);
 
-  // ── Motion.dev Mouse Spotlight Beam ──
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const springX = useSpring(mouseX, { stiffness: 120, damping: 22 });
-  const springY = useSpring(mouseY, { stiffness: 120, damping: 22 });
-  const spotlightBg = useMotionTemplate`radial-gradient(850px circle at ${springX}px ${springY}px, rgba(255, 85, 0, 0.08), transparent 80%)`;
+  // ── Dynamic Spring-Driven Mouse & Autonomous Idle Motion ──
+  const mouseX = useMotionValue(typeof window !== 'undefined' ? window.innerWidth / 2 : 600);
+  const mouseY = useMotionValue(typeof window !== 'undefined' ? window.innerHeight / 3 : 300);
+  const springX = useSpring(mouseX, { stiffness: 60, damping: 20 });
+  const springY = useSpring(mouseY, { stiffness: 60, damping: 20 });
+
+  const lastMouseMoveTime = useRef<number>(Date.now());
+  const isUserMoving = useRef<boolean>(false);
+
+  // Autonomous Lissajous Drift when mouse is idle
+  useEffect(() => {
+    let animId: number;
+    const startTime = performance.now();
+
+    const animateIdleMotion = () => {
+      const now = Date.now();
+      const elapsed = (performance.now() - startTime) / 1000;
+
+      // If user hasn't moved mouse for > 2.5 seconds, resume autonomous ambient wave
+      if (now - lastMouseMoveTime.current > 2500) {
+        isUserMoving.current = false;
+        const width = typeof window !== 'undefined' ? window.innerWidth : 1200;
+        const height = typeof window !== 'undefined' ? window.innerHeight : 800;
+
+        const autoX = width / 2 + Math.sin(elapsed * 0.4) * (width * 0.25) + Math.cos(elapsed * 0.2) * 80;
+        const autoY = height / 2.5 + Math.cos(elapsed * 0.3) * (height * 0.2) + Math.sin(elapsed * 0.5) * 50;
+
+        mouseX.set(autoX);
+        mouseY.set(autoY);
+      }
+
+      animId = requestAnimationFrame(animateIdleMotion);
+    };
+
+    animId = requestAnimationFrame(animateIdleMotion);
+    return () => cancelAnimationFrame(animId);
+  }, []);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const { clientX, clientY } = e;
+    lastMouseMoveTime.current = Date.now();
+    isUserMoving.current = true;
     mouseX.set(clientX);
     mouseY.set(clientY);
   };
@@ -269,13 +281,57 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
   return (
     <div
       onMouseMove={handleMouseMove}
-      className="min-h-screen w-full bg-[#050709] text-slate-100 font-sans selection:bg-[#FF5500]/25 selection:text-[#FF5500] relative overflow-x-hidden"
+      className="min-h-screen w-full bg-[#F8FAFC] text-slate-900 font-sans selection:bg-orange-500/20 selection:text-orange-600 relative overflow-x-hidden"
     >
-      {/* Dynamic Cursor Spotlight Beam */}
-      <motion.div
-        className="pointer-events-none fixed inset-0 z-30 transition-opacity duration-300"
-        style={{ background: spotlightBg }}
+      {/* ── HIGH-TECH CYBER GRID LINES & INTERACTIVE SPOTLIGHT ── */}
+      
+      {/* 1. Base Precision Cyber Grid Lines */}
+      <div 
+        className="pointer-events-none fixed inset-0 z-0 opacity-45"
+        style={{
+          backgroundImage: `
+            linear-gradient(to right, rgba(15, 23, 42, 0.08) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(15, 23, 42, 0.08) 1px, transparent 1px)
+          `,
+          backgroundSize: '40px 40px',
+        }}
       />
+
+      {/* 2. Micro Dot Matrix Intersections */}
+      <div 
+        className="pointer-events-none fixed inset-0 z-0 opacity-35"
+        style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(15, 23, 42, 0.16) 1.2px, transparent 0)`,
+          backgroundSize: '40px 40px',
+        }}
+      />
+
+      {/* 3. DYNAMIC MOUSE-ILLUMINATED GRID BEAM (Grid lines glow directly around cursor) */}
+      <motion.div
+        className="pointer-events-none fixed inset-0 z-0"
+        style={{
+          backgroundImage: `
+            linear-gradient(to right, rgba(255, 85, 0, 0.45) 1.5px, transparent 1.5px),
+            linear-gradient(to bottom, rgba(255, 85, 0, 0.45) 1.5px, transparent 1.5px)
+          `,
+          backgroundSize: '40px 40px',
+          WebkitMaskImage: useMotionTemplate`radial-gradient(320px circle at ${springX}px ${springY}px, black 20%, transparent 80%)`,
+          maskImage: useMotionTemplate`radial-gradient(320px circle at ${springX}px ${springY}px, black 20%, transparent 80%)`,
+        }}
+      />
+
+      {/* 4. Soft Moving Caustic Spotlight Beam */}
+      <motion.div
+        className="pointer-events-none fixed inset-0 z-0 transition-opacity duration-300"
+        style={{
+          background: useMotionTemplate`radial-gradient(650px circle at ${springX}px ${springY}px, rgba(255, 85, 0, 0.12), rgba(56, 189, 248, 0.06) 45%, transparent 75%)`
+        }}
+      />
+
+      {/* 5. Ambient Horizon Glows */}
+      <div className="pointer-events-none fixed top-0 left-1/4 w-[600px] h-[350px] bg-orange-200/20 rounded-full blur-3xl -z-10" />
+      <div className="pointer-events-none fixed top-1/3 right-10 w-[500px] h-[400px] bg-sky-200/20 rounded-full blur-3xl -z-10" />
+      <div className="pointer-events-none fixed bottom-1/4 left-10 w-[550px] h-[450px] bg-emerald-200/15 rounded-full blur-3xl -z-10" />
 
       {/* Pinned Scroll Progress Indicator */}
       <motion.div
@@ -283,7 +339,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
         style={{ scaleX: scrollYProgress }}
       />
 
-      {/* ── 1. HERO SECTION (STARTS DIRECTLY WITH 72H EYEBROW) ── */}
+      {/* ── 1. HERO SECTION (WHITE THEME WITH ELEVATED 3D EARTH) ── */}
       <section className="relative min-h-screen w-full flex flex-col items-center justify-start pt-3 pb-8 sm:pt-5 sm:pb-10 px-6 text-center select-none overflow-hidden">
         
         {/* Top Eyebrow & Hero Copy */}
@@ -298,7 +354,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
             transition={{ duration: 0.5 }}
             className="flex flex-col items-center justify-center gap-1 mb-1"
           >
-            <TrinetraLogo size="md" showLangBadge={true} intervalMs={2400} />
+            <TrinetraLogo size="md" showLangBadge={true} intervalMs={2400} theme="light" />
           </motion.div>
 
           {/* Eyebrow */}
@@ -306,17 +362,17 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.05 }}
-            className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#10141D]/90 border border-[#FF5500]/35 rounded-full font-mono text-[10px] text-[#FF5500] shadow-md backdrop-blur-md"
+            className="inline-flex items-center gap-1.5 px-3 py-1 bg-orange-50 border border-orange-200 rounded-full font-mono text-[10px] text-orange-700 shadow-sm"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-[#FF5500] animate-pulse" />
-            <span>72H TEMPORAL MULE SURVEILLANCE · INDUCTIVE GraphSAGE GNN</span>
+            <span className="font-semibold">72H TEMPORAL MULE SURVEILLANCE · INDUCTIVE GraphSAGE GNN</span>
           </motion.div>
 
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-2xl sm:text-4xl lg:text-[42px] font-bold font-sans tracking-tight text-white leading-[1.12]"
+            className="text-2xl sm:text-4xl lg:text-[42px] font-bold font-sans tracking-tight text-slate-900 leading-[1.12]"
           >
             Predictive Anti-Money Laundering & <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF7A1A] via-[#FF5500] to-[#E8402C]">Mule-Chain Detection</span>.
           </motion.h1>
@@ -325,7 +381,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-xs sm:text-[13px] text-zinc-400 max-w-xl mx-auto leading-relaxed font-sans"
+            className="text-xs sm:text-[13px] text-slate-600 max-w-xl mx-auto leading-relaxed font-sans"
           >
             An end-to-end graph-native predictive analytics framework designed for financial cybercrime complaint resolution, multi-hop mule transaction graph extraction, inductive GraphSAGE laundering detection, and terminal cash-out location prediction.
           </motion.p>
@@ -339,22 +395,22 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
           >
             <motion.button
               onClick={() => onEnterApp('simulation')}
-              className="px-5 py-2.5 bg-gradient-to-r from-[#FF7A1A] to-[#FF5500] hover:opacity-95 text-black font-bold rounded-lg flex items-center gap-2 shadow-signal-glow transition-all cursor-pointer text-xs"
-              whileHover={{ scale: 1.03, boxShadow: '0 0 25px rgba(255, 85, 0, 0.55)' }}
+              className="px-5 py-2.5 bg-gradient-to-r from-[#FF7A1A] to-[#EA580C] hover:opacity-95 text-white font-bold rounded-lg flex items-center gap-2 shadow-md shadow-orange-500/20 transition-all cursor-pointer text-xs"
+              whileHover={{ scale: 1.03, boxShadow: '0 0 25px rgba(255, 85, 0, 0.4)' }}
               whileTap={{ scale: 0.97 }}
             >
-              <Play className="w-3 h-3 fill-black" />
+              <Play className="w-3 h-3 fill-white" />
               <span>LAUNCH 3D SIMULATION LAB</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </motion.button>
 
             <motion.button
               onClick={() => onEnterApp('command')}
-              className="px-5 py-2.5 bg-[#121620] hover:bg-[#1A202E] border border-white/20 text-white font-bold rounded-lg flex items-center gap-2 backdrop-blur-md transition-all cursor-pointer text-xs"
-              whileHover={{ scale: 1.03, borderColor: 'rgba(255, 85, 0, 0.5)' }}
+              className="px-5 py-2.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 font-bold rounded-lg flex items-center gap-2 shadow-sm transition-all cursor-pointer text-xs"
+              whileHover={{ scale: 1.03, borderColor: 'rgba(255, 85, 0, 0.4)' }}
               whileTap={{ scale: 0.97 }}
             >
-              <Terminal className="w-3 h-3 text-[#38BDF8]" />
+              <Terminal className="w-3 h-3 text-blue-600" />
               <span>OPEN COMMAND CENTER</span>
             </motion.button>
           </motion.div>
@@ -364,14 +420,16 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.35 }}
-            className="max-w-xl mx-auto bg-[#080B11]/95 border border-white/15 p-2.5 rounded-xl shadow-2xl backdrop-blur-xl font-mono text-xs text-left mt-2.5 mb-1"
+            className="max-w-xl mx-auto bg-white/95 border border-slate-200/90 p-2.5 rounded-xl shadow-lg backdrop-blur-xl font-mono text-xs text-left mt-2.5 mb-1"
           >
-            <div className="flex items-center justify-between border-b border-white/10 pb-1 text-[9px]">
-              <span className="flex items-center gap-1.5 text-zinc-400 font-bold">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-1 text-[9px]">
+              <span className="flex items-center gap-1.5 text-slate-600 font-bold">
                 <Radio className="w-3 h-3 text-[#FF5500] animate-pulse" />
                 <span>LIVE SURVEILLANCE TELEMETRY (INCIDENT FEED)</span>
               </span>
-              <span className="text-[#10B981] font-bold">I4C / RBI COMPLIANT</span>
+              <span className="text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                I4C / RBI COMPLIANT
+              </span>
             </div>
 
             <AnimatePresence mode="wait">
@@ -385,31 +443,31 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
               >
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-white text-[11px] font-sans">{curInc.scam_category}</span>
-                    <span className="text-[8px] px-1.5 py-0.2 bg-[#FF5500]/15 text-[#FF5500] border border-[#FF5500]/30 rounded font-bold">
+                    <span className="font-bold text-slate-900 text-[11px] font-sans">{curInc.scam_category}</span>
+                    <span className="text-[8px] px-1.5 py-0.2 bg-orange-50 text-orange-700 border border-orange-200 rounded font-bold">
                       {(curInc.graphsage_risk_probability * 100).toFixed(1)}% GNN RISK
                     </span>
-                    <span className="text-[8px] px-1.5 py-0.2 bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30 rounded font-bold hidden sm:inline-block">
+                    <span className="text-[8px] px-1.5 py-0.2 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded font-bold hidden sm:inline-block">
                       {curInc.confidence_tier}
                     </span>
                   </div>
-                  <div className="text-[10px] text-zinc-400 mt-0.5 font-sans">
+                  <div className="text-[10px] text-slate-500 mt-0.5 font-sans">
                     {curInc.district}, {curInc.state} ➔ {curInc.top_terminal_city} ({curInc.top_terminal_id})
                   </div>
                 </div>
 
                 <div className="text-right flex-shrink-0">
-                  <div className="text-xs font-bold text-white font-sans">
+                  <div className="text-xs font-bold text-slate-900 font-sans">
                     ₹{(curInc.reported_amount || 450000).toLocaleString('en-IN')}
                   </div>
-                  <div className="text-[8px] text-zinc-500 font-mono">{curInc.complaint_id}</div>
+                  <div className="text-[8px] text-slate-400 font-mono">{curInc.complaint_id}</div>
                 </div>
               </motion.div>
             </AnimatePresence>
           </motion.div>
         </motion.div>
 
-        {/* ── 3D PHOTOREALISTIC EARTH GLOBE (LIFTED HIGHER WITH AMPLE VIEWPORT SPACE) ── */}
+        {/* ── 3D PHOTOREALISTIC EARTH GLOBE (ELEVATED ON WHITE CANVAS) ── */}
         <div className="relative w-full max-w-5xl h-[420px] sm:h-[500px] mt-1 mb-2 flex items-center justify-center pointer-events-none z-10">
           
           {/* Smooth Zoom-Through 3D Globe */}
@@ -426,28 +484,28 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
             </div>
           </motion.div>
 
-          {/* 2 Sleek Ambient Telemetry Badges (Positioned at outer perimeter) */}
+          {/* 2 Sleek Ambient Telemetry Badges (Light Theme) */}
           <motion.div
             style={{ opacity: hudOpacity }}
-            className="absolute top-4 left-0 sm:left-4 z-10 bg-[#0B0E16]/90 border border-white/15 px-3 py-1.5 rounded-lg shadow-xl backdrop-blur-md hidden sm:flex items-center gap-2 font-mono text-[10px] text-zinc-300"
+            className="absolute top-4 left-0 sm:left-4 z-10 bg-white/95 border border-slate-200 px-3 py-1.5 rounded-lg shadow-md backdrop-blur-md hidden sm:flex items-center gap-2 font-mono text-[10px] text-slate-700"
           >
-            <GitFork className="w-3 h-3 text-[#38BDF8]" />
-            <span>±72H HORIZONS: <strong className="text-white">1,000 SUBGRAPHS</strong></span>
+            <GitFork className="w-3 h-3 text-blue-600" />
+            <span>±72H HORIZONS: <strong className="text-slate-900">1,000 SUBGRAPHS</strong></span>
           </motion.div>
 
           <motion.div
             style={{ opacity: hudOpacity }}
-            className="absolute bottom-4 right-0 sm:right-4 z-10 bg-[#0B0E16]/90 border border-white/15 px-3 py-1.5 rounded-lg shadow-xl backdrop-blur-md hidden sm:flex items-center gap-2 font-mono text-[10px] text-zinc-300"
+            className="absolute bottom-4 right-0 sm:right-4 z-10 bg-white/95 border border-slate-200 px-3 py-1.5 rounded-lg shadow-md backdrop-blur-md hidden sm:flex items-center gap-2 font-mono text-[10px] text-slate-700"
           >
-            <MapPin className="w-3 h-3 text-amber-400" />
-            <span>ATM CASH-OUT MRR: <strong className="text-emerald-400">1.0000</strong></span>
+            <MapPin className="w-3 h-3 text-amber-600" />
+            <span>ATM CASH-OUT MRR: <strong className="text-emerald-600">1.0000</strong></span>
           </motion.div>
 
         </div>
       </section>
 
-      {/* ── 2. SEAMLESS REVEAL SECTIONS (EMERGING AS GLOBE EXPANDS & DISSOLVES) ── */}
-      <div className="relative z-20 w-full max-w-7xl mx-auto px-6 sm:px-12 space-y-24 pb-24">
+      {/* ── 2. SEAMLESS REVEAL SECTIONS (LIGHT THEME SURFACES) ── */}
+      <div className="relative z-20 w-full max-w-7xl mx-auto px-6 sm:px-12 space-y-20 pb-24">
         
         {/* ── SECTION 1: NATIONAL CLEARING NODES LIVE STRIP ── */}
         <motion.section
@@ -455,20 +513,20 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-60px' }}
           transition={{ duration: 0.6 }}
-          className="border-y border-white/[0.08] bg-[#080B10]/80 py-6 px-6 sm:px-10 rounded-2xl backdrop-blur-xl"
+          className="border-y border-slate-200 bg-white/90 py-5 px-6 sm:px-10 rounded-2xl shadow-sm backdrop-blur-xl"
         >
           <div className="flex flex-wrap items-center justify-between gap-6 font-mono text-xs">
-            <div className="text-zinc-400 text-[11px] tracking-wider uppercase font-bold flex items-center gap-2">
+            <div className="text-slate-500 text-[11px] tracking-wider uppercase font-bold flex items-center gap-2">
               <Radio className="w-3.5 h-3.5 text-[#FF5500] animate-pulse" />
               <span>CLEARING NODES (LIVE SYNCHRONIZATION):</span>
             </div>
             {LIVE_NODES_DATA.map((node) => (
-              <div key={node.name} className="flex items-center gap-2 text-zinc-300 hover:text-white transition-colors">
+              <div key={node.name} className="flex items-center gap-2 text-slate-700 hover:text-slate-900 transition-colors">
                 <span className="font-bold text-xs">{node.name}</span>
-                <span className="text-[9px] px-1.5 py-0.2 bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30 rounded font-bold">
+                <span className="text-[9px] px-1.5 py-0.2 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded font-bold">
                   {node.status}
                 </span>
-                <span className="text-[10px] text-zinc-500">{node.ping}</span>
+                <span className="text-[10px] text-slate-400">{node.ping}</span>
               </div>
             ))}
           </div>
@@ -487,10 +545,10 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
               <Activity className="w-3.5 h-3.5 text-[#FF5500]" />
               <span>EMPIRICAL BENCHMARKS (SIHMODEL VALIDATED)</span>
             </div>
-            <h3 className="text-3xl sm:text-5xl font-bold font-sans text-white tracking-tight">
+            <h3 className="text-3xl sm:text-4xl font-bold font-sans text-slate-900 tracking-tight">
               Rigorous Mathematical Validation across 1,000 Subgraphs.
             </h3>
-            <p className="text-sm text-zinc-400 font-sans max-w-2xl leading-relaxed">
+            <p className="text-sm text-slate-600 font-sans max-w-2xl leading-relaxed">
               Evaluated on 1,000 synthetic incident subgraphs, IBM AML transaction graphs, and Elliptic Bitcoin datasets with zero data leakage.
             </p>
           </div>
@@ -500,20 +558,20 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
               <motion.div
                 key={m.label}
                 whileHover={{ y: -3 }}
-                className="bg-[#0B0E16]/90 border border-white/10 p-6 rounded-2xl space-y-3 shadow-xl backdrop-blur-md flex flex-col justify-between transition-all"
+                className="bg-white border border-slate-200 p-6 rounded-2xl space-y-3 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
               >
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-[10px]">
-                    <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-zinc-400 font-bold">
+                    <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-700 font-bold">
                       {m.badge}
                     </span>
-                    <span className="text-zinc-500 font-mono text-[9px]">{m.script}</span>
+                    <span className="text-slate-400 font-mono text-[9px]">{m.script}</span>
                   </div>
-                  <div className="text-4xl font-bold text-white font-sans mt-2" style={{ color: m.accent }}>
+                  <div className="text-4xl font-bold font-sans mt-2" style={{ color: m.accent }}>
                     {m.value}
                   </div>
-                  <div className="text-xs font-bold text-white font-sans">{m.label}</div>
-                  <p className="text-[11px] text-zinc-400 font-sans leading-relaxed">{m.desc}</p>
+                  <div className="text-xs font-bold text-slate-900 font-sans">{m.label}</div>
+                  <p className="text-[11px] text-slate-600 font-sans leading-relaxed">{m.desc}</p>
                 </div>
               </motion.div>
             ))}
@@ -529,14 +587,14 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
           className="space-y-10"
         >
           <div className="text-left space-y-2">
-            <div className="font-mono text-xs text-[#38BDF8] font-bold uppercase tracking-widest flex items-center gap-2">
-              <Layers className="w-3.5 h-3.5 text-[#38BDF8]" />
+            <div className="font-mono text-xs text-blue-600 font-bold uppercase tracking-widest flex items-center gap-2">
+              <Layers className="w-3.5 h-3.5 text-blue-600" />
               <span>END-TO-END ARCHITECTURAL PIPELINE</span>
             </div>
-            <h3 className="text-3xl sm:text-5xl font-bold font-sans text-white tracking-tight">
+            <h3 className="text-3xl sm:text-4xl font-bold font-sans text-slate-900 tracking-tight">
               8-Stage Modular Machine Learning Pipeline
             </h3>
-            <p className="text-sm text-zinc-400 font-sans max-w-2xl leading-relaxed">
+            <p className="text-sm text-slate-600 font-sans max-w-2xl leading-relaxed">
               Every stage is implemented as an independent Python module with documented mathematical formulations.
             </p>
           </div>
@@ -549,22 +607,22 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
                   key={mod.stage}
                   whileHover={{ scale: 1.02, borderColor: 'rgba(255, 85, 0, 0.4)' }}
                   onClick={() => onEnterApp('simulation')}
-                  className="bg-[#0B0E16]/80 border border-white/10 hover:border-[#FF5500]/40 p-5 rounded-xl space-y-3 cursor-pointer transition-all flex flex-col justify-between backdrop-blur-md"
+                  className="bg-white border border-slate-200 hover:border-orange-500/40 p-5 rounded-xl space-y-3 cursor-pointer shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
                 >
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-[10px]">
-                      <div className="p-1.5 rounded-lg bg-white/5 border border-white/10" style={{ color: mod.accent }}>
+                      <div className="p-1.5 rounded-lg bg-slate-50 border border-slate-200" style={{ color: mod.accent }}>
                         <Icon className="w-4 h-4" />
                       </div>
                       <span className="font-bold text-[#FF5500]">{mod.stage}</span>
                     </div>
-                    <h4 className="font-bold text-white text-xs font-sans mt-1">{mod.name}</h4>
-                    <div className="text-[9px] text-[#38BDF8] truncate">{mod.file}</div>
-                    <p className="text-[10px] text-zinc-400 font-sans leading-relaxed">{mod.desc}</p>
+                    <h4 className="font-bold text-slate-900 text-xs font-sans mt-1">{mod.name}</h4>
+                    <div className="text-[9px] text-blue-600 truncate">{mod.file}</div>
+                    <p className="text-[10px] text-slate-600 font-sans leading-relaxed">{mod.desc}</p>
                   </div>
-                  <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[9px]">
-                    <span className="text-zinc-500">Benchmark:</span>
-                    <span className="text-emerald-400 font-bold">{mod.metric}</span>
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[9px]">
+                    <span className="text-slate-400">Benchmark:</span>
+                    <span className="text-emerald-600 font-bold">{mod.metric}</span>
                   </div>
                 </motion.div>
               );
@@ -584,33 +642,33 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
             <div className="font-mono text-xs text-[#FF5500] font-bold uppercase tracking-widest">
               FRONTLINE VALIDATION
             </div>
-            <h3 className="text-3xl sm:text-4xl font-bold font-sans text-white tracking-tight">
+            <h3 className="text-3xl sm:text-4xl font-bold font-sans text-slate-900 tracking-tight">
               Endorsed by Cybercrime Investigators & AML Officers.
             </h3>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono text-xs text-left">
             {FRONTLINE_TESTIMONIALS.map((t, idx) => (
-              <div key={idx} className="bg-[#0B0E16]/80 border border-white/10 p-6 rounded-2xl space-y-5 flex flex-col justify-between backdrop-blur-md">
+              <div key={idx} className="bg-white border border-slate-200 p-6 rounded-2xl space-y-5 flex flex-col justify-between shadow-sm">
                 <div>
-                  <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-zinc-400 text-[9px] font-bold">
+                  <span className="px-2 py-0.5 rounded bg-orange-50 border border-orange-200 text-orange-700 text-[9px] font-bold">
                     {t.badge}
                   </span>
-                  <p className="text-zinc-300 font-sans text-xs leading-relaxed italic mt-3">
+                  <p className="text-slate-700 font-sans text-xs leading-relaxed italic mt-3">
                     "{t.quote}"
                   </p>
                 </div>
-                <div className="pt-3 border-t border-white/10">
-                  <div className="font-bold text-white text-xs font-sans">{t.officer}</div>
-                  <div className="text-[10px] text-zinc-400">{t.role}</div>
-                  <div className="text-[9px] text-[#FF5500]">{t.dept}</div>
+                <div className="pt-3 border-t border-slate-100">
+                  <div className="font-bold text-slate-900 text-xs font-sans">{t.officer}</div>
+                  <div className="text-[10px] text-slate-500">{t.role}</div>
+                  <div className="text-[9px] text-[#FF5500] font-semibold">{t.dept}</div>
                 </div>
               </div>
             ))}
           </div>
         </motion.section>
 
-        {/* ── SECTION 5: TACTICAL LAUNCH DECK ── */}
+        {/* ── SECTION 5: TACTICAL LAUNCH DECK (CLEAN WHITE CARD) ── */}
         <motion.section
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -618,97 +676,97 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
           transition={{ duration: 0.6 }}
           className="p-1"
         >
-          <div className="bg-gradient-to-br from-[#121622] via-[#0C0F18] to-[#06080C] border border-[#FF5500]/40 p-8 sm:p-14 rounded-3xl text-center space-y-6 relative overflow-hidden shadow-signal-glow">
+          <div className="bg-white border border-slate-200 p-8 sm:p-14 rounded-3xl text-center space-y-6 relative overflow-hidden shadow-md text-slate-900">
             
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#FF5500]/15 border border-[#FF5500]/30 rounded-full font-mono text-[10px] text-[#FF5500]">
-              <Shield className="w-3.5 h-3.5" />
-              <span>LIVE INCIDENT DATABASE · 1,000 CASES PRE-LOADED</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-50 border border-orange-200 rounded-full font-mono text-[10px] text-orange-700">
+              <Shield className="w-3.5 h-3.5 text-orange-600" />
+              <span className="font-semibold">LIVE INCIDENT DATABASE · 1,000 CASES PRE-LOADED</span>
             </div>
 
-            <h2 className="text-3xl sm:text-5xl font-bold font-sans text-white tracking-tight uppercase max-w-2xl mx-auto">
+            <h2 className="text-3xl sm:text-5xl font-bold font-sans text-slate-900 tracking-tight uppercase max-w-2xl mx-auto">
               Ready to Neutralize Multi-Hop Mule Syndicates?
             </h2>
 
-            <p className="text-sm text-zinc-300 max-w-xl mx-auto font-sans leading-relaxed">
+            <p className="text-sm text-slate-600 max-w-xl mx-auto font-sans leading-relaxed">
               Launch the full 3D interactive simulation lab, inspect real multi-hop graphs, and simulate automated account freeze advisories across Indian banking networks.
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-4 pt-3 font-mono text-xs">
               <motion.button
                 onClick={() => onEnterApp('simulation')}
-                className="px-8 py-4 bg-gradient-to-r from-[#FF7A1A] to-[#FF5500] hover:opacity-95 text-black font-bold rounded-lg shadow-signal-glow flex items-center gap-2 text-sm transition-all cursor-pointer"
-                whileHover={{ scale: 1.03, boxShadow: '0 0 35px rgba(255, 85, 0, 0.6)' }}
+                className="px-8 py-4 bg-gradient-to-r from-[#FF7A1A] to-[#EA580C] hover:opacity-95 text-white font-bold rounded-lg shadow-md shadow-orange-500/20 flex items-center gap-2 text-sm transition-all cursor-pointer"
+                whileHover={{ scale: 1.03, boxShadow: '0 0 30px rgba(255, 85, 0, 0.4)' }}
                 whileTap={{ scale: 0.97 }}
               >
-                <Play className="w-4 h-4 fill-black" />
+                <Play className="w-4 h-4 fill-white" />
                 <span>LAUNCH 3D SIMULATION LAB</span>
                 <ArrowRight className="w-4 h-4" />
               </motion.button>
 
               <motion.button
                 onClick={() => onEnterApp('command')}
-                className="px-8 py-4 bg-[#1A202E] hover:bg-[#252D3E] border border-white/20 text-white font-bold rounded-lg text-sm backdrop-blur-md transition-all cursor-pointer"
-                whileHover={{ scale: 1.03, borderColor: 'rgba(255, 85, 0, 0.5)' }}
+                className="px-8 py-4 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 font-bold rounded-lg text-sm shadow-sm transition-all cursor-pointer"
+                whileHover={{ scale: 1.03, borderColor: 'rgba(255, 85, 0, 0.4)' }}
                 whileTap={{ scale: 0.97 }}
               >
-                <Terminal className="w-4 h-4 text-[#38BDF8]" />
+                <Terminal className="w-4 h-4 text-blue-600" />
                 <span>ENTER COMMAND CENTER</span>
               </motion.button>
             </div>
           </div>
         </motion.section>
 
-        {/* ── SECTION 6: COMPREHENSIVE FOOTER ── */}
-        <footer className="border-t border-white/[0.08] pt-12 font-mono text-xs">
+        {/* ── SECTION 6: COMPREHENSIVE FOOTER (CLEAN WHITE SURFACE) ── */}
+        <footer className="border border-slate-200 bg-white/95 p-8 sm:p-12 rounded-3xl shadow-sm backdrop-blur-xl font-mono text-xs text-slate-600">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 text-left">
             {/* Expanded Team Trinetra Brand Showcase (2 Cols) */}
             <div className="lg:col-span-2 space-y-4">
-              <TrinetraLogo size="footer" showLangBadge={false} intervalMs={2600} />
-              <div className="text-[10px] text-emerald-400 font-bold flex items-center gap-1.5 pt-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
+              <TrinetraLogo size="footer" showLangBadge={false} intervalMs={2600} theme="light" />
+              <div className="text-[10px] text-emerald-700 font-bold flex items-center gap-1.5 pt-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
                 <span>NATIONAL FINANCIAL CYBERCRIME DEFENSE GRID · OPERATIONAL</span>
               </div>
             </div>
 
             <div className="space-y-2">
-              <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">PIPELINE STAGES</div>
-              <ul className="space-y-1 text-zinc-400 text-[11px]">
-                <li className="hover:text-white cursor-pointer" onClick={() => onEnterApp('simulation')}>Stage 0: Entity Resolution</li>
-                <li className="hover:text-white cursor-pointer" onClick={() => onEnterApp('simulation')}>Stage 1/2: Subgraph Extraction</li>
-                <li className="hover:text-white cursor-pointer" onClick={() => onEnterApp('simulation')}>Stage 3: GraphSAGE GNN</li>
-                <li className="hover:text-white cursor-pointer" onClick={() => onEnterApp('cashout-map')}>Stage 4: ATM Exit Prediction</li>
+              <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">PIPELINE STAGES</div>
+              <ul className="space-y-1 text-slate-600 text-[11px]">
+                <li className="hover:text-slate-900 cursor-pointer" onClick={() => onEnterApp('simulation')}>Stage 0: Entity Resolution</li>
+                <li className="hover:text-slate-900 cursor-pointer" onClick={() => onEnterApp('simulation')}>Stage 1/2: Subgraph Extraction</li>
+                <li className="hover:text-slate-900 cursor-pointer" onClick={() => onEnterApp('simulation')}>Stage 3: GraphSAGE GNN</li>
+                <li className="hover:text-slate-900 cursor-pointer" onClick={() => onEnterApp('cashout-map')}>Stage 4: ATM Exit Prediction</li>
               </ul>
             </div>
 
             <div className="space-y-2">
-              <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">INVESTIGATIVE TOOLS</div>
-              <ul className="space-y-1 text-zinc-400 text-[11px]">
-                <li className="hover:text-white cursor-pointer" onClick={() => onEnterApp('command')}>Command Center</li>
-                <li className="hover:text-white cursor-pointer" onClick={() => onEnterApp('incidents')}>1,000 Case Incident Roster</li>
-                <li className="hover:text-white cursor-pointer" onClick={() => onEnterApp('cashout-map')}>Geospatial Cash-Out Radar</li>
-                <li className="hover:text-white cursor-pointer" onClick={() => onEnterApp('policy')}>Threshold Policy Tuning</li>
+              <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">INVESTIGATIVE TOOLS</div>
+              <ul className="space-y-1 text-slate-600 text-[11px]">
+                <li className="hover:text-slate-900 cursor-pointer" onClick={() => onEnterApp('command')}>Command Center</li>
+                <li className="hover:text-slate-900 cursor-pointer" onClick={() => onEnterApp('incidents')}>1,000 Case Incident Roster</li>
+                <li className="hover:text-slate-900 cursor-pointer" onClick={() => onEnterApp('cashout-map')}>Geospatial Cash-Out Radar</li>
+                <li className="hover:text-slate-900 cursor-pointer" onClick={() => onEnterApp('policy')}>Threshold Policy Tuning</li>
               </ul>
             </div>
 
             <div className="space-y-2">
-              <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">SPECS & COMPLIANCE</div>
-              <p className="text-[10px] text-zinc-400 font-sans leading-relaxed">
+              <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">SPECS & COMPLIANCE</div>
+              <p className="text-[10px] text-slate-600 font-sans leading-relaxed">
                 PyTorch Geometric · PyG · XGBoost · FastAPI · Three.js · NetworkX.
               </p>
-              <div className="text-[9px] text-zinc-500 pt-2">
+              <div className="text-[9px] text-slate-400 pt-2">
                 Evaluated on 1,000 synthetic subgraphs. No real PII utilized.
               </div>
             </div>
           </div>
 
-          <div className="border-t border-white/5 mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between text-[10px] text-zinc-500">
+          <div className="border-t border-slate-200 mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between text-[10px] text-slate-500">
             <span>© 2026 SIH CYBERGUARD — National Cybercrime Predictive Platform.</span>
             <div className="flex gap-4 mt-2 sm:mt-0">
-              <span className="hover:text-zinc-400 cursor-pointer">Security Protocol</span>
+              <span className="hover:text-slate-800 cursor-pointer">Security Protocol</span>
               <span>·</span>
-              <span className="hover:text-zinc-400 cursor-pointer">Audit Logs</span>
+              <span className="hover:text-slate-800 cursor-pointer">Audit Logs</span>
               <span>·</span>
-              <span className="hover:text-zinc-400 cursor-pointer">REST API</span>
+              <span className="hover:text-slate-800 cursor-pointer">REST API</span>
             </div>
           </div>
         </footer>

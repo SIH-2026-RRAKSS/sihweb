@@ -4,17 +4,17 @@
 
 @layer base {
   :root {
-    color-scheme: dark;
-    --bg-base: #060709;
-    --bg-surface: #0C0E12;
-    --border-hairline: rgba(255, 255, 255, 0.08);
-    --border-strong: rgba(255, 255, 255, 0.16);
+    color-scheme: light;
+    --bg-base: #F8FAFC;
+    --bg-surface: #FFFFFF;
+    --border-hairline: rgba(15, 23, 42, 0.08);
+    --border-strong: rgba(15, 23, 42, 0.16);
     --signal-orange: #FF5500;
   }
 
   body {
-    background-color: #060709;
-    color: #E2E8F0;
+    background-color: #F8FAFC;
+    color: #0F172A;
     font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -29,25 +29,26 @@ body::before {
   inset: 0;
   pointer-events: none;
   z-index: 1;
-  opacity: 0.035;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 320 320' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.9'/></svg>");
+  opacity: 0.015;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 320 320' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.9'/></svg>");
   background-size: 320px 320px;
 }
 
 @layer components {
-  /* Industrial Surface Panel */
+  /* Industrial Surface Panel (Crisp Light Theme) */
   .industrial-panel {
-    background: #0C0E12;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    background: #FFFFFF;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.02);
     position: relative;
-    transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .industrial-panel:hover {
-    border-color: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 85, 0, 0.3);
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
   }
 
   /* Card Sheen Sweep */
@@ -60,7 +61,7 @@ body::before {
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.04) 50%, transparent 65%);
+    background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.6) 50%, transparent 65%);
     background-size: 250% 100%;
     background-position: 130% 0;
     opacity: 0;
@@ -73,23 +74,23 @@ body::before {
 
   /* Industrial Micro-Label */
   .tag-label {
-    @apply font-mono text-[9px] uppercase tracking-widest px-1.5 py-0.5 border font-semibold;
+    @apply font-mono text-[9px] uppercase tracking-widest px-1.5 py-0.5 border font-semibold rounded;
   }
 
   .tag-signal {
-    @apply bg-orange-500/10 text-orange-400 border-orange-500/30;
+    @apply bg-orange-50 text-orange-700 border-orange-200;
   }
 
   .tag-amber {
-    @apply bg-amber-500/10 text-amber-400 border-amber-500/30;
+    @apply bg-amber-50 text-amber-800 border-amber-200;
   }
 
   .tag-emerald {
-    @apply bg-emerald-500/10 text-emerald-400 border-emerald-500/30;
+    @apply bg-emerald-50 text-emerald-800 border-emerald-200;
   }
 
   .tag-neutral {
-    @apply bg-white/5 text-slate-300 border-white/10;
+    @apply bg-slate-100 text-slate-700 border-slate-200;
   }
 }
 
@@ -99,37 +100,68 @@ body::before {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #060709;
+  background: #F1F5F9;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1F242E;
-  border-radius: 4px;
+  background: #CBD5E1;
+  border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #323A4A;
+  background: #94A3B8;
 }
 
-/* Map Dark Tile Styling (OpenStreetMap No-Watermark Filter) */
-.leaflet-container {
-  background: #060709 !important;
-}
-.leaflet-tile {
-  filter: brightness(0.6) invert(1) contrast(2.2) hue-rotate(200deg) saturate(0.2) brightness(0.75);
-}
-
-/* Leaflet Custom DivIcon */
-.leaflet-div-icon {
-  background: transparent !important;
-  border: none !important;
-}
-
-/* Animated Laundering Flow Corridor */
-@keyframes flowDash {
-  to {
-    stroke-dashoffset: -32;
+/* Autonomous Floating Ambient Keyframes */
+@keyframes floatOrb1 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(80px, -50px) scale(1.15);
+  }
+  66% {
+    transform: translate(-45px, 60px) scale(0.92);
   }
 }
-.leaflet-interactive.flow-corridor-animated {
-  animation: flowDash 1.2s linear infinite;
+
+@keyframes floatOrb2 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1.1);
+  }
+  33% {
+    transform: translate(-90px, 50px) scale(0.9);
+  }
+  66% {
+    transform: translate(55px, -45px) scale(1.12);
+  }
 }
 
+@keyframes floatOrb3 {
+  0%, 100% {
+    transform: translate(0, 0) scale(0.95);
+  }
+  50% {
+    transform: translate(60px, 80px) scale(1.18);
+  }
+}
+
+@keyframes gridDrift {
+  0% {
+    background-position: 0px 0px;
+  }
+  100% {
+    background-position: 48px 48px;
+  }
+}
+
+.animate-float-1 {
+  animation: floatOrb1 16s ease-in-out infinite;
+}
+.animate-float-2 {
+  animation: floatOrb2 20s ease-in-out infinite;
+}
+.animate-float-3 {
+  animation: floatOrb3 18s ease-in-out infinite;
+}
+.animate-grid-drift {
+  animation: gridDrift 28s linear infinite;
+}
