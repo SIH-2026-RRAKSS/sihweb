@@ -81,13 +81,13 @@ export const PolicySimulatorView: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4 text-xs font-sans">
-            <div className="p-3 bg-white rounded-2xl border border-cyber-800 text-center min-w-[120px]">
+            <div className="p-3 bg-white rounded-2xl border border-slate-200 text-center min-w-[120px]">
               <div className="text-[10px] text-slate-500 uppercase">Alert Caseload</div>
               <div className="text-lg font-bold text-amber-400">{policyResult?.alerts_generated || 44} / 200</div>
               <div className="text-[9px] text-slate-500">({policyResult?.alert_rate_percent || 22.0}% Rate)</div>
             </div>
 
-            <div className="p-3 bg-white rounded-2xl border border-cyber-800 text-center min-w-[120px]">
+            <div className="p-3 bg-white rounded-2xl border border-slate-200 text-center min-w-[120px]">
               <div className="text-[10px] text-slate-500 uppercase">Expected F1-Score</div>
               <div className="text-lg font-bold text-emerald-400">{policyResult?.f1_score_percent.toFixed(2) || '88.89'}%</div>
               <div className="text-[9px] text-slate-500">Harmonic Mean</div>
@@ -222,7 +222,7 @@ export const PolicySimulatorView: React.FC = () => {
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs font-sans">
-            <thead className="bg-white text-slate-500 border-b border-cyber-800 text-[10px] uppercase">
+            <thead className="bg-white text-slate-500 border-b border-slate-200 text-[10px] uppercase">
               <tr>
                 <th className="py-2.5 px-3">Cutoff (τ)</th>
                 <th className="py-2.5 px-3">Policy Tier</th>

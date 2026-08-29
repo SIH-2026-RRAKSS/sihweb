@@ -90,12 +90,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 text-center pt-1 border-t border-cyber-800">
-          <div className="p-1.5 bg-white rounded border border-cyber-800">
+        <div className="grid grid-cols-2 gap-2 text-center pt-1 border-t border-slate-200">
+          <div className="p-1.5 bg-white rounded border border-slate-200">
             <div className="text-[9px] text-slate-500 uppercase">Test F1-Score</div>
             <div className="text-xs font-sans font-bold text-cyber-cyan">90.66%</div>
           </div>
-          <div className="p-1.5 bg-white rounded border border-cyber-800">
+          <div className="p-1.5 bg-white rounded border border-slate-200">
             <div className="text-[9px] text-slate-500 uppercase">Terminal MRR</div>
             <div className="text-xs font-sans font-bold text-amber-400">1.0000</div>
           </div>

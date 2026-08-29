@@ -420,7 +420,7 @@ export const GraphVisualizerView: React.FC<GraphVisualizerProps> = ({
             className="w-full h-[520px] cursor-grab active:cursor-grabbing bg-white rounded-xl"
           />
 
-          <div className="absolute bottom-3 left-3 text-[10px] font-sans text-slate-500 bg-white px-2 py-1 rounded border border-cyber-800">
+          <div className="absolute bottom-3 left-3 text-[10px] font-sans text-slate-500 bg-white px-2 py-1 rounded border border-slate-200">
             Drag nodes to rearrange • Click node to inspect details • Drag background to pan
           </div>
         </div>
@@ -446,7 +446,7 @@ export const GraphVisualizerView: React.FC<GraphVisualizerProps> = ({
                   <div className="text-[11px] text-slate-700 font-sans mt-0.5">{selectedNode.label}</div>
                 </div>
 
-                <div className="p-2.5 bg-white rounded-2xl border border-cyber-800 space-y-1.5">
+                <div className="p-2.5 bg-white rounded-2xl border border-slate-200 space-y-1.5">
                   <div className="flex justify-between">
                     <span className="text-slate-500">Node Type:</span>
                     <span className="font-bold text-slate-800">{selectedNode.node_type}</span>
@@ -461,7 +461,7 @@ export const GraphVisualizerView: React.FC<GraphVisualizerProps> = ({
                   </div>
                 </div>
 
-                <div className="p-2.5 bg-white rounded-2xl border border-cyber-800 space-y-1.5">
+                <div className="p-2.5 bg-white rounded-2xl border border-slate-200 space-y-1.5">
                   <div className="flex justify-between">
                     <span className="text-slate-500">In-Degree / Incoming:</span>
                     <span className="text-emerald-400 font-bold">{selectedNode.in_degree} (₹{selectedNode.total_incoming_amount.toLocaleString()})</span>

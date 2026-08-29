@@ -38,8 +38,8 @@ const colorMap = {
     badge: 'text-acid-green',
   },
   white: {
-    border: 'border-slate-700',
-    iconBg: 'bg-slate-800 text-slate-700 border-slate-700',
+    border: 'border-slate-200',
+    iconBg: 'bg-slate-50 text-slate-700 border-slate-200',
     val: 'text-slate-900',
     badge: 'text-slate-500',
   },

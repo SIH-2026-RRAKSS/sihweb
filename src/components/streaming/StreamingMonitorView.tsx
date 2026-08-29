@@ -259,8 +259,8 @@ export const StreamingMonitorView: React.FC = () => {
         </div>
 
         {testResult && (
-          <div className="p-4 bg-white rounded-xl border border-cyber-800 space-y-3 mt-2 animate-fadeIn font-sans text-xs">
-            <div className="flex items-center justify-between border-b border-cyber-800 pb-2">
+          <div className="p-4 bg-white rounded-xl border border-slate-200 space-y-3 mt-2 animate-fadeIn font-sans text-xs">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-2">
               <span className="text-slate-700 font-bold">Dynamic GNN Inference Result:</span>
               <span className="text-emerald-400 font-bold flex items-center gap-1">
                 <Clock className="w-3.5 h-3.5" />

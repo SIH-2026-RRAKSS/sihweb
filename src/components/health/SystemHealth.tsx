@@ -110,7 +110,7 @@ export const SystemHealth: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <div className="p-3 bg-white border border-slate-800 flex items-center justify-between">
+              <div className="p-3 bg-white border border-slate-200 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <div className="w-2.5 h-2.5 bg-acid-green animate-ping" />
                   <div>
@@ -123,7 +123,7 @@ export const SystemHealth: React.FC = () => {
                 </span>
               </div>
 
-              <div className="p-3 bg-white border border-slate-800 flex items-center justify-between">
+              <div className="p-3 bg-white border border-slate-200 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <div className="w-2.5 h-2.5 bg-acid-green rounded-none" />
                   <div>
@@ -136,7 +136,7 @@ export const SystemHealth: React.FC = () => {
                 </span>
               </div>
 
-              <div className="p-3 bg-white border border-slate-800 flex items-center justify-between">
+              <div className="p-3 bg-white border border-slate-200 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <div className="w-2.5 h-2.5 bg-acid-green rounded-none" />
                   <div>
@@ -149,7 +149,7 @@ export const SystemHealth: React.FC = () => {
                 </span>
               </div>
 
-              <div className="p-3 bg-white border border-slate-800 flex items-center justify-between">
+              <div className="p-3 bg-white border border-slate-200 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <div className="w-2.5 h-2.5 bg-neon-cyan animate-pulse" />
                   <div>
@@ -180,7 +180,7 @@ export const SystemHealth: React.FC = () => {
               </span>
             </div>
 
-            <div className="h-60 w-full bg-white p-2 border border-slate-800">
+            <div className="h-60 w-full bg-white p-2 border border-slate-200">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={latencyChartData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="#18253d" />
@@ -196,7 +196,7 @@ export const SystemHealth: React.FC = () => {
               </ResponsiveContainer>
             </div>
 
-            <div className="p-2 bg-white border border-slate-800 text-[10px] text-slate-500 flex items-center justify-between">
+            <div className="p-2 bg-white border border-slate-200 text-[10px] text-slate-500 flex items-center justify-between">
               <span>95% OF GRAPH INFERENCE QUERIES COMPLETE IN &lt; 105MS</span>
               <span className="text-neon-cyan font-bold">FAST INFERENCE ARCHITECTURE</span>
             </div>

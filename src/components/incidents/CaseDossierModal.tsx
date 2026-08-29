@@ -120,7 +120,7 @@ ${detail.investigative_evidence_bullets.map((b, i) => `${i + 1}. ${b}`).join('\n
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80  overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-white/90  overflow-y-auto">
       <div className="relative w-full max-w-4xl bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden my-8 max-h-[90vh] flex flex-col">
         {/* Modal Header */}
         <div className="px-6 py-4 bg-white border-b border-slate-200 flex items-center justify-between flex-shrink-0">
@@ -169,7 +169,7 @@ ${detail.investigative_evidence_bullets.map((b, i) => `${i + 1}. ${b}`).join('\n
               )}
 
               {/* Status Header Bar */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-3.5 bg-white border border-cyber-800 rounded-xl font-sans">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-3.5 bg-white border border-slate-200 rounded-xl font-sans">
                 <div>
                   <div className="text-[10px] text-slate-500 uppercase">Operational Risk Tier</div>
                   <div className="text-sm font-bold text-cyber-red flex items-center gap-1.5 mt-0.5">
@@ -195,8 +195,8 @@ ${detail.investigative_evidence_bullets.map((b, i) => `${i + 1}. ${b}`).join('\n
               {/* Section 1 & 2: Grid Profile & Resolved Entity */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* 1. Complaint Profile */}
-                <div className="p-4 bg-white border border-cyber-800 rounded-xl space-y-2.5">
-                  <div className="flex items-center gap-2 text-slate-700 font-sans font-bold text-xs border-b border-cyber-800 pb-2">
+                <div className="p-4 bg-white border border-slate-200 rounded-xl space-y-2.5">
+                  <div className="flex items-center gap-2 text-slate-700 font-sans font-bold text-xs border-b border-slate-200 pb-2">
                     <User className="w-3.5 h-3.5 text-cyber-cyan" />
                     1. Primary Complaint Details
                   </div>
@@ -225,8 +225,8 @@ ${detail.investigative_evidence_bullets.map((b, i) => `${i + 1}. ${b}`).join('\n
                 </div>
 
                 {/* 2. Resolved Canonical Entity Master */}
-                <div className="p-4 bg-white border border-cyber-800 rounded-xl space-y-2.5">
-                  <div className="flex items-center gap-2 text-slate-700 font-sans font-bold text-xs border-b border-cyber-800 pb-2">
+                <div className="p-4 bg-white border border-slate-200 rounded-xl space-y-2.5">
+                  <div className="flex items-center gap-2 text-slate-700 font-sans font-bold text-xs border-b border-slate-200 pb-2">
                     <Building className="w-3.5 h-3.5 text-purple-400" />
                     2. Resolved Canonical Financial Entity
                   </div>
@@ -264,7 +264,7 @@ ${detail.investigative_evidence_bullets.map((b, i) => `${i + 1}. ${b}`).join('\n
               </div>
 
               {/* Section 4: Concrete Observable Graph Evidence */}
-              <div className="p-4 bg-white border border-cyber-800 rounded-xl space-y-3">
+              <div className="p-4 bg-white border border-slate-200 rounded-xl space-y-3">
                 <div className="text-xs font-sans font-bold text-slate-700 uppercase flex items-center justify-between">
                   <span>4. Concrete Observable Graph Evidence Bullets</span>
                   <span className="text-[10px] text-emerald-400">{detail.investigative_evidence_bullets.length} Signals Validated</span>

@@ -34,7 +34,7 @@ const tierConfig = {
     label: 'UNCLASSIFIED ENTITY',
     shortLabel: 'UNCLASSIFIED',
     icon: HelpCircle,
-    className: 'rounded-full border bg-slate-800 text-slate-500 border-slate-700 font-bold',
+    className: 'rounded-full border bg-slate-50 text-slate-500 border-slate-200 font-bold',
     dot: 'bg-slate-500 rounded-full',
   },
 };

@@ -210,13 +210,13 @@ export const GeospatialMapView: React.FC<GeospatialMapProps> = () => {
 
             {selectedEntity ? (
               <div className="space-y-3 mt-3 text-xs font-sans">
-                <div className="p-3 bg-white rounded-2xl border border-cyber-800 space-y-1.5">
+                <div className="p-3 bg-white rounded-2xl border border-slate-200 space-y-1.5">
                   <div className="text-[10px] text-slate-500 uppercase">Selected Entity ID</div>
                   <div className="text-sm font-bold text-cyber-cyan">{selectedEntity.entity_id}</div>
                   <div className="text-[11px] text-slate-700 font-sans">{selectedEntity.holder_name}</div>
                 </div>
 
-                <div className="p-3 bg-white rounded-2xl border border-cyber-800 space-y-1.5">
+                <div className="p-3 bg-white rounded-2xl border border-slate-200 space-y-1.5">
                   <div className="flex justify-between">
                     <span className="text-slate-500">Jurisdiction:</span>
                     <span className="text-slate-800 font-bold">{selectedEntity.city}, {selectedEntity.state}</span>
@@ -237,7 +237,7 @@ export const GeospatialMapView: React.FC<GeospatialMapProps> = () => {
                   </div>
                 </div>
 
-                <div className="p-3 bg-white rounded-2xl border border-cyber-800 space-y-1">
+                <div className="p-3 bg-white rounded-2xl border border-slate-200 space-y-1">
                   <div className="text-[10px] text-slate-500 uppercase">GNN Risk Assessment</div>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-800">Probability:</span>
@@ -252,7 +252,7 @@ export const GeospatialMapView: React.FC<GeospatialMapProps> = () => {
             )}
 
             {/* Monitored Corridor List */}
-            <div className="mt-4 pt-3 border-t border-cyber-800 space-y-2">
+            <div className="mt-4 pt-3 border-t border-slate-200 space-y-2">
               <div className="text-[10px] font-sans text-slate-500 uppercase tracking-wider">
                 Top Monitored Urban Hubs
               </div>

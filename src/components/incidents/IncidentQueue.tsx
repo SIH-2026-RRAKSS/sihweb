@@ -184,7 +184,7 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase }) =>
       <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-saas-card">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs font-sans">
-            <thead className="bg-slate-800/50 border-b border-slate-200 text-[10px] text-slate-500">
+            <thead className="bg-slate-50 border-b border-slate-200 text-[10px] text-slate-500">
               <tr>
                 <th className="p-3">COMPLAINT ID</th>
                 <th className="p-3">INTAKE ORIGIN</th>

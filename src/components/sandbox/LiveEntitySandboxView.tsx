@@ -152,7 +152,7 @@ export const LiveEntitySandboxView: React.FC<LiveEntitySandboxProps> = ({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="p-4 bg-white rounded-xl border border-cyber-800 font-sans">
+            <div className="p-4 bg-white rounded-xl border border-slate-200 font-sans">
               <div className="text-[10px] text-slate-500 uppercase">Calculated Laundering Risk</div>
               <div className={`text-2xl font-bold mt-1 ${prediction.risk_probability > 0.5 ? 'text-cyber-red' : 'text-emerald-400'}`}>
                 {(prediction.risk_probability * 100).toFixed(2)}%
@@ -162,7 +162,7 @@ export const LiveEntitySandboxView: React.FC<LiveEntitySandboxProps> = ({
               </div>
             </div>
 
-            <div className="p-4 bg-white rounded-xl border border-cyber-800 font-sans">
+            <div className="p-4 bg-white rounded-xl border border-slate-200 font-sans">
               <div className="text-[10px] text-slate-500 uppercase">Operational Confidence Tier</div>
               <div className="text-xl font-bold text-amber-400 mt-1">
                 {prediction.confidence_tier}
@@ -172,7 +172,7 @@ export const LiveEntitySandboxView: React.FC<LiveEntitySandboxProps> = ({
               </div>
             </div>
 
-            <div className="p-4 bg-white rounded-xl border border-cyber-800 font-sans">
+            <div className="p-4 bg-white rounded-xl border border-slate-200 font-sans">
               <div className="text-[10px] text-slate-500 uppercase">Dynamic Subgraph Topology</div>
               <div className="text-xl font-bold text-cyber-cyan mt-1">
                 {prediction.num_nodes} Nodes • {prediction.num_edges} Edges

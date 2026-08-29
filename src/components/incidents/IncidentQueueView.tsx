@@ -81,7 +81,7 @@ export const IncidentQueueView: React.FC<IncidentQueueProps> = ({
         );
       default:
         return (
-          <span className="px-2 py-0.5 text-[10px] font-sans bg-slate-800 text-slate-500 rounded">
+          <span className="px-2 py-0.5 text-[10px] font-sans bg-slate-50 text-slate-500 rounded">
             {tier}
           </span>
         );

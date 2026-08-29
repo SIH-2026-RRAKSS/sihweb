@@ -53,7 +53,7 @@ export const ThreeWayBenchmarkView: React.FC = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-cyber-800 font-sans text-center">
+          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200 font-sans text-center">
             <div className="p-2 bg-white rounded">
               <div className="text-[9px] text-slate-500 uppercase">XGBoost Baseline</div>
               <div className="text-xs font-bold text-slate-700">86.98% ± 2.28%</div>
@@ -88,7 +88,7 @@ export const ThreeWayBenchmarkView: React.FC = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-cyber-800 font-sans text-center">
+          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200 font-sans text-center">
             <div className="p-2 bg-white rounded">
               <div className="text-[9px] text-slate-500 uppercase">ROC-AUC</div>
               <div className="text-xs font-bold text-slate-700">0.9456</div>
@@ -109,7 +109,7 @@ export const ThreeWayBenchmarkView: React.FC = () => {
         </div>
 
         {/* Dataset C */}
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 space-y-3.5 border-slate-700">
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 space-y-3.5 border-slate-200">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-sans font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">
               Dataset C (Elliptic)
@@ -126,7 +126,7 @@ export const ThreeWayBenchmarkView: React.FC = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-cyber-800 font-sans text-center">
+          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200 font-sans text-center">
             <div className="p-2 bg-white rounded">
               <div className="text-[9px] text-slate-500 uppercase">Test Illicit Rate</div>
               <div className="text-xs font-bold text-slate-700">6.50% (1,083 / 16.6k)</div>
@@ -155,7 +155,7 @@ export const ThreeWayBenchmarkView: React.FC = () => {
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs font-sans">
-            <thead className="bg-white text-slate-500 border-b border-cyber-800 text-[10px] uppercase">
+            <thead className="bg-white text-slate-500 border-b border-slate-200 text-[10px] uppercase">
               <tr>
                 <th className="py-3 px-3">Dataset Corpus</th>
                 <th className="py-3 px-3">Evaluation Task</th>
