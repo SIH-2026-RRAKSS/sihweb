@@ -80,7 +80,7 @@ export class ApiService {
         query.append('page_size', (resolvedParams.page_size || 50).toString());
       }
 
-      const res = await fetch(`${BASE_URL}/incidents?${query.toString()}`, { signal: AbortSignal.timeout(2500) });
+      const res = await fetch(`${BASE_URL}/incidents?${query.toString()}`, { signal: AbortSignal.timeout(15000) });
       if (res.ok) {
         const data = await res.json();
         if (data.items && data.items.length > 0) {
