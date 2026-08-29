@@ -9,6 +9,7 @@ import { CashOutMap } from './components/geo/CashOutMap';
 import { PolicyBenchmark } from './components/policy/PolicyBenchmark';
 import { CaseDossier } from './components/dossier/CaseDossier';
 import { SystemHealth } from './components/health/SystemHealth';
+import { StreamingMonitorView } from './components/streaming/StreamingMonitorView';
 import { LiveDemoView } from './components/demo/LiveDemoView';
 import { ApiService } from './services/api';
 
@@ -74,6 +75,8 @@ const App: React.FC = () => {
         return <CaseDossier caseId={selectedCaseId} onBack={handleBackFromDossier} />;
       case 'health':
         return <SystemHealth />;
+      case 'live-demo':
+        return <StreamingMonitorView />;
       default:
         return <CommandCenter onSelectCase={handleSelectCase} onNavigate={handleNavigate} />;
     }

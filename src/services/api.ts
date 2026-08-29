@@ -365,4 +365,20 @@ export class ApiService {
   public static async getThreeWayBenchmark(): Promise<ThreeWayBenchmarkRow[]> {
     return this.getThreeWayBenchmarks();
   }
+
+  public static async simulateStreamBatch(dataset: 'synthetic' | 'ibm' = 'synthetic', numTx: number = 50, offset: number = 0): Promise<any> {
+    try {
+      const res = await fetch(`${BASE_URL}/simulate/stream?dataset=${dataset}&num_tx=${numTx}&offset=${offset}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(30000)
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {
+      console.warn('Simulation stream fallback:', e);
+    }
+    return null;
+  }
 }
