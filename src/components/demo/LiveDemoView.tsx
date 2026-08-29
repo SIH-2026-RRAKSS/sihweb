@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Activity, ShieldAlert, Network, Settings, FileText, Search, Play, ServerCrash, CheckCircle2 } from 'lucide-react';
 
+const BASE_URL = ((import.meta as any).env?.VITE_API_BASE_URL as string) || '/api';
+
 export const LiveDemoView: React.FC = () => {
   const [incidents, setIncidents] = useState<any[]>([]);
   const [selectedIncident, setSelectedIncident] = useState<any | null>(null);
@@ -13,7 +15,7 @@ export const LiveDemoView: React.FC = () => {
   
   // Policy simulator state
   const [threshold, setThreshold] = useState(0.85);
-  const [dataset, setDataset] = useState('IBM AML');
+  const [dataset, setDataset] = useState('synthetic');
   const [policyResult, setPolicyResult] = useState<any | null>(null);
   
   const [serverOnline, setServerOnline] = useState(true);
@@ -22,10 +24,10 @@ export const LiveDemoView: React.FC = () => {
   useEffect(() => {
     const fetchIncidents = async () => {
       try {
-        const res = await fetch('http://localhost:8000/api/incidents?skip=0&limit=50&min_risk=0.50');
+        const res = await fetch(`${BASE_URL}/incidents?page=1&page_size=50&min_risk=0.50`);
         if (res.ok) {
           const data = await res.json();
-          setIncidents(data);
+          setIncidents(data.items || (Array.isArray(data) ? data : []));
           setServerOnline(true);
         } else {
           throw new Error('Server returned error');
@@ -49,8 +51,9 @@ export const LiveDemoView: React.FC = () => {
   // 2. Interactive Graph Fetch
   const handleSelectIncident = async (inc: any) => {
     setSelectedIncident(inc);
+    const incId = inc.complaint_id || inc.incident_id;
     try {
-      const res = await fetch(`http://localhost:8000/api/incidents/${inc.incident_id}/graph`);
+      const res = await fetch(`${BASE_URL}/incidents/${incId}/graph`);
       if (res.ok) {
         setGraphData(await res.json());
       } else {
@@ -62,11 +65,11 @@ export const LiveDemoView: React.FC = () => {
         num_nodes: 12,
         num_edges: 15,
         nodes: [
-          { id: inc.entity_id, label: "Suspect Node", color: "red" },
-          { id: inc.predicted_terminal, label: "Cash Out", color: "black" }
+          { id: inc.reported_account_number || inc.entity_id || 'ACC_01', label: "Suspect Node", color: "red" },
+          { id: inc.top_terminal_id || inc.predicted_terminal || 'ATM_014', label: "Cash Out", color: "black" }
         ],
         edges: [
-          { source: inc.entity_id, target: inc.predicted_terminal, amount: 45000.0 }
+          { source: inc.reported_account_number || inc.entity_id || 'ACC_01', target: inc.top_terminal_id || inc.predicted_terminal || 'ATM_014', amount: 45000.0 }
         ]
       });
     }
@@ -75,7 +78,7 @@ export const LiveDemoView: React.FC = () => {
   // 3. Manual Investigation Trigger
   const handleManualTrigger = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/predict/subgraph', {
+      const res = await fetch(`${BASE_URL}/predict/subgraph`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ seed_entity_id: seedEntity, max_hops: maxHops })
@@ -98,16 +101,16 @@ export const LiveDemoView: React.FC = () => {
 
   // 4. Dossier Export
   const handleExportDossier = (incidentId: string) => {
-    window.open(`http://localhost:8000/api/dossier/${incidentId}/export?format=html`, '_blank');
+    window.open(`${BASE_URL}/dossier/${incidentId}/export?format=html`, '_blank');
   };
 
   // 5. Policy Tune
   const handleTunePolicy = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/policy/tune', {
+      const res = await fetch(`${BASE_URL}/policy/tune`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ threshold, dataset })
+        body: JSON.stringify({ threshold, dataset: 'synthetic' })
       });
       if (res.ok) {
         setPolicyResult(await res.json());
