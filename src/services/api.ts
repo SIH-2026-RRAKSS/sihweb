@@ -81,6 +81,7 @@ export class ApiService {
       }
 
       const res = await fetch(`${BASE_URL}/incidents?${query.toString()}`, { signal: AbortSignal.timeout(6000) });
+      
       if (res.ok) {
         const data = await res.json();
         if (data.items && data.items.length > 0) {
