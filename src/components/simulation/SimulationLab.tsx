@@ -179,7 +179,7 @@ export const SimulationLab: React.FC = () => {
         
         {/* Left: Active Seed Entity Pill */}
         <div className="flex items-center gap-2.5">
-          <div className="flex items-center gap-1.5 px-3 py-1 bg-[#141822] border border-white/15 rounded text-slate-900 font-bold">
+          <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-100 border border-slate-200 rounded text-slate-900 font-bold">
             <span className="w-2 h-2 rounded-full bg-[#FF5500] animate-pulse" />
             <span>ACTIVE SEED:</span>
             <span className="text-[#FF5500]">{seedEntityId}</span>
@@ -211,7 +211,7 @@ export const SimulationLab: React.FC = () => {
                 className={`relative px-3 py-1.5 rounded text-[10px] font-bold transition-colors whitespace-nowrap z-10 ${
                   isSelected
                     ? 'text-slate-900'
-                    : 'text-slate-500 hover:text-slate-800 bg-[#141822]/60 border border-slate-100'
+                    : 'text-slate-500 hover:text-slate-800 bg-slate-50 border border-slate-200'
                 }`}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -233,7 +233,7 @@ export const SimulationLab: React.FC = () => {
           <div className="relative">
             <motion.button
               onClick={() => setShowCaseSelector(!showCaseSelector)}
-              className="px-3 py-1.5 bg-[#1A202C] hover:bg-[#252D3D] border border-slate-200 text-slate-900 font-bold rounded flex items-center gap-1.5 text-[10px] transition-all"
+              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-900 font-bold rounded flex items-center gap-1.5 text-[10px] transition-all"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -370,7 +370,7 @@ export const SimulationLab: React.FC = () => {
 
               <motion.button
                 onClick={handleReset}
-                className="p-3 bg-[#1A202C] hover:bg-[#252D3D] border border-slate-200 text-slate-700 hover:text-slate-900 rounded transition-colors"
+                className="p-3 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 hover:text-slate-900 rounded transition-colors"
                 title="Reset Simulation"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}

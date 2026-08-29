@@ -205,7 +205,7 @@ export const SimulationOutputs: React.FC<SimulationOutputsProps> = ({
           {onNavigateToDossier && incidentDetail?.complaint.complaint_id && (
             <motion.button
               onClick={() => onNavigateToDossier(incidentDetail.complaint.complaint_id)}
-              className="w-full py-2 bg-[#1A202C] hover:bg-[#252D3D] text-slate-900 border border-slate-200 rounded font-bold text-[10px] flex items-center justify-center gap-1.5 transition-colors"
+              className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-900 border border-slate-200 rounded font-bold text-[10px] flex items-center justify-center gap-1.5 transition-colors"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >

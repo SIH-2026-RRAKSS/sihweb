@@ -137,7 +137,7 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
           <select
             value={tierFilter}
             onChange={(e) => setTierFilter(e.target.value)}
-            className="bg-white border border-white/15 text-slate-700 px-1.5 py-0.5 rounded text-[9px] font-bold focus:outline-none"
+            className="bg-white border border-slate-300 text-slate-700 px-1.5 py-0.5 rounded text-[9px] font-bold focus:outline-none"
           >
             <option value="ALL">ALL TIERS</option>
             <option value="HIGH_CONFIDENCE">CRITICAL</option>
@@ -150,7 +150,7 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
         <select
           value={seedEntityId}
           onChange={(e) => handleSelectCase(e.target.value)}
-          className="w-full bg-white border border-white/15 text-slate-900 px-2.5 py-1.5 rounded text-[11px] font-bold focus:border-[#FF5500] focus:outline-none"
+          className="w-full bg-white border border-slate-300 text-slate-900 px-2.5 py-1.5 rounded text-[11px] font-bold focus:border-[#FF5500] focus:outline-none"
         >
           {filteredIncidents.slice(0, 100).map((inc) => (
             <option key={inc.complaint_id} value={inc.complaint_id}>
@@ -230,7 +230,7 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
               className={`p-2 border rounded cursor-pointer transition-all ${
                 scenario === scen.id
                   ? 'bg-slate-100 border-white/30 text-slate-900 shadow-sm'
-                  : 'bg-slate-50 border-slate-100 text-slate-500 hover:border-white/15'
+                  : 'bg-slate-50 border-slate-200 text-slate-500 hover:border-slate-300'
               }`}
             >
               <div className="flex items-center justify-between text-[11px] font-bold">
