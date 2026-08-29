@@ -14,7 +14,8 @@ import {
   Clock,
   Radio,
   Wifi,
-  Database
+  Database,
+  Zap
 } from 'lucide-react';
 
 import { TrinetraLogo } from '../ui/TrinetraLogo';
@@ -28,7 +29,7 @@ export type NavPage =
   | 'policy'
   | 'dossier'
   | 'health'
-  | 'splash';
+  | 'splash' | 'live-demo';
 
 interface AppShellProps {
   activePage: NavPage;
@@ -48,6 +49,7 @@ const NAV_ITEMS: { id: NavPage; label: string; code: string; icon: any; is3D?: b
   { id: 'policy', label: 'Threshold Policy', code: 'POL-TUNE', icon: SlidersHorizontal },
   { id: 'dossier', label: 'Case Dossiers', code: 'CASE-DOS', icon: FileText },
   { id: 'health', label: 'System Telemetry', code: 'SYS-MON', icon: Activity },
+  { id: 'live-demo', label: 'Live Backend Demo', code: 'API-DEMO', icon: Zap },
 ];
 
 export const AppShell: React.FC<AppShellProps> = ({
@@ -78,7 +80,7 @@ export const AppShell: React.FC<AppShellProps> = ({
     <div className="flex flex-col h-screen w-screen bg-[#F8FAFC] text-slate-900 font-sans antialiased overflow-hidden select-none">
       
       {/* ── 1. TOP COMMAND BAR (WHITE THEME) ── */}
-      <header className="h-12 bg-white border-b border-slate-200 px-4 flex items-center justify-between font-mono text-xs z-50 flex-shrink-0 shadow-sm">
+      <header className="h-12 bg-white border-b border-slate-200 px-4 flex items-center justify-between font-sans text-xs z-50 flex-shrink-0 shadow-sm">
         {/* Left: Brand Identity (Click to Splash) */}
         <div 
           onClick={() => onNavigate('splash')} 
@@ -86,7 +88,7 @@ export const AppShell: React.FC<AppShellProps> = ({
           title="Return to Splash Overview (Team Trinetra)"
         >
           <TrinetraLogo size="sm" showLangBadge={false} intervalMs={2800} theme="light" />
-          <span className="text-[10px] text-slate-500 font-mono hidden sm:inline-block border-l border-slate-200 pl-2.5">
+          <span className="text-[10px] text-slate-500 font-sans hidden sm:inline-block border-l border-slate-200 pl-2.5">
             AML DEFCON-2
           </span>
         </div>
@@ -105,21 +107,21 @@ export const AppShell: React.FC<AppShellProps> = ({
 
           <div className="flex items-center gap-1.5 text-slate-500">
             <span>FASTAPI:</span>
-            <span className={`font-bold ${backendOnline ? 'text-emerald-600' : 'text-slate-400'}`}>
+            <span className={`font-bold ${backendOnline ? 'text-emerald-600' : 'text-slate-500'}`}>
               {backendOnline ? '200 OK' : 'MOCK FALLBACK'}
             </span>
           </div>
         </div>
 
         {/* Right: Military Time */}
-        <div className="flex items-center gap-3 text-[11px] text-slate-500 font-mono">
+        <div className="flex items-center gap-3 text-[11px] text-slate-500 font-sans">
           <div className="flex items-center gap-1">
-            <Clock className="w-3.5 h-3.5 text-slate-400" />
+            <Clock className="w-3.5 h-3.5 text-slate-500" />
             <span className="text-slate-900 font-bold">{time.ist || '00:00:00'}</span>
-            <span className="text-slate-400 text-[9px]">IST</span>
+            <span className="text-slate-500 text-[9px]">IST</span>
           </div>
-          <span className="text-slate-300">|</span>
-          <div className="text-slate-400">
+          <span className="text-slate-700">|</span>
+          <div className="text-slate-500">
             <span>{time.utc || '00:00:00'}</span>
             <span className="text-[9px] ml-0.5">UTC</span>
           </div>
@@ -130,7 +132,7 @@ export const AppShell: React.FC<AppShellProps> = ({
       <div className="flex flex-1 min-h-0 overflow-hidden">
         
         {/* Left Navigation Rail */}
-        <aside className={`${collapsed ? 'w-16' : 'w-56'} bg-white border-r border-slate-200 flex flex-col justify-between p-2.5 transition-all duration-300 z-40 flex-shrink-0 font-mono shadow-sm`}>
+        <aside className={`${collapsed ? 'w-16' : 'w-56'} bg-white border-r border-slate-200 flex flex-col justify-between p-2.5 transition-all duration-300 z-40 flex-shrink-0 font-sans shadow-sm`}>
           <div className="space-y-1">
             {NAV_ITEMS.map((item) => {
               const Icon = item.icon;
@@ -142,17 +144,17 @@ export const AppShell: React.FC<AppShellProps> = ({
                   onClick={() => onNavigate(item.id)}
                   className={`w-full flex items-center gap-3 px-3 py-2 rounded text-xs transition-all ${
                     isActive
-                      ? 'bg-gradient-to-r from-[#FF7A1A] to-[#EA580C] text-white font-bold shadow-md shadow-orange-500/20'
+                      ? 'bg-gradient-to-r from-[#FF7A1A] to-[#EA580C] text-slate-900 font-bold shadow-md shadow-orange-500/20'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                   }`}
                   title={collapsed ? item.label : undefined}
                 >
-                  <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-white' : 'text-slate-500'}`} />
+                  <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-slate-900' : 'text-slate-500'}`} />
                   {!collapsed && (
                     <div className="flex-1 text-left flex items-center justify-between truncate">
                       <span className="truncate">{item.label}</span>
                       {item.is3D && (
-                        <span className={`text-[8px] px-1 py-0.2 rounded font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-orange-50 text-orange-600 border border-orange-200'}`}>
+                        <span className={`text-[8px] px-1 py-0.2 rounded font-bold ${isActive ? 'bg-white/20 text-slate-900' : 'bg-orange-50 text-orange-600 border border-orange-200'}`}>
                           3D
                         </span>
                       )}
@@ -167,7 +169,7 @@ export const AppShell: React.FC<AppShellProps> = ({
           <div className="space-y-2 pt-2 border-t border-slate-200 text-[10px]">
             {!collapsed && (
               <div className="space-y-1">
-                <span className="text-slate-400 font-bold uppercase tracking-wider block text-[9px]">
+                <span className="text-slate-500 font-bold uppercase tracking-wider block text-[9px]">
                   EVALUATION DATASET:
                 </span>
                 {(['SYNTHETIC_A', 'IBM_B', 'ELLIPTIC_C'] as const).map((ds) => (
@@ -207,23 +209,23 @@ export const AppShell: React.FC<AppShellProps> = ({
       </div>
 
       {/* ── 3. BOTTOM CONTINUOUS TELEMETRY STRIP ── */}
-      <footer className="h-7 bg-white border-t border-slate-200 px-4 flex items-center justify-between font-mono text-[10px] text-slate-500 z-50 flex-shrink-0">
+      <footer className="h-7 bg-white border-t border-slate-200 px-4 flex items-center justify-between font-sans text-[10px] text-slate-500 z-50 flex-shrink-0">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
             <span>STREAM: <strong className="text-slate-800 font-sans">1,448.90 TX/SEC</strong></span>
           </div>
-          <span className="text-slate-300">|</span>
+          <span className="text-slate-700">|</span>
           <div>ACTIVE CHAINS: <strong className="text-[#FF5500] font-sans">48 RINGS</strong></div>
-          <span className="text-slate-300">|</span>
+          <span className="text-slate-700">|</span>
           <div>CASH-OUT EXPOSURE: <strong className="text-amber-600 font-sans">₹4.82 CR</strong></div>
         </div>
 
         <div className="hidden sm:flex items-center gap-4">
           <div>GRAPH SCALE: <strong className="text-slate-700">750 NODES / 5,000 EDGES</strong></div>
-          <span className="text-slate-300">|</span>
+          <span className="text-slate-700">|</span>
           <div>POLICY: <strong className="text-slate-700">τ = 0.50</strong></div>
-          <span className="text-slate-300">|</span>
+          <span className="text-slate-700">|</span>
           <div className="text-emerald-600 font-bold">P50: 71.67ms (SLA OK)</div>
         </div>
       </footer>

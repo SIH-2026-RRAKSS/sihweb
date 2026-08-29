@@ -78,7 +78,7 @@ export const PolicyBenchmark: React.FC = () => {
   const mode = getOperationalMode(threshold);
 
   return (
-    <div className="space-y-3 font-mono">
+    <div className="space-y-3 font-sans">
       {/* ── SECTION A: TACTICAL THRESHOLD CONSOLE ── */}
       <GlassCard padding="md" glow="cyan">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-cyan-500/30 pb-2.5 mb-4">
@@ -87,7 +87,7 @@ export const PolicyBenchmark: React.FC = () => {
               <SlidersHorizontal className="w-4 h-4" />
             </div>
             <div>
-              <div className="font-mono text-xs font-black tracking-wider text-neon-cyan text-glow-cyan">
+              <div className="font-sans text-xs font-black tracking-wider text-neon-cyan text-glow-cyan">
                 OPERATIONAL THRESHOLD POLICY CONSOLE (τ)
               </div>
               <div className="text-[9px] text-slate-500">
@@ -96,7 +96,7 @@ export const PolicyBenchmark: React.FC = () => {
             </div>
           </div>
 
-          <div className={`px-2.5 py-1 border font-mono text-[10px] font-bold ${mode.color}`}>
+          <div className={`px-2.5 py-1 border font-sans text-[10px] font-bold ${mode.color}`}>
             {mode.name}
           </div>
         </div>
@@ -104,8 +104,8 @@ export const PolicyBenchmark: React.FC = () => {
         {/* Threshold Slider Slider Control */}
         <div className="space-y-2 mb-6">
           <div className="flex justify-between text-xs font-bold">
-            <span className="text-slate-300">POLICY DECISION THRESHOLD:</span>
-            <span className="text-neon-cyan text-sm text-glow-cyan font-mono">τ = {threshold.toFixed(2)}</span>
+            <span className="text-slate-700">POLICY DECISION THRESHOLD:</span>
+            <span className="text-neon-cyan text-sm text-glow-cyan font-sans">τ = {threshold.toFixed(2)}</span>
           </div>
 
           <input
@@ -115,10 +115,10 @@ export const PolicyBenchmark: React.FC = () => {
             step="0.05"
             value={threshold}
             onChange={(e) => setThreshold(Number(e.target.value))}
-            className="w-full h-2 bg-cyber-950 border border-slate-800 rounded-none appearance-none accent-neon-cyan cursor-pointer"
+            className="w-full h-2 bg-white border border-slate-200 rounded-none appearance-none accent-neon-cyan cursor-pointer"
           />
 
-          <div className="flex justify-between text-[9px] text-slate-500 font-mono">
+          <div className="flex justify-between text-[9px] text-slate-500 font-sans">
             <span>0.10 (MAX RECALL)</span>
             <span>0.50 (BALANCED)</span>
             <span>0.90 (MAX PRECISION)</span>
@@ -127,32 +127,32 @@ export const PolicyBenchmark: React.FC = () => {
 
         {/* Live Metrics Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
-          <div className="p-3 bg-cyber-950 border border-slate-800">
-            <div className="text-[10px] text-slate-400 mb-1">PRECISION:</div>
+          <div className="p-3 bg-white border border-slate-200">
+            <div className="text-[10px] text-slate-500 mb-1">PRECISION:</div>
             <div className="text-xl font-bold text-neon-cyan">
               {policyData ? `${policyData.precision_percent.toFixed(1)}%` : '--'}
             </div>
             <div className="text-[8px] text-slate-500 mt-1">TRUE POSITIVES / ALERTS</div>
           </div>
 
-          <div className="p-3 bg-cyber-950 border border-slate-800">
-            <div className="text-[10px] text-slate-400 mb-1">RECALL:</div>
+          <div className="p-3 bg-white border border-slate-200">
+            <div className="text-[10px] text-slate-500 mb-1">RECALL:</div>
             <div className="text-xl font-bold text-acid-green">
               {policyData ? `${policyData.recall_percent.toFixed(1)}%` : '--'}
             </div>
             <div className="text-[8px] text-slate-500 mt-1">ILLICIT CAPTURE RATE</div>
           </div>
 
-          <div className="p-3 bg-cyber-950 border border-slate-800">
-            <div className="text-[10px] text-slate-400 mb-1">F1 OPTIMIZATION:</div>
+          <div className="p-3 bg-white border border-slate-200">
+            <div className="text-[10px] text-slate-500 mb-1">F1 OPTIMIZATION:</div>
             <div className="text-xl font-bold text-amber-cash">
               {policyData ? `${policyData.f1_score_percent.toFixed(1)}%` : '--'}
             </div>
             <div className="text-[8px] text-slate-500 mt-1">HARMONIC MEAN</div>
           </div>
 
-          <div className="p-3 bg-cyber-950 border border-slate-800">
-            <div className="text-[10px] text-slate-400 mb-1">FALSE POSITIVES:</div>
+          <div className="p-3 bg-white border border-slate-200">
+            <div className="text-[10px] text-slate-500 mb-1">FALSE POSITIVES:</div>
             <div className="text-xl font-bold text-crimson-alert">
               {policyData ? `${policyData.false_positives} / 200` : '--'}
             </div>
@@ -161,8 +161,8 @@ export const PolicyBenchmark: React.FC = () => {
         </div>
 
         {/* Precision / Recall Trade-off Chart */}
-        <div className="h-52 w-full bg-cyber-950 p-2 border border-slate-800">
-          <div className="text-[10px] text-slate-400 mb-2 font-bold flex items-center justify-between">
+        <div className="h-52 w-full bg-white p-2 border border-slate-200">
+          <div className="text-[10px] text-slate-500 mb-2 font-bold flex items-center justify-between">
             <span>PRECISION / RECALL / F1 TRADEOFF CURVE (RECHARTS)</span>
             <span className="text-neon-cyan">τ RANGE: 0.10 - 0.90</span>
           </div>
@@ -190,7 +190,7 @@ export const PolicyBenchmark: React.FC = () => {
             <Cpu className="w-4 h-4" />
           </div>
           <div>
-            <div className="font-mono text-xs font-black tracking-wider text-neon-cyan text-glow-cyan">
+            <div className="font-sans text-xs font-black tracking-wider text-neon-cyan text-glow-cyan">
               3-WAY BENCHMARK EVALUATION MATRIX (STAGE 7)
             </div>
             <div className="text-[9px] text-slate-500">
@@ -200,8 +200,8 @@ export const PolicyBenchmark: React.FC = () => {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs font-mono">
-            <thead className="bg-cyber-900 border-b border-cyan-500/30 text-[10px] text-slate-400">
+          <table className="w-full text-left text-xs font-sans">
+            <thead className="bg-white border-b border-cyan-500/30 text-[10px] text-slate-500">
               <tr>
                 <th className="p-3">DATASET BENCHMARK</th>
                 <th className="p-3">EVALUATION TASK</th>
@@ -211,12 +211,12 @@ export const PolicyBenchmark: React.FC = () => {
                 <th className="p-3">PR-AUC</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/80 bg-cyber-950/60">
+            <tbody className="divide-y divide-slate-800/80 bg-white">
               {benchmarkData.map((row, i) => (
-                <tr key={i} className="hover:bg-cyber-850 transition-colors">
-                  <td className="p-3 font-bold text-slate-100">{row.dataset}</td>
-                  <td className="p-3 text-slate-400 text-[10px]">{row.evaluation_task}</td>
-                  <td className="p-3 text-slate-300">{row.xgboost_f1}</td>
+                <tr key={i} className="hover:bg-slate-50 transition-colors">
+                  <td className="p-3 font-bold text-slate-900">{row.dataset}</td>
+                  <td className="p-3 text-slate-500 text-[10px]">{row.evaluation_task}</td>
+                  <td className="p-3 text-slate-700">{row.xgboost_f1}</td>
                   <td className="p-3 text-neon-cyan font-bold text-glow-cyan">{row.graphsage_f1}</td>
                   <td className="p-3 text-acid-green font-bold">{row.f1_delta}</td>
                   <td className="p-3 text-amber-cash font-bold">{row.pr_auc}</td>
@@ -226,7 +226,7 @@ export const PolicyBenchmark: React.FC = () => {
           </table>
         </div>
 
-        <div className="mt-3 p-2 bg-cyber-950 border border-slate-800 text-[10px] text-slate-400 flex items-center justify-between">
+        <div className="mt-3 p-2 bg-white border border-slate-200 text-[10px] text-slate-500 flex items-center justify-between">
           <span>TERMINAL PREDICTION MRR: <span className="text-acid-green font-bold">1.0000 (TOP-1 CASH-OUT ACCURACY: 100.0%)</span></span>
           <span className="text-amber-cash font-bold">ALL BENCHMARKS EVALUATED ON SYNTHETIC HOLDOUT SUITES</span>
         </div>

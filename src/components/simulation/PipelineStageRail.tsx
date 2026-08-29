@@ -38,7 +38,7 @@ export const PipelineStageRail: React.FC<PipelineStageRailProps> = ({
   const progressPercent = Math.min(100, (currentStage / 8) * 100);
 
   return (
-    <div className="relative bg-[#0C0E12] border border-white/10 rounded-lg p-2.5 flex flex-col space-y-2 font-mono text-xs shadow-industrial-sm overflow-hidden select-none">
+    <div className="relative bg-white border border-slate-200 rounded-2xl p-2.5 flex flex-col space-y-2 font-sans text-xs shadow-sm overflow-hidden select-none">
       
       {/* Top Track & Status */}
       <div className="flex items-center justify-between">
@@ -58,8 +58,8 @@ export const PipelineStageRail: React.FC<PipelineStageRailProps> = ({
                     isActive
                       ? 'text-black font-bold'
                       : isComplete
-                      ? 'text-white hover:text-white bg-white/5 border border-white/10'
-                      : 'text-zinc-500 hover:text-zinc-300 bg-white/[0.02] border border-transparent'
+                      ? 'text-slate-900 hover:text-slate-900 bg-slate-100 border border-slate-200'
+                      : 'text-slate-500 hover:text-slate-700 bg-white/[0.02] border border-transparent'
                   }`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -96,14 +96,14 @@ export const PipelineStageRail: React.FC<PipelineStageRailProps> = ({
         </div>
 
         {/* Pipeline Status Tag */}
-        <div className="pl-3 border-l border-white/10 flex-shrink-0 flex items-center gap-2">
+        <div className="pl-3 border-l border-slate-200 flex-shrink-0 flex items-center gap-2">
           <motion.span
             className={`text-[10px] px-2.5 py-1 rounded font-bold uppercase tracking-wider ${
               state === 'running'
                 ? 'bg-[#FF5500]/15 text-[#FF5500] border border-[#FF5500]/40'
                 : state === 'complete'
                 ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/40'
-                : 'bg-white/5 text-zinc-400 border border-white/10'
+                : 'bg-slate-100 text-slate-500 border border-slate-200'
             }`}
             animate={state === 'running' ? { opacity: [0.7, 1, 0.7] } : { opacity: 1 }}
             transition={{ duration: 1.2, repeat: Infinity }}

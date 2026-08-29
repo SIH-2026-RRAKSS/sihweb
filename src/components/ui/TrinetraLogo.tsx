@@ -103,7 +103,7 @@ export const TrinetraLogo: React.FC<TrinetraLogoProps> = ({
           </p>
 
           <div className="flex items-center gap-2 pt-0.5">
-            <span className="px-2 py-0.5 rounded bg-orange-50 border border-orange-200 text-orange-700 font-mono text-[10px] font-semibold">
+            <span className="px-2 py-0.5 rounded bg-orange-50 border border-orange-200 text-orange-700 font-sans text-[10px] font-semibold">
               Active Script: {current.lang} ({current.code})
             </span>
           </div>
@@ -197,7 +197,7 @@ export const TrinetraLogo: React.FC<TrinetraLogoProps> = ({
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 4 }}
                 transition={{ duration: 0.25 }}
-                className={`rounded bg-orange-50 border border-orange-200 text-orange-700 font-mono font-semibold ${sizeConfig.badgeSize}`}
+                className={`rounded bg-orange-50 border border-orange-200 text-orange-700 font-sans font-semibold ${sizeConfig.badgeSize}`}
               >
                 {current.lang} ({current.code})
               </motion.span>

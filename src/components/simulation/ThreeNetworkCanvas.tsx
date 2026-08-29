@@ -47,7 +47,7 @@ interface ThreeNetworkCanvasProps {
 /**
  * 🏧 EPIC INDUSTRIAL ATM CASH-OUT KIOSK WITH ACTIVE LASER TURRET
  */
-function createEpicATMKioskModel(colorHex: number = 0xf59e0b, terminalLabel: string = 'ATM CASH-OUT'): THREE.Group {
+function createEpicATMKioskModel(colorHex: number = 0xf97316, terminalLabel: string = 'ATM CASH-OUT'): THREE.Group {
   const group = new THREE.Group();
 
   // 1. Heavy Chamfered Base Pedestal
@@ -327,9 +327,15 @@ function createEpicBankBranchModel(): THREE.Group {
 /**
  * 📱 EPIC TITANIUM CYBER SMARTPHONE (MOBILE UPI MULE) WITH 3D HOLOGRAM
  */
-function createEpicMobileUPITerminalModel(isHighRisk: boolean, label: string = 'UPI MULE'): THREE.Group {
+function createEpicMobileUPITerminalModel(risk: number, label: string = 'UPI MULE'): THREE.Group {
   const group = new THREE.Group();
-  const accentColor = isHighRisk ? 0xff5500 : 0x38bdf8;
+  
+  let accentColorStr = '#10B981'; // Emerald / Benign
+  if (risk >= 0.70) accentColorStr = '#EF4444'; // Crimson / Confirmed Mule
+  else if (risk > 0.30) accentColorStr = '#F97316'; // Amber / Watchlist
+
+  const colorObj = new THREE.Color(accentColorStr);
+  const accentColor = colorObj.getHex();
 
   const bodyGeo = new THREE.BoxGeometry(4.0, 8.2, 0.7);
   const bodyMat = new THREE.MeshStandardMaterial({
@@ -351,7 +357,7 @@ function createEpicMobileUPITerminalModel(isHighRisk: boolean, label: string = '
     qCtx.fillStyle = '#05070d';
     qCtx.fillRect(0, 0, 400, 600);
 
-    qCtx.fillStyle = isHighRisk ? '#ff5500' : '#38bdf8';
+    qCtx.fillStyle = accentColorStr;
     qCtx.fillRect(0, 0, 400, 70);
     qCtx.fillStyle = '#000000';
     qCtx.font = 'bold 24px sans-serif';
@@ -363,15 +369,15 @@ function createEpicMobileUPITerminalModel(isHighRisk: boolean, label: string = '
     qCtx.fillRect(80, 130, 70, 70);
     qCtx.fillRect(250, 130, 70, 70);
     qCtx.fillRect(80, 300, 70, 70);
-    qCtx.fillStyle = isHighRisk ? '#ff5500' : '#38bdf8';
+    qCtx.fillStyle = accentColorStr;
     qCtx.fillRect(180, 230, 40, 40);
 
     qCtx.fillStyle = '#ffffff';
     qCtx.font = 'bold 24px sans-serif';
     qCtx.fillText(label.slice(0, 18), 40, 450);
-    qCtx.fillStyle = isHighRisk ? '#ff5500' : '#10b981';
+    qCtx.fillStyle = accentColorStr;
     qCtx.font = '18px monospace';
-    qCtx.fillText('INTERMEDIATE HOP CONDUIT', 45, 510);
+    qCtx.fillText(`RISK PROBABILITY: ${(risk * 100).toFixed(1)}%`, 45, 510);
   }
   const qrTex = new THREE.CanvasTexture(qrCanvas);
   const screenMat = new THREE.MeshBasicMaterial({ map: qrTex, side: THREE.DoubleSide });
@@ -515,6 +521,20 @@ export const ThreeNetworkCanvas: React.FC<ThreeNetworkCanvasProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [cameraMode, setCameraMode] = useState<'PERSPECTIVE' | 'TOP' | 'ISOMETRIC'>('PERSPECTIVE');
   const [inspectedNode, setInspectedNode] = useState<SimNode3D | null>(null);
+  const [temporalScrubber, setTemporalScrubber] = useState<number>(72); // 0 to 72 hours
+
+  useEffect(() => {
+    nodesRef.current.forEach(node => {
+      const nodeTime = node.hopLevel * 24; 
+      const isVisible = temporalScrubber >= nodeTime;
+      node.targetScale = isVisible ? 1.0 : 0.001;
+    });
+
+    edgesRef.current.forEach(edge => {
+      const edgeTime = edge.hopLevel * 24;
+      edge.targetProgress = temporalScrubber >= edgeTime ? 1.0 : 0.0;
+    });
+  }, [temporalScrubber]);
 
   const targetCamPosRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 80, 155));
   const targetLookAtRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 5, 0));
@@ -646,8 +666,8 @@ export const ThreeNetworkCanvas: React.FC<ThreeNetworkCanvasProps> = ({
 
     if (tier === 'NORMAL') {
       nodes = [
-        { id: seedEntityId, label: `${seedEntityId} (Origin Account)`, type: 'VICTIM', city: location, risk: gnnRisk, amount, hopLevel: 0, position: new THREE.Vector3(-40, 0, 0), color: '#10B981', targetScale: 1.0, currentScale: 1.0 },
-        { id: 'BANK_CLEARING', label: 'Commercial Bank Clearing', type: 'LAYERING', city: `${location} Branch`, risk: gnnRisk, amount, hopLevel: 1, position: new THREE.Vector3(0, 0, 0), color: '#E2E8F0', targetScale: 1.0, currentScale: 1.0 },
+        { id: seedEntityId, label: `${seedEntityId} (Origin Account)`, type: 'VICTIM', city: location, risk: gnnRisk, amount, hopLevel: 0, position: new THREE.Vector3(-40, 0, 0), color: '#F8FAFC', targetScale: 1.0, currentScale: 1.0 },
+        { id: 'BANK_CLEARING', label: 'Commercial Bank Clearing', type: 'LAYERING', city: `${location} Branch`, risk: gnnRisk, amount, hopLevel: 1, position: new THREE.Vector3(0, 0, 0), color: '#F8FAFC', targetScale: 1.0, currentScale: 1.0 },
         { id: 'MERCHANT_EXIT', label: 'Verified Merchant Vendor', type: 'MERCHANT', city: 'Retail Settlement', risk: gnnRisk, amount, hopLevel: 2, position: new THREE.Vector3(40, 0, 0), color: '#10B981', targetScale: 1.0, currentScale: 1.0 },
       ];
       edgeDefs = [
@@ -658,10 +678,10 @@ export const ThreeNetworkCanvas: React.FC<ThreeNetworkCanvasProps> = ({
       const p1 = Math.round(amount * 0.52);
       const p2 = amount - p1;
       nodes = [
-        { id: seedEntityId, label: `${seedEntityId} (Micro Origin)`, type: 'VICTIM', city: location, risk: gnnRisk, amount: p1, hopLevel: 0, position: new THREE.Vector3(-48, 0, -22), color: '#FF5500', targetScale: 1.0, currentScale: 1.0 },
+        { id: seedEntityId, label: `${seedEntityId} (Micro Origin)`, type: 'VICTIM', city: location, risk: gnnRisk, amount: p1, hopLevel: 0, position: new THREE.Vector3(-48, 0, -22), color: '#F8FAFC', targetScale: 1.0, currentScale: 1.0 },
         { id: 'SMURF_MULE_2', label: 'Mule Micro-Deposit', type: 'MULE', city: 'Intermediary Hub', risk: gnnRisk, amount: p2, hopLevel: 0, position: new THREE.Vector3(-48, 0, 22), color: '#38BDF8', targetScale: 1.0, currentScale: 1.0 },
-        { id: 'AGGREGATOR', label: 'Consolidation Mule Account', type: 'LAYERING', city: 'Aggregation Branch', risk: gnnRisk, amount, hopLevel: 1, position: new THREE.Vector3(6, 0, 0), color: '#E2E8F0', targetScale: 1.0, currentScale: 1.0 },
-        { id: 'ATM_EXIT', label: `${exitTerminalId} (${exitCity})`, type: 'ATM', city: exitCity, risk: gnnRisk, amount, hopLevel: 2, position: new THREE.Vector3(50, 0, 0), color: '#F59E0B', targetScale: 1.0, currentScale: 1.0 },
+        { id: 'AGGREGATOR', label: 'Consolidation Mule Account', type: 'LAYERING', city: 'Aggregation Branch', risk: gnnRisk, amount, hopLevel: 1, position: new THREE.Vector3(6, 0, 0), color: '#F8FAFC', targetScale: 1.0, currentScale: 1.0 },
+        { id: 'ATM_EXIT', label: `${exitTerminalId} (${exitCity})`, type: 'ATM', city: exitCity, risk: gnnRisk, amount, hopLevel: 2, position: new THREE.Vector3(50, 0, 0), color: '#F97316', targetScale: 1.0, currentScale: 1.0 },
       ];
       edgeDefs = [
         { source: seedEntityId, target: 'AGGREGATOR', amount: p1, hopLevel: 1, isCashOut: false, isSuspicious: true },
@@ -675,13 +695,13 @@ export const ThreeNetworkCanvas: React.FC<ThreeNetworkCanvasProps> = ({
       const p3 = amount - p1 - p2;
 
       nodes = [
-        { id: seedEntityId, label: `${seedEntityId} (Victim Safe)`, type: 'VICTIM', city: location, risk: gnnRisk, amount, hopLevel: 0, position: new THREE.Vector3(-50, 0, 0), color: '#FF5500', targetScale: 1.0, currentScale: 1.0 },
+        { id: seedEntityId, label: `${seedEntityId} (Victim Safe)`, type: 'VICTIM', city: location, risk: gnnRisk, amount, hopLevel: 0, position: new THREE.Vector3(-50, 0, 0), color: '#F8FAFC', targetScale: 1.0, currentScale: 1.0 },
         { id: 'MULE_01', label: 'UPI Mule Account Alpha', type: 'MULE', city: 'Kolkata Hub', risk: 0.96, amount: p1, hopLevel: 1, position: new THREE.Vector3(-22, 0, -26), color: '#38BDF8', targetScale: 1.0, currentScale: 1.0 },
         { id: 'MULE_02', label: 'UPI Mule Account Beta', type: 'MULE', city: 'Bhubaneswar Hub', risk: 0.95, amount: p2, hopLevel: 1, position: new THREE.Vector3(-20, 0, 26), color: '#38BDF8', targetScale: 1.0, currentScale: 1.0 },
         { id: 'MULE_03', label: 'UPI Mule Account Gamma', type: 'MULE', city: 'Ranchi Hub', risk: 0.92, amount: p3, hopLevel: 1, position: new THREE.Vector3(-8, 0, 0), color: '#38BDF8', targetScale: 1.0, currentScale: 1.0 },
-        { id: 'LAYER_01', label: 'Commercial Clearing Branch', type: 'LAYERING', city: 'Nagpur', risk: 0.88, amount: p1 + Math.round(p3 * 0.5), hopLevel: 2, position: new THREE.Vector3(16, 0, -18), color: '#E2E8F0', targetScale: 1.0, currentScale: 1.0 },
-        { id: 'LAYER_02', label: 'Inter-Bank Routing Hub', type: 'LAYERING', city: 'Pune', risk: 0.88, amount: p2 + Math.round(p3 * 0.5), hopLevel: 2, position: new THREE.Vector3(18, 0, 18), color: '#E2E8F0', targetScale: 1.0, currentScale: 1.0 },
-        { id: 'ATM_EXIT', label: `${exitTerminalId} (${exitCity})`, type: 'ATM', city: exitCity, risk: gnnRisk, amount, hopLevel: 3, position: new THREE.Vector3(54, 0, 0), color: '#F59E0B', targetScale: 1.0, currentScale: 1.0 },
+        { id: 'LAYER_01', label: 'Commercial Clearing Branch', type: 'LAYERING', city: 'Nagpur', risk: 0.88, amount: p1 + Math.round(p3 * 0.5), hopLevel: 2, position: new THREE.Vector3(16, 0, -18), color: '#F8FAFC', targetScale: 1.0, currentScale: 1.0 },
+        { id: 'LAYER_02', label: 'Inter-Bank Routing Hub', type: 'LAYERING', city: 'Pune', risk: 0.88, amount: p2 + Math.round(p3 * 0.5), hopLevel: 2, position: new THREE.Vector3(18, 0, 18), color: '#F8FAFC', targetScale: 1.0, currentScale: 1.0 },
+        { id: 'ATM_EXIT', label: `${exitTerminalId} (${exitCity})`, type: 'ATM', city: exitCity, risk: gnnRisk, amount, hopLevel: 3, position: new THREE.Vector3(54, 0, 0), color: '#F97316', targetScale: 1.0, currentScale: 1.0 },
       ];
       edgeDefs = [
         { source: seedEntityId, target: 'MULE_01', amount: p1, hopLevel: 1, isCashOut: false, isSuspicious: true },
@@ -705,7 +725,7 @@ export const ThreeNetworkCanvas: React.FC<ThreeNetworkCanvasProps> = ({
       let modelGroup: THREE.Group;
 
       if (node.type === 'ATM') {
-        modelGroup = createEpicATMKioskModel(0xf59e0b, exitTerminalId);
+        modelGroup = createEpicATMKioskModel(0xf97316, exitTerminalId);
       } else if (node.type === 'LAYERING') {
         modelGroup = createEpicBankBranchModel();
       } else if (node.type === 'VICTIM') {
@@ -713,7 +733,7 @@ export const ThreeNetworkCanvas: React.FC<ThreeNetworkCanvasProps> = ({
       } else if (node.type === 'MERCHANT') {
         modelGroup = createEpicVerifiedMerchantModel();
       } else {
-        modelGroup = createEpicMobileUPITerminalModel(node.risk > 0.5, node.label);
+        modelGroup = createEpicMobileUPITerminalModel(node.risk, node.label);
       }
 
       modelGroup.position.copy(node.position);
@@ -749,7 +769,7 @@ export const ThreeNetworkCanvas: React.FC<ThreeNetworkCanvasProps> = ({
       const stage = currentStageRef.current;
       const isTargetActive = stage >= (def.hopLevel === 1 ? 2 : (def.hopLevel === 2 ? 4 : 5)) || stage === 8;
 
-      const colorHex = def.isCashOut ? 0xf59e0b : (def.isSuspicious ? 0xff5500 : 0x10b981);
+      const colorHex = def.isCashOut ? 0xf97316 : (def.isSuspicious ? 0xff5500 : 0x10b981);
 
       const coreGeom = new THREE.BufferGeometry().setFromPoints([src.position, src.position]);
       const coreMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.95 });
@@ -782,7 +802,7 @@ export const ThreeNetworkCanvas: React.FC<ThreeNetworkCanvasProps> = ({
     const particleCount = 45;
     const pGeom = new THREE.SphereGeometry(1.1, 16, 16);
     const pMatOrange = new THREE.MeshBasicMaterial({ color: 0xff5500 });
-    const pMatAmber = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
+    const pMatAmber = new THREE.MeshBasicMaterial({ color: 0xf97316 });
     const pMatGreen = new THREE.MeshBasicMaterial({ color: 0x10b981 });
 
     const particles: { mesh: THREE.Mesh; edgeIdx: number; progress: number; speed: number }[] = [];
@@ -953,18 +973,18 @@ export const ThreeNetworkCanvas: React.FC<ThreeNetworkCanvasProps> = ({
   };
 
   return (
-    <div className="relative w-full h-full min-h-[460px] bg-[#060709] border border-white/10 rounded-lg overflow-hidden select-none font-mono">
+    <div className="relative w-full h-full min-h-[460px] bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden select-none font-sans">
       <div ref={containerRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
 
       {/* Top Overlay Controls Bar */}
       <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none text-xs">
-        <div className="flex items-center gap-2 bg-[#0C0E12]/90 border border-white/10 px-3.5 py-1.5 rounded backdrop-blur-md pointer-events-auto shadow-industrial-sm">
+        <div className="flex items-center gap-2 bg-white/90 border border-slate-200 px-3.5 py-1.5 rounded  pointer-events-auto shadow-sm">
           <span className="w-2 h-2 rounded-full bg-[#FF5500] animate-pulse" />
-          <span className="text-white font-bold text-[11px]">
+          <span className="text-slate-900 font-bold text-[11px]">
             SEED ENTITY: <span className="text-[#FF5500]">{seedEntityId}</span>
           </span>
           <span className="text-zinc-600">|</span>
-          <span className="text-zinc-300 text-[10px]">
+          <span className="text-slate-700 text-[10px]">
             {incidentDetail?.complaint.location ? incidentDetail.complaint.location : 'National Grid'}
           </span>
           <span className="text-zinc-600">|</span>
@@ -974,7 +994,7 @@ export const ThreeNetworkCanvas: React.FC<ThreeNetworkCanvasProps> = ({
         </div>
 
         {/* Camera Perspective Selector */}
-        <div className="flex items-center gap-1 bg-[#0C0E12]/90 border border-white/10 p-0.5 rounded backdrop-blur-md pointer-events-auto text-[10px] shadow-industrial-sm">
+        <div className="flex items-center gap-1 bg-white/90 border border-slate-200 p-0.5 rounded  pointer-events-auto text-[10px] shadow-sm">
           {(['PERSPECTIVE', 'TOP', 'ISOMETRIC'] as const).map((mode) => (
             <button
               key={mode}
@@ -982,7 +1002,7 @@ export const ThreeNetworkCanvas: React.FC<ThreeNetworkCanvasProps> = ({
               className={`px-2.5 py-1 rounded font-bold transition-all ${
                 cameraMode === mode
                   ? 'bg-white text-black shadow-sm'
-                  : 'text-zinc-400 hover:text-zinc-200'
+                  : 'text-slate-500 hover:text-slate-800'
               }`}
             >
               {mode}
@@ -991,7 +1011,7 @@ export const ThreeNetworkCanvas: React.FC<ThreeNetworkCanvasProps> = ({
 
           <button
             onClick={() => handleSetCamera('PERSPECTIVE')}
-            className="p-1 text-zinc-400 hover:text-white transition-colors"
+            className="p-1 text-slate-500 hover:text-slate-900 transition-colors"
             title="Reset Camera"
           >
             <RotateCcw className="w-3.5 h-3.5" />
@@ -999,41 +1019,59 @@ export const ThreeNetworkCanvas: React.FC<ThreeNetworkCanvasProps> = ({
         </div>
       </div>
 
+      {/* Temporal Scrubber */}
+      <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 w-96 bg-white/90 border border-slate-200 p-2.5 rounded  pointer-events-auto font-sans shadow-sm flex flex-col gap-1">
+        <div className="flex justify-between text-[9px] font-bold text-slate-500 uppercase">
+          <span>T₀ (Trigger)</span>
+          <span className="text-cyan-400">T+{temporalScrubber}H FORWARD BFS</span>
+          <span>Tₘₐₓ (72H)</span>
+        </div>
+        <input 
+          type="range" 
+          min="0" 
+          max="72" 
+          step="1"
+          value={temporalScrubber}
+          onChange={(e) => setTemporalScrubber(Number(e.target.value))}
+          className="w-full accent-cyan-400 h-1.5 bg-slate-100 rounded-full appearance-none cursor-ew-resize"
+        />
+      </div>
+
       {/* Floating Node Inspector Modal (When clicking any 3D node) */}
       {inspectedNode && (
-        <div className="absolute top-14 right-3 w-64 bg-[#0C0E12]/95 border border-[#FF5500]/40 rounded-lg p-3 backdrop-blur-md shadow-industrial-lg text-[10px] space-y-2 pointer-events-auto animate-in fade-in zoom-in-95">
-          <div className="flex items-center justify-between border-b border-white/10 pb-1.5">
+        <div className="absolute top-14 right-3 w-64 bg-white/95 border border-[#FF5500]/40 rounded-2xl p-3  shadow-industrial-lg text-[10px] space-y-2 pointer-events-auto animate-in fade-in zoom-in-95">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-1.5">
             <span className="text-[#FF5500] font-bold uppercase tracking-wider flex items-center gap-1">
               <Eye className="w-3 h-3" />
               <span>NODE INSPECTOR</span>
             </span>
             <button
               onClick={() => setInspectedNode(null)}
-              className="text-zinc-500 hover:text-white font-bold"
+              className="text-slate-500 hover:text-slate-900 font-bold"
             >
               ✕
             </button>
           </div>
 
-          <div className="space-y-1 text-zinc-300">
-            <div className="font-bold text-white text-xs truncate">{inspectedNode.label}</div>
-            <div className="flex justify-between text-zinc-400">
+          <div className="space-y-1 text-slate-700">
+            <div className="font-bold text-slate-900 text-xs truncate">{inspectedNode.label}</div>
+            <div className="flex justify-between text-slate-500">
               <span>Node Type:</span>
-              <span className="text-white font-bold">{inspectedNode.type}</span>
+              <span className="text-slate-900 font-bold">{inspectedNode.type}</span>
             </div>
-            <div className="flex justify-between text-zinc-400">
+            <div className="flex justify-between text-slate-500">
               <span>Location:</span>
-              <span className="text-zinc-200">{inspectedNode.city}</span>
+              <span className="text-slate-800">{inspectedNode.city}</span>
             </div>
-            <div className="flex justify-between text-zinc-400">
+            <div className="flex justify-between text-slate-500">
               <span>Transacted Volume:</span>
               <span className="text-emerald-400 font-bold">₹{inspectedNode.amount.toLocaleString('en-IN')}</span>
             </div>
-            <div className="flex justify-between text-zinc-400">
+            <div className="flex justify-between text-slate-500">
               <span>Hop Distance:</span>
-              <span className="text-white font-bold">Hop {inspectedNode.hopLevel}</span>
+              <span className="text-slate-900 font-bold">Hop {inspectedNode.hopLevel}</span>
             </div>
-            <div className="flex justify-between text-zinc-400">
+            <div className="flex justify-between text-slate-500">
               <span>GraphSAGE Risk:</span>
               <span className="text-[#FF5500] font-bold">{(inspectedNode.risk * 100).toFixed(1)}%</span>
             </div>
@@ -1042,21 +1080,21 @@ export const ThreeNetworkCanvas: React.FC<ThreeNetworkCanvasProps> = ({
       )}
 
       {/* Bottom Visual Legend */}
-      <div className="absolute bottom-3 left-3 flex items-center gap-4 bg-[#0C0E12]/90 border border-white/10 px-3.5 py-1.5 rounded text-[10px] text-zinc-400 backdrop-blur-md pointer-events-auto font-mono shadow-industrial-sm">
+      <div className="absolute bottom-3 left-3 flex items-center gap-4 bg-white/90 border border-slate-200 px-3.5 py-1.5 rounded text-[10px] text-slate-500  pointer-events-auto font-sans shadow-sm">
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded bg-[#FF5500]" />
-          <span className="text-white font-bold">Victim Safe Vault</span>
+          <span className="text-slate-900 font-bold">Victim Safe Vault</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded bg-[#38BDF8]" />
-          <span className="text-white font-bold">Mobile UPI Mules</span>
+          <span className="text-slate-900 font-bold">Mobile UPI Mules</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded bg-zinc-300" />
-          <span className="text-white font-bold">Commercial Bank Clearing</span>
+          <span className="text-slate-900 font-bold">Commercial Bank Clearing</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded bg-[#F59E0B]" />
+          <div className="w-3 h-3 rounded bg-[#F97316]" />
           <span className="text-amber-400 font-bold">ATM Cash-Out Kiosk</span>
         </div>
       </div>

@@ -173,22 +173,22 @@ export const SimulationLab: React.FC = () => {
   });
 
   return (
-    <div className="h-full flex flex-col gap-3 overflow-hidden font-mono text-xs select-none">
+    <div className="h-full flex flex-col gap-3 overflow-hidden font-sans text-xs select-none">
       {/* ── TOP TACTICAL BAR: SEED ENTITY SWITCHER & QUICK PRESETS ── */}
-      <div className="bg-[#0C0E12] border border-white/10 rounded-lg p-3 flex flex-wrap items-center justify-between gap-3 shadow-industrial-sm flex-shrink-0">
+      <div className="bg-white border border-slate-200 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 shadow-sm flex-shrink-0">
         
         {/* Left: Active Seed Entity Pill */}
         <div className="flex items-center gap-2.5">
-          <div className="flex items-center gap-1.5 px-3 py-1 bg-[#141822] border border-white/15 rounded text-white font-bold">
+          <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-100 border border-slate-200 rounded text-slate-900 font-bold">
             <span className="w-2 h-2 rounded-full bg-[#FF5500] animate-pulse" />
             <span>ACTIVE SEED:</span>
             <span className="text-[#FF5500]">{seedEntityId}</span>
           </div>
 
-          <div className="hidden sm:flex items-center gap-2 text-[11px] text-zinc-400">
+          <div className="hidden sm:flex items-center gap-2 text-[11px] text-slate-500">
             <span>{incidentDetail?.complaint.location ? incidentDetail.complaint.location : 'Locating...'}</span>
             <span className="text-zinc-600">|</span>
-            <span className="text-white font-bold">₹{(incidentDetail?.complaint.reported_amount || 450000).toLocaleString('en-IN')}</span>
+            <span className="text-slate-900 font-bold">₹{(incidentDetail?.complaint.reported_amount || 450000).toLocaleString('en-IN')}</span>
             <span className="text-zinc-600">|</span>
             <span className={`font-bold px-1.5 py-0.2 rounded text-[10px] ${
               incidentDetail?.model_prediction.confidence_tier === 'HIGH_CONFIDENCE'
@@ -210,8 +210,8 @@ export const SimulationLab: React.FC = () => {
                 onClick={() => handleSelectCase(preset.id)}
                 className={`relative px-3 py-1.5 rounded text-[10px] font-bold transition-colors whitespace-nowrap z-10 ${
                   isSelected
-                    ? 'text-white'
-                    : 'text-zinc-400 hover:text-zinc-200 bg-[#141822]/60 border border-white/5'
+                    ? 'text-slate-900'
+                    : 'text-slate-500 hover:text-slate-800 bg-slate-50 border border-slate-200'
                 }`}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -224,7 +224,7 @@ export const SimulationLab: React.FC = () => {
                   />
                 )}
                 <span>{preset.label}</span>
-                <span className="text-zinc-500 ml-1">({preset.terminal})</span>
+                <span className="text-slate-500 ml-1">({preset.terminal})</span>
               </motion.button>
             );
           })}
@@ -233,13 +233,13 @@ export const SimulationLab: React.FC = () => {
           <div className="relative">
             <motion.button
               onClick={() => setShowCaseSelector(!showCaseSelector)}
-              className="px-3 py-1.5 bg-[#1A202C] hover:bg-[#252D3D] border border-white/20 text-white font-bold rounded flex items-center gap-1.5 text-[10px] transition-all"
+              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-900 font-bold rounded flex items-center gap-1.5 text-[10px] transition-all"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
               <Search className="w-3 h-3 text-[#FF5500]" />
               <span>SEARCH ALL (1,000 CASES)</span>
-              <ChevronDown className="w-3 h-3 text-zinc-400" />
+              <ChevronDown className="w-3 h-3 text-slate-500" />
             </motion.button>
 
             {/* Dropdown Modal with Motion.dev AnimatePresence */}
@@ -250,11 +250,11 @@ export const SimulationLab: React.FC = () => {
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: -10 }}
                   transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-                  className="absolute right-0 top-full mt-2 w-96 max-h-96 bg-[#0C0E12]/98 border border-white/20 rounded-lg shadow-industrial-lg z-50 p-3.5 flex flex-col space-y-2.5 backdrop-blur-xl"
+                  className="absolute right-0 top-full mt-2 w-96 max-h-96 bg-white/98 border border-slate-200 rounded-2xl shadow-industrial-lg z-50 p-3.5 flex flex-col space-y-2.5 "
                 >
-                  <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                    <span className="font-bold text-white text-xs">SELECT COMPLAINT SEED ENTITY</span>
-                    <button onClick={() => setShowCaseSelector(false)} className="text-zinc-400 hover:text-white text-xs font-bold">✕</button>
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                    <span className="font-bold text-slate-900 text-xs">SELECT COMPLAINT SEED ENTITY</span>
+                    <button onClick={() => setShowCaseSelector(false)} className="text-slate-500 hover:text-slate-900 text-xs font-bold">✕</button>
                   </div>
 
                   <div className="space-y-1.5">
@@ -263,7 +263,7 @@ export const SimulationLab: React.FC = () => {
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search by ID, State, District, Scam..."
-                      className="w-full bg-[#060709] border border-white/10 rounded px-2.5 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#FF5500]"
+                      className="w-full bg-slate-50 border border-slate-200 rounded px-2.5 py-1.5 text-xs text-slate-900 placeholder-zinc-500 focus:outline-none focus:border-[#FF5500]"
                     />
                     <div className="flex items-center gap-1 text-[9px]">
                       {(['ALL', 'HIGH_CONFIDENCE', 'MEDIUM_CONFIDENCE', 'NORMAL'] as const).map((tier) => (
@@ -271,7 +271,7 @@ export const SimulationLab: React.FC = () => {
                           key={tier}
                           onClick={() => setTierFilter(tier)}
                           className={`px-2 py-0.5 rounded font-bold ${
-                            tierFilter === tier ? 'bg-[#FF5500] text-black' : 'bg-white/5 text-zinc-400 hover:text-white'
+                            tierFilter === tier ? 'bg-[#FF5500] text-black' : 'bg-slate-100 text-slate-500 hover:text-slate-900'
                           }`}
                         >
                           {tier === 'HIGH_CONFIDENCE' ? 'HIGH' : (tier === 'MEDIUM_CONFIDENCE' ? 'MED' : tier)}
@@ -287,17 +287,17 @@ export const SimulationLab: React.FC = () => {
                         onClick={() => handleSelectCase(inc.complaint_id)}
                         className={`p-2 rounded border cursor-pointer flex items-center justify-between text-[10px] transition-all ${
                           seedEntityId === inc.complaint_id
-                            ? 'bg-[#FF5500]/15 border-[#FF5500] text-white'
-                            : 'bg-[#060709] border-white/5 text-zinc-300 hover:border-white/20'
+                            ? 'bg-[#FF5500]/15 border-[#FF5500] text-slate-900'
+                            : 'bg-slate-50 border-slate-100 text-slate-700 hover:border-slate-200'
                         }`}
                       >
                         <div>
-                          <div className="font-bold text-white">{inc.complaint_id} · <span className="text-zinc-400">{inc.district}, {inc.state}</span></div>
-                          <div className="text-[9px] text-zinc-500">{inc.scam_category} {inc.top_terminal_id ? `➔ ${inc.top_terminal_id}` : ''}</div>
+                          <div className="font-bold text-slate-900">{inc.complaint_id} · <span className="text-slate-500">{inc.district}, {inc.state}</span></div>
+                          <div className="text-[9px] text-slate-500">{inc.scam_category} {inc.top_terminal_id ? `➔ ${inc.top_terminal_id}` : ''}</div>
                         </div>
                         <div className="text-right">
                           <div className="font-bold text-emerald-400">₹{(inc.reported_amount || 0).toLocaleString('en-IN')}</div>
-                          <div className="text-[8px] text-zinc-500">{inc.confidence_tier}</div>
+                          <div className="text-[8px] text-slate-500">{inc.confidence_tier}</div>
                         </div>
                       </div>
                     ))}
@@ -335,13 +335,13 @@ export const SimulationLab: React.FC = () => {
         <div className="lg:col-span-4 h-full flex flex-col gap-3 overflow-hidden">
           
           {/* Execution Control Deck */}
-          <div className="bg-[#0C0E12] border border-white/10 rounded-lg p-3.5 space-y-3 shadow-industrial-sm flex-shrink-0">
-            <div className="flex items-center justify-between border-b border-white/10 pb-2">
-              <span className="font-bold text-white text-xs flex items-center gap-1.5">
+          <div className="bg-white border border-slate-200 rounded-2xl p-3.5 space-y-3 shadow-sm flex-shrink-0">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+              <span className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
                 <Zap className="w-3.5 h-3.5 text-[#FF5500]" />
                 <span>PIPELINE EXECUTION CONSOLE</span>
               </span>
-              <span className="text-[9px] text-zinc-500">STAGE 0-8 INFERENCE</span>
+              <span className="text-[9px] text-slate-500">STAGE 0-8 INFERENCE</span>
             </div>
 
             {/* Primary Action Button with Motion Spring & Glow */}
@@ -370,7 +370,7 @@ export const SimulationLab: React.FC = () => {
 
               <motion.button
                 onClick={handleReset}
-                className="p-3 bg-[#1A202C] hover:bg-[#252D3D] border border-white/10 text-zinc-300 hover:text-white rounded transition-colors"
+                className="p-3 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 hover:text-slate-900 rounded transition-colors"
                 title="Reset Simulation"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -381,8 +381,8 @@ export const SimulationLab: React.FC = () => {
 
             {/* Execution Velocity Selector with Motion.dev LayoutId */}
             <div className="flex items-center justify-between text-[10px] pt-1">
-              <span className="text-zinc-400">Execution Velocity:</span>
-              <div className="flex items-center gap-1 bg-[#060709] p-0.5 rounded border border-white/10">
+              <span className="text-slate-500">Execution Velocity:</span>
+              <div className="flex items-center gap-1 bg-slate-50 p-0.5 rounded border border-slate-200">
                 {([1, 2, 4] as const).map((s) => {
                   const isCur = speed === s;
                   return (
@@ -390,7 +390,7 @@ export const SimulationLab: React.FC = () => {
                       key={s}
                       onClick={() => setSpeed(s)}
                       className={`relative px-3 py-0.5 rounded font-bold transition-colors z-10 ${
-                        isCur ? 'text-black' : 'text-zinc-400 hover:text-white'
+                        isCur ? 'text-black' : 'text-slate-500 hover:text-slate-900'
                       }`}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}

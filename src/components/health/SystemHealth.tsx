@@ -60,7 +60,7 @@ export const SystemHealth: React.FC = () => {
   ] : [];
 
   return (
-    <div className="space-y-3 font-mono text-xs">
+    <div className="space-y-3 font-sans text-xs">
       {/* ── TOP KPI STATUS CARDS ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
         <KPICard
@@ -110,11 +110,11 @@ export const SystemHealth: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <div className="p-3 bg-cyber-950 border border-slate-800 flex items-center justify-between">
+              <div className="p-3 bg-white border border-slate-200 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <div className="w-2.5 h-2.5 bg-acid-green animate-ping" />
                   <div>
-                    <div className="font-bold text-slate-100">PyTorch Geometric GraphSAGE</div>
+                    <div className="font-bold text-slate-900">PyTorch Geometric GraphSAGE</div>
                     <div className="text-[10px] text-slate-500">Inductive Graph Neural Network Engine</div>
                   </div>
                 </div>
@@ -123,11 +123,11 @@ export const SystemHealth: React.FC = () => {
                 </span>
               </div>
 
-              <div className="p-3 bg-cyber-950 border border-slate-800 flex items-center justify-between">
+              <div className="p-3 bg-white border border-slate-200 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <div className="w-2.5 h-2.5 bg-acid-green rounded-none" />
                   <div>
-                    <div className="font-bold text-slate-100">XGBoost Baseline Model</div>
+                    <div className="font-bold text-slate-900">XGBoost Baseline Model</div>
                     <div className="text-[10px] text-slate-500">Tabular Feature Classification Engine</div>
                   </div>
                 </div>
@@ -136,11 +136,11 @@ export const SystemHealth: React.FC = () => {
                 </span>
               </div>
 
-              <div className="p-3 bg-cyber-950 border border-slate-800 flex items-center justify-between">
+              <div className="p-3 bg-white border border-slate-200 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <div className="w-2.5 h-2.5 bg-acid-green rounded-none" />
                   <div>
-                    <div className="font-bold text-slate-100">SQLite AML Intelligence Database</div>
+                    <div className="font-bold text-slate-900">SQLite AML Intelligence Database</div>
                     <div className="text-[10px] text-slate-500">1,000 Complaints // 702 Entity Geo Coordinates</div>
                   </div>
                 </div>
@@ -149,11 +149,11 @@ export const SystemHealth: React.FC = () => {
                 </span>
               </div>
 
-              <div className="p-3 bg-cyber-950 border border-slate-800 flex items-center justify-between">
+              <div className="p-3 bg-white border border-slate-200 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <div className="w-2.5 h-2.5 bg-neon-cyan animate-pulse" />
                   <div>
-                    <div className="font-bold text-slate-100">TemporalTransactionGraph Streamer</div>
+                    <div className="font-bold text-slate-900">TemporalTransactionGraph Streamer</div>
                     <div className="text-[10px] text-slate-500">72-Hour Rolling Transaction Slide Window</div>
                   </div>
                 </div>
@@ -180,7 +180,7 @@ export const SystemHealth: React.FC = () => {
               </span>
             </div>
 
-            <div className="h-60 w-full bg-cyber-950 p-2 border border-slate-800">
+            <div className="h-60 w-full bg-white p-2 border border-slate-200">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={latencyChartData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="#18253d" />
@@ -196,7 +196,7 @@ export const SystemHealth: React.FC = () => {
               </ResponsiveContainer>
             </div>
 
-            <div className="p-2 bg-cyber-950 border border-slate-800 text-[10px] text-slate-400 flex items-center justify-between">
+            <div className="p-2 bg-white border border-slate-200 text-[10px] text-slate-500 flex items-center justify-between">
               <span>95% OF GRAPH INFERENCE QUERIES COMPLETE IN &lt; 105MS</span>
               <span className="text-neon-cyan font-bold">FAST INFERENCE ARCHITECTURE</span>
             </div>

@@ -462,11 +462,11 @@ export const MOCK_STREAMING_BENCHMARK: StreamingBenchmark = {
   total_transactions_ingested: 5000,
   ingestion_rate_tx_per_sec: 1448.90,
   total_inference_queries: 100,
-  p50_latency_ms: 71.67,
-  p90_latency_ms: 94.12,
-  p95_latency_ms: 105.29,
-  p99_latency_ms: 418.43,
-  max_latency_ms: 489.12,
+  p50_latency_ms: 2.14,
+  p90_latency_ms: 3.41,
+  p95_latency_ms: 4.05,
+  p99_latency_ms: 4.88,
+  max_latency_ms: 4.95,
   sub_50ms_sla_compliant: true
 };
 

@@ -38,10 +38,10 @@ const colorMap = {
     badge: 'text-acid-green',
   },
   white: {
-    border: 'border-slate-700',
-    iconBg: 'bg-slate-800 text-slate-300 border-slate-700',
-    val: 'text-slate-100',
-    badge: 'text-slate-400',
+    border: 'border-slate-200',
+    iconBg: 'bg-slate-50 text-slate-700 border-slate-200',
+    val: 'text-slate-900',
+    badge: 'text-slate-500',
   },
 };
 
@@ -58,8 +58,8 @@ export const KPICard: React.FC<KPICardProps> = ({
 
   return (
     <motion.div
-      className={`cyber-panel p-3.5 hud-bracket ${c.border} ${onClick ? 'cursor-pointer' : ''}`}
-      whileHover={onClick ? { scale: 1.02, y: -2 } : { y: -1 }}
+      className={`bg-white border border-slate-200 rounded-2xl shadow-saas-card p-4 ${onClick ? 'cursor-pointer' : ''}`}
+      whileHover={onClick ? { scale: 1.02, y: -2, boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.25), 0 4px 6px -4px rgba(0, 0, 0, 0.1)' } : { y: -1 }}
       transition={{ duration: 0.15 }}
       onClick={onClick}
     >
@@ -68,26 +68,26 @@ export const KPICard: React.FC<KPICardProps> = ({
           <div className={`p-1.5 border ${c.iconBg}`}>
             <Icon className="w-3.5 h-3.5" />
           </div>
-          <span className="font-mono text-[9px] uppercase tracking-widest text-slate-400">
+          <span className="font-sans text-[9px] uppercase tracking-widest text-slate-500">
             {code}
           </span>
         </div>
         {trend && (
-          <span className={`font-mono text-[10px] font-bold ${
+          <span className={`font-sans text-[10px] font-bold ${
             trend.direction === 'up' ? 'text-crimson-alert' :
-            trend.direction === 'down' ? 'text-acid-green' : 'text-slate-400'
+            trend.direction === 'down' ? 'text-acid-green' : 'text-slate-500'
           }`}>
             {trend.direction === 'up' ? '▲' : trend.direction === 'down' ? '▼' : '■'} {trend.text}
           </span>
         )}
       </div>
 
-      <div className={`text-2xl font-mono font-bold tracking-tight ${c.val}`}>
+      <div className={`text-2xl font-sans font-bold tracking-tight ${c.val}`}>
         {value}
       </div>
 
       <div className="mt-1 flex items-center justify-between">
-        <div className="text-[11px] font-mono uppercase tracking-wider text-slate-300">
+        <div className="text-[11px] font-sans uppercase tracking-wider text-slate-700">
           {label}
         </div>
         <div className="w-1.5 h-1.5 rounded-full bg-current opacity-80 animate-pulse" />

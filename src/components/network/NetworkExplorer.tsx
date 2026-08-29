@@ -259,9 +259,9 @@ export const NetworkExplorer: React.FC = () => {
   }, [graphData]);
 
   return (
-    <div className="flex flex-col lg:flex-row h-full gap-3 font-mono text-xs overflow-hidden">
+    <div className="flex flex-col lg:flex-row h-full gap-3 font-sans text-xs overflow-hidden">
       {/* ── LEFT / MAIN: 3D THREE.JS GRAPH CANVAS ── */}
-      <div className="flex-1 flex flex-col bg-cyber-900 border border-cyan-500/30 p-3 hud-bracket relative overflow-hidden">
+      <div className="flex-1 flex flex-col bg-white border border-cyan-500/30 p-3 hud-bracket relative overflow-hidden">
         {/* Filter Controls Header */}
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-cyan-500/30 pb-2.5 z-20">
           <div className="flex items-center gap-2">
@@ -269,7 +269,7 @@ export const NetworkExplorer: React.FC = () => {
               <Zap className="w-4 h-4" />
             </div>
             <div>
-              <div className="font-mono text-xs font-black tracking-wider text-neon-cyan text-glow-cyan">
+              <div className="font-sans text-xs font-black tracking-wider text-neon-cyan text-glow-cyan">
                 3D MULE NETWORK EXPLORER
               </div>
               <div className="text-[9px] text-slate-500">
@@ -280,11 +280,11 @@ export const NetworkExplorer: React.FC = () => {
 
           {/* Incident Selector */}
           <div className="flex items-center gap-2">
-            <span className="text-[10px] text-slate-400">SELECT INCIDENT:</span>
+            <span className="text-[10px] text-slate-500">SELECT INCIDENT:</span>
             <select
               value={selectedIncidentId}
               onChange={(e) => setSelectedIncidentId(e.target.value)}
-              className="bg-cyber-950 border border-cyan-500/40 text-neon-cyan px-2 py-1 text-xs font-bold focus:outline-none"
+              className="bg-white border border-cyan-500/40 text-neon-cyan px-2 py-1 text-xs font-bold focus:outline-none"
             >
               {incidents.map((inc) => (
                 <option key={inc.complaint_id} value={inc.complaint_id}>
@@ -300,7 +300,7 @@ export const NetworkExplorer: React.FC = () => {
           <div ref={containerRef} className="w-full h-full cursor-grab" />
 
           {/* Top HUD Overlay */}
-          <div className="absolute top-2 left-2 bg-black/80 px-2.5 py-1 border border-slate-800 text-[10px] text-slate-300 pointer-events-none">
+          <div className="absolute top-2 left-2 bg-white/90 px-2.5 py-1 border border-slate-200 text-[10px] text-slate-700 pointer-events-none">
             NODES: <span className="text-neon-cyan font-bold">{graphData?.num_nodes || 9}</span> | EDGES: <span className="text-neon-cyan font-bold">{graphData?.num_edges || 10}</span>
           </div>
         </div>
@@ -310,7 +310,7 @@ export const NetworkExplorer: React.FC = () => {
       <div className="w-full lg:w-80 flex flex-col">
         <GlassCard className="flex-1 flex flex-col space-y-3.5" padding="md" glow="cyan">
           <div className="flex items-center justify-between border-b border-cyan-500/30 pb-2">
-            <div className="font-mono text-xs font-black text-neon-cyan text-glow-cyan">
+            <div className="font-sans text-xs font-black text-neon-cyan text-glow-cyan">
               NODE TELEMETRY
             </div>
             <span className="text-[9px] text-amber-cash bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5">
@@ -319,36 +319,36 @@ export const NetworkExplorer: React.FC = () => {
           </div>
 
           {selectedNode ? (
-            <div className="space-y-3 font-mono text-xs">
-              <div className="p-2.5 bg-cyber-950 border border-slate-800">
+            <div className="space-y-3 font-sans text-xs">
+              <div className="p-2.5 bg-white border border-slate-200">
                 <div className="text-[10px] text-slate-500">ENTITY / ACCOUNT ID:</div>
                 <div className="text-sm font-bold text-neon-cyan">{selectedNode.id}</div>
-                <div className="text-[10px] text-slate-400 mt-0.5">{selectedNode.label}</div>
+                <div className="text-[10px] text-slate-500 mt-0.5">{selectedNode.label}</div>
               </div>
 
               <div className="space-y-1.5">
-                <div className="flex justify-between border-b border-slate-800 pb-1">
-                  <span className="text-slate-400">NODE TYPE:</span>
+                <div className="flex justify-between border-b border-slate-200 pb-1">
+                  <span className="text-slate-500">NODE TYPE:</span>
                   <span className="text-amber-cash font-bold">{selectedNode.node_type}</span>
                 </div>
-                <div className="flex justify-between border-b border-slate-800 pb-1">
-                  <span className="text-slate-400">HOP DISTANCE:</span>
-                  <span className="text-slate-100">{selectedNode.hop_distance} HOP(S)</span>
+                <div className="flex justify-between border-b border-slate-200 pb-1">
+                  <span className="text-slate-500">HOP DISTANCE:</span>
+                  <span className="text-slate-900">{selectedNode.hop_distance} HOP(S)</span>
                 </div>
-                <div className="flex justify-between border-b border-slate-800 pb-1">
-                  <span className="text-slate-400">LOCATION:</span>
-                  <span className="text-slate-100">{selectedNode.city || 'Bhubaneswar'}</span>
+                <div className="flex justify-between border-b border-slate-200 pb-1">
+                  <span className="text-slate-500">LOCATION:</span>
+                  <span className="text-slate-900">{selectedNode.city || 'Bhubaneswar'}</span>
                 </div>
-                <div className="flex justify-between border-b border-slate-800 pb-1">
-                  <span className="text-slate-400">IN/OUT DEGREE:</span>
+                <div className="flex justify-between border-b border-slate-200 pb-1">
+                  <span className="text-slate-500">IN/OUT DEGREE:</span>
                   <span className="text-neon-cyan">{selectedNode.in_degree} IN / {selectedNode.out_degree} OUT</span>
                 </div>
-                <div className="flex justify-between border-b border-slate-800 pb-1">
-                  <span className="text-slate-400">TOTAL INFLOW:</span>
+                <div className="flex justify-between border-b border-slate-200 pb-1">
+                  <span className="text-slate-500">TOTAL INFLOW:</span>
                   <span className="text-acid-green font-bold">₹{selectedNode.total_incoming_amount.toLocaleString('en-IN')}</span>
                 </div>
-                <div className="flex justify-between border-b border-slate-800 pb-1">
-                  <span className="text-slate-400">TOTAL OUTFLOW:</span>
+                <div className="flex justify-between border-b border-slate-200 pb-1">
+                  <span className="text-slate-500">TOTAL OUTFLOW:</span>
                   <span className="text-crimson-alert font-bold">₹{selectedNode.total_outgoing_amount.toLocaleString('en-IN')}</span>
                 </div>
               </div>

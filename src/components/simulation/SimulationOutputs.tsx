@@ -34,22 +34,22 @@ export const SimulationOutputs: React.FC<SimulationOutputsProps> = ({
   const terminalCity = results?.terminalPrediction.city || incidentDetail?.model_prediction.top_terminal_city || (isNormal ? 'Legitimate Direct Settlement' : 'Bengaluru (Indiranagar)');
 
   return (
-    <div className="bg-[#0C0E12] border border-white/10 rounded-lg p-4 flex flex-col space-y-3.5 text-slate-200 overflow-y-auto shadow-industrial-sm h-full font-mono text-xs select-none">
+    <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col space-y-3.5 text-slate-800 overflow-y-auto shadow-sm h-full font-sans text-xs select-none">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
+      <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
         <div className="flex items-center gap-2">
           <Activity className="w-3.5 h-3.5 text-[#FF5500]" />
           <div>
-            <div className="font-bold tracking-tight text-white text-xs">
+            <div className="font-bold tracking-tight text-slate-900 text-xs">
               INTELLIGENCE TELEMETRY
             </div>
-            <div className="text-[9px] text-zinc-500">STAGE 0-8 REAL-TIME INFERENCE</div>
+            <div className="text-[9px] text-slate-500">STAGE 0-8 REAL-TIME INFERENCE</div>
           </div>
         </div>
 
         <motion.span
           className={`text-[9px] px-2 py-0.5 rounded font-bold ${
-            isComplete ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-white/5 text-zinc-400'
+            isComplete ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-slate-100 text-slate-500'
           }`}
           animate={isComplete ? { scale: [1, 1.05, 1] } : {}}
           transition={{ duration: 0.3 }}
@@ -59,9 +59,9 @@ export const SimulationOutputs: React.FC<SimulationOutputsProps> = ({
       </div>
 
       {/* ── 1. GRAPHSAGE RISK SCORE GAUGE ── */}
-      <div className="bg-[#060709] border border-white/10 rounded p-3 space-y-2">
+      <div className="bg-slate-50 border border-slate-200 rounded p-3 space-y-2">
         <div className="flex items-center justify-between text-[11px]">
-          <span className="text-zinc-400 font-bold">GraphSAGE GNN SCORE</span>
+          <span className="text-slate-500 font-bold">GraphSAGE GNN SCORE</span>
           <span className={`font-bold px-1.5 py-0.2 rounded text-[10px] ${
             isStage4Plus
               ? tier === 'HIGH_CONFIDENCE'
@@ -75,7 +75,7 @@ export const SimulationOutputs: React.FC<SimulationOutputsProps> = ({
 
         <div className="flex items-baseline justify-between pt-1">
           <motion.span
-            className="text-2xl font-bold font-sans text-white tracking-tight"
+            className="text-2xl font-bold font-sans text-slate-900 tracking-tight"
             key={isStage4Plus ? gnnScore : 'standby'}
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
@@ -83,10 +83,10 @@ export const SimulationOutputs: React.FC<SimulationOutputsProps> = ({
           >
             {isStage4Plus ? `${(gnnScore * 100).toFixed(2)}%` : '--.-%'}
           </motion.span>
-          <span className="text-[10px] text-zinc-500">POLICY τ = 0.50</span>
+          <span className="text-[10px] text-slate-500">POLICY τ = 0.50</span>
         </div>
 
-        <div className="w-full bg-[#1A1E26] h-2 rounded overflow-hidden">
+        <div className="w-full bg-slate-100 h-2 rounded overflow-hidden">
           <motion.div
             className={`h-full ${
               tier === 'HIGH_CONFIDENCE' ? 'bg-[#FF5500]' : (tier === 'MEDIUM_CONFIDENCE' ? 'bg-amber-400' : 'bg-emerald-400')
@@ -99,18 +99,18 @@ export const SimulationOutputs: React.FC<SimulationOutputsProps> = ({
       </div>
 
       {/* ── 2. MODEL COMPARISON (GRAPHSAGE VS XGBOOST) ── */}
-      <div className="bg-[#060709] border border-white/10 rounded p-2.5 space-y-2 text-[10px]">
-        <div className="text-zinc-400 font-bold uppercase tracking-wider">
+      <div className="bg-slate-50 border border-slate-200 rounded p-2.5 space-y-2 text-[10px]">
+        <div className="text-slate-500 font-bold uppercase tracking-wider">
           Baseline vs Graph Inductive Lift
         </div>
 
         <div className="space-y-1.5">
           <div>
-            <div className="flex justify-between text-zinc-400 mb-0.5">
+            <div className="flex justify-between text-slate-500 mb-0.5">
               <span>GraphSAGE GNN (Stage 3B):</span>
-              <span className="text-white font-bold">{isStage3Plus ? `${(gnnScore * 100).toFixed(1)}%` : '--'}</span>
+              <span className="text-slate-900 font-bold">{isStage3Plus ? `${(gnnScore * 100).toFixed(1)}%` : '--'}</span>
             </div>
-            <div className="w-full bg-[#1A1E26] h-1 rounded overflow-hidden">
+            <div className="w-full bg-slate-100 h-1 rounded overflow-hidden">
               <motion.div
                 className="h-full bg-[#FF5500]"
                 initial={{ width: '0%' }}
@@ -121,11 +121,11 @@ export const SimulationOutputs: React.FC<SimulationOutputsProps> = ({
           </div>
 
           <div>
-            <div className="flex justify-between text-zinc-400 mb-0.5">
+            <div className="flex justify-between text-slate-500 mb-0.5">
               <span>XGBoost Baseline (Stage 3A):</span>
-              <span className="text-zinc-300 font-bold">{isStage3Plus ? `${(xgbScore * 100).toFixed(1)}%` : '--'}</span>
+              <span className="text-slate-700 font-bold">{isStage3Plus ? `${(xgbScore * 100).toFixed(1)}%` : '--'}</span>
             </div>
-            <div className="w-full bg-[#1A1E26] h-1 rounded overflow-hidden">
+            <div className="w-full bg-slate-100 h-1 rounded overflow-hidden">
               <motion.div
                 className="h-full bg-zinc-400"
                 initial={{ width: '0%' }}
@@ -138,7 +138,7 @@ export const SimulationOutputs: React.FC<SimulationOutputsProps> = ({
       </div>
 
       {/* ── 3. PREDICTED CASH-OUT EXIT TERMINAL ── */}
-      <div className="bg-[#060709] border border-white/10 rounded p-2.5 space-y-1.5">
+      <div className="bg-slate-50 border border-slate-200 rounded p-2.5 space-y-1.5">
         <div className="flex items-center justify-between text-[10px] text-amber-400 font-bold">
           <span className="flex items-center gap-1">
             <MapPin className="w-3 h-3 text-amber-400" />
@@ -148,10 +148,10 @@ export const SimulationOutputs: React.FC<SimulationOutputsProps> = ({
         </div>
 
         <div className="flex justify-between items-baseline pt-0.5">
-          <span className="text-sm font-bold text-white">
+          <span className="text-sm font-bold text-slate-900">
             {isStage5Plus ? (isNormal ? 'Verified Merchant' : terminalId) : '---'}
           </span>
-          <span className="text-[11px] text-zinc-400 truncate max-w-[150px]">
+          <span className="text-[11px] text-slate-500 truncate max-w-[150px]">
             {isStage5Plus ? terminalCity : 'Calculating...'}
           </span>
         </div>
@@ -159,11 +159,11 @@ export const SimulationOutputs: React.FC<SimulationOutputsProps> = ({
 
       {/* ── 4. INVESTIGATIVE EVIDENCE BULLETS (STAGE 6) ── */}
       <div className="space-y-1.5 flex-1 min-h-[110px]">
-        <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">
+        <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
           AI Evidence Briefing (Stage 6)
         </div>
 
-        <div className="space-y-1 text-[10px] text-zinc-300">
+        <div className="space-y-1 text-[10px] text-slate-700">
           {(isStage7Plus && results?.evidence && results.evidence.length > 0
             ? results.evidence
             : [
@@ -177,10 +177,10 @@ export const SimulationOutputs: React.FC<SimulationOutputsProps> = ({
               initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: idx * 0.08 }}
-              className="flex items-start gap-1.5 bg-[#060709] p-1.5 border border-white/5 rounded"
+              className="flex items-start gap-1.5 bg-slate-50 p-1.5 border border-slate-100 rounded"
             >
               <CheckCircle2 className="w-3 h-3 text-[#FF5500] flex-shrink-0 mt-0.5" />
-              <span className="leading-snug text-zinc-300">{bullet}</span>
+              <span className="leading-snug text-slate-700">{bullet}</span>
             </motion.div>
           ))}
         </div>
@@ -192,7 +192,7 @@ export const SimulationOutputs: React.FC<SimulationOutputsProps> = ({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-          className="pt-2 border-t border-white/10 space-y-2"
+          className="pt-2 border-t border-slate-200 space-y-2"
         >
           <div className={`p-2 rounded text-center font-bold text-[10px] ${
             tier === 'HIGH_CONFIDENCE'
@@ -205,7 +205,7 @@ export const SimulationOutputs: React.FC<SimulationOutputsProps> = ({
           {onNavigateToDossier && incidentDetail?.complaint.complaint_id && (
             <motion.button
               onClick={() => onNavigateToDossier(incidentDetail.complaint.complaint_id)}
-              className="w-full py-2 bg-[#1A202C] hover:bg-[#252D3D] text-white border border-white/20 rounded font-bold text-[10px] flex items-center justify-center gap-1.5 transition-colors"
+              className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-900 border border-slate-200 rounded font-bold text-[10px] flex items-center justify-center gap-1.5 transition-colors"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >

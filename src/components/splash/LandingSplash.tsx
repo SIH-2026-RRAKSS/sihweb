@@ -362,7 +362,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.05 }}
-            className="inline-flex items-center gap-1.5 px-3 py-1 bg-orange-50 border border-orange-200 rounded-full font-mono text-[10px] text-orange-700 shadow-sm"
+            className="inline-flex items-center gap-1.5 px-3 py-1 bg-orange-50 border border-orange-200 rounded-full font-sans text-[10px] text-orange-700 shadow-sm"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-[#FF5500] animate-pulse" />
             <span className="font-semibold">72H TEMPORAL MULE SURVEILLANCE · INDUCTIVE GraphSAGE GNN</span>
@@ -391,11 +391,11 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="flex flex-wrap items-center justify-center gap-3 pt-0.5 font-mono text-xs"
+            className="flex flex-wrap items-center justify-center gap-3 pt-0.5 font-sans text-xs"
           >
             <motion.button
               onClick={() => onEnterApp('simulation')}
-              className="px-5 py-2.5 bg-gradient-to-r from-[#FF7A1A] to-[#EA580C] hover:opacity-95 text-white font-bold rounded-lg flex items-center gap-2 shadow-md shadow-orange-500/20 transition-all cursor-pointer text-xs"
+              className="px-5 py-2.5 bg-gradient-to-r from-[#FF7A1A] to-[#EA580C] hover:opacity-95 text-slate-900 font-bold rounded-lg flex items-center gap-2 shadow-md shadow-orange-500/20 transition-all cursor-pointer text-xs"
               whileHover={{ scale: 1.03, boxShadow: '0 0 25px rgba(255, 85, 0, 0.4)' }}
               whileTap={{ scale: 0.97 }}
             >
@@ -420,7 +420,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.35 }}
-            className="max-w-xl mx-auto bg-white/95 border border-slate-200/90 p-2.5 rounded-xl shadow-lg backdrop-blur-xl font-mono text-xs text-left mt-2.5 mb-1"
+            className="max-w-xl mx-auto bg-white/95 border border-slate-200/90 p-2.5 rounded-xl shadow-lg backdrop-blur-xl font-sans text-xs text-left mt-2.5 mb-1"
           >
             <div className="flex items-center justify-between border-b border-slate-100 pb-1 text-[9px]">
               <span className="flex items-center gap-1.5 text-slate-600 font-bold">
@@ -460,7 +460,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
                   <div className="text-xs font-bold text-slate-900 font-sans">
                     ₹{(curInc.reported_amount || 450000).toLocaleString('en-IN')}
                   </div>
-                  <div className="text-[8px] text-slate-400 font-mono">{curInc.complaint_id}</div>
+                  <div className="text-[8px] text-slate-500 font-sans">{curInc.complaint_id}</div>
                 </div>
               </motion.div>
             </AnimatePresence>
@@ -487,7 +487,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
           {/* 2 Sleek Ambient Telemetry Badges (Light Theme) */}
           <motion.div
             style={{ opacity: hudOpacity }}
-            className="absolute top-4 left-0 sm:left-4 z-10 bg-white/95 border border-slate-200 px-3 py-1.5 rounded-lg shadow-md backdrop-blur-md hidden sm:flex items-center gap-2 font-mono text-[10px] text-slate-700"
+            className="absolute top-4 left-0 sm:left-4 z-10 bg-white/95 border border-slate-200 px-3 py-1.5 rounded-lg shadow-md backdrop-blur-md hidden sm:flex items-center gap-2 font-sans text-[10px] text-slate-700"
           >
             <GitFork className="w-3 h-3 text-blue-600" />
             <span>±72H HORIZONS: <strong className="text-slate-900">1,000 SUBGRAPHS</strong></span>
@@ -495,7 +495,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
 
           <motion.div
             style={{ opacity: hudOpacity }}
-            className="absolute bottom-4 right-0 sm:right-4 z-10 bg-white/95 border border-slate-200 px-3 py-1.5 rounded-lg shadow-md backdrop-blur-md hidden sm:flex items-center gap-2 font-mono text-[10px] text-slate-700"
+            className="absolute bottom-4 right-0 sm:right-4 z-10 bg-white/95 border border-slate-200 px-3 py-1.5 rounded-lg shadow-md backdrop-blur-md hidden sm:flex items-center gap-2 font-sans text-[10px] text-slate-700"
           >
             <MapPin className="w-3 h-3 text-amber-600" />
             <span>ATM CASH-OUT MRR: <strong className="text-emerald-600">1.0000</strong></span>
@@ -515,7 +515,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
           transition={{ duration: 0.6 }}
           className="border-y border-slate-200 bg-white/90 py-5 px-6 sm:px-10 rounded-2xl shadow-sm backdrop-blur-xl"
         >
-          <div className="flex flex-wrap items-center justify-between gap-6 font-mono text-xs">
+          <div className="flex flex-wrap items-center justify-between gap-6 font-sans text-xs">
             <div className="text-slate-500 text-[11px] tracking-wider uppercase font-bold flex items-center gap-2">
               <Radio className="w-3.5 h-3.5 text-[#FF5500] animate-pulse" />
               <span>CLEARING NODES (LIVE SYNCHRONIZATION):</span>
@@ -526,7 +526,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
                 <span className="text-[9px] px-1.5 py-0.2 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded font-bold">
                   {node.status}
                 </span>
-                <span className="text-[10px] text-slate-400">{node.ping}</span>
+                <span className="text-[10px] text-slate-500">{node.ping}</span>
               </div>
             ))}
           </div>
@@ -541,7 +541,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
           className="space-y-10"
         >
           <div className="text-left space-y-2">
-            <div className="font-mono text-xs text-[#FF5500] font-bold uppercase tracking-widest flex items-center gap-2">
+            <div className="font-sans text-xs text-[#FF5500] font-bold uppercase tracking-widest flex items-center gap-2">
               <Activity className="w-3.5 h-3.5 text-[#FF5500]" />
               <span>EMPIRICAL BENCHMARKS (SIHMODEL VALIDATED)</span>
             </div>
@@ -553,7 +553,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 font-mono text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 font-sans text-xs">
             {BENCHMARK_METRICS.map((m) => (
               <motion.div
                 key={m.label}
@@ -565,7 +565,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
                     <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-700 font-bold">
                       {m.badge}
                     </span>
-                    <span className="text-slate-400 font-mono text-[9px]">{m.script}</span>
+                    <span className="text-slate-500 font-sans text-[9px]">{m.script}</span>
                   </div>
                   <div className="text-4xl font-bold font-sans mt-2" style={{ color: m.accent }}>
                     {m.value}
@@ -587,7 +587,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
           className="space-y-10"
         >
           <div className="text-left space-y-2">
-            <div className="font-mono text-xs text-blue-600 font-bold uppercase tracking-widest flex items-center gap-2">
+            <div className="font-sans text-xs text-blue-600 font-bold uppercase tracking-widest flex items-center gap-2">
               <Layers className="w-3.5 h-3.5 text-blue-600" />
               <span>END-TO-END ARCHITECTURAL PIPELINE</span>
             </div>
@@ -599,7 +599,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-mono text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-sans text-xs">
             {PIPELINE_MODULES.map((mod) => {
               const Icon = mod.icon;
               return (
@@ -621,7 +621,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
                     <p className="text-[10px] text-slate-600 font-sans leading-relaxed">{mod.desc}</p>
                   </div>
                   <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[9px]">
-                    <span className="text-slate-400">Benchmark:</span>
+                    <span className="text-slate-500">Benchmark:</span>
                     <span className="text-emerald-600 font-bold">{mod.metric}</span>
                   </div>
                 </motion.div>
@@ -639,7 +639,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
           className="space-y-10"
         >
           <div className="text-center max-w-2xl mx-auto space-y-3">
-            <div className="font-mono text-xs text-[#FF5500] font-bold uppercase tracking-widest">
+            <div className="font-sans text-xs text-[#FF5500] font-bold uppercase tracking-widest">
               FRONTLINE VALIDATION
             </div>
             <h3 className="text-3xl sm:text-4xl font-bold font-sans text-slate-900 tracking-tight">
@@ -647,7 +647,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
             </h3>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono text-xs text-left">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-sans text-xs text-left">
             {FRONTLINE_TESTIMONIALS.map((t, idx) => (
               <div key={idx} className="bg-white border border-slate-200 p-6 rounded-2xl space-y-5 flex flex-col justify-between shadow-sm">
                 <div>
@@ -678,7 +678,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
         >
           <div className="bg-white border border-slate-200 p-8 sm:p-14 rounded-3xl text-center space-y-6 relative overflow-hidden shadow-md text-slate-900">
             
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-50 border border-orange-200 rounded-full font-mono text-[10px] text-orange-700">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-50 border border-orange-200 rounded-full font-sans text-[10px] text-orange-700">
               <Shield className="w-3.5 h-3.5 text-orange-600" />
               <span className="font-semibold">LIVE INCIDENT DATABASE · 1,000 CASES PRE-LOADED</span>
             </div>
@@ -691,10 +691,10 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
               Launch the full 3D interactive simulation lab, inspect real multi-hop graphs, and simulate automated account freeze advisories across Indian banking networks.
             </p>
 
-            <div className="flex flex-wrap items-center justify-center gap-4 pt-3 font-mono text-xs">
+            <div className="flex flex-wrap items-center justify-center gap-4 pt-3 font-sans text-xs">
               <motion.button
                 onClick={() => onEnterApp('simulation')}
-                className="px-8 py-4 bg-gradient-to-r from-[#FF7A1A] to-[#EA580C] hover:opacity-95 text-white font-bold rounded-lg shadow-md shadow-orange-500/20 flex items-center gap-2 text-sm transition-all cursor-pointer"
+                className="px-8 py-4 bg-gradient-to-r from-[#FF7A1A] to-[#EA580C] hover:opacity-95 text-slate-900 font-bold rounded-lg shadow-md shadow-orange-500/20 flex items-center gap-2 text-sm transition-all cursor-pointer"
                 whileHover={{ scale: 1.03, boxShadow: '0 0 30px rgba(255, 85, 0, 0.4)' }}
                 whileTap={{ scale: 0.97 }}
               >
@@ -717,7 +717,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
         </motion.section>
 
         {/* ── SECTION 6: COMPREHENSIVE FOOTER (CLEAN WHITE SURFACE) ── */}
-        <footer className="border border-slate-200 bg-white/95 p-8 sm:p-12 rounded-3xl shadow-sm backdrop-blur-xl font-mono text-xs text-slate-600">
+        <footer className="border border-slate-200 bg-white/95 p-8 sm:p-12 rounded-3xl shadow-sm backdrop-blur-xl font-sans text-xs text-slate-600">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 text-left">
             {/* Expanded Team Trinetra Brand Showcase (2 Cols) */}
             <div className="lg:col-span-2 space-y-4">
@@ -729,7 +729,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
             </div>
 
             <div className="space-y-2">
-              <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">PIPELINE STAGES</div>
+              <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">PIPELINE STAGES</div>
               <ul className="space-y-1 text-slate-600 text-[11px]">
                 <li className="hover:text-slate-900 cursor-pointer" onClick={() => onEnterApp('simulation')}>Stage 0: Entity Resolution</li>
                 <li className="hover:text-slate-900 cursor-pointer" onClick={() => onEnterApp('simulation')}>Stage 1/2: Subgraph Extraction</li>
@@ -739,7 +739,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
             </div>
 
             <div className="space-y-2">
-              <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">INVESTIGATIVE TOOLS</div>
+              <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">INVESTIGATIVE TOOLS</div>
               <ul className="space-y-1 text-slate-600 text-[11px]">
                 <li className="hover:text-slate-900 cursor-pointer" onClick={() => onEnterApp('command')}>Command Center</li>
                 <li className="hover:text-slate-900 cursor-pointer" onClick={() => onEnterApp('incidents')}>1,000 Case Incident Roster</li>
@@ -749,11 +749,11 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
             </div>
 
             <div className="space-y-2">
-              <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">SPECS & COMPLIANCE</div>
+              <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">SPECS & COMPLIANCE</div>
               <p className="text-[10px] text-slate-600 font-sans leading-relaxed">
                 PyTorch Geometric · PyG · XGBoost · FastAPI · Three.js · NetworkX.
               </p>
-              <div className="text-[9px] text-slate-400 pt-2">
+              <div className="text-[9px] text-slate-500 pt-2">
                 Evaluated on 1,000 synthetic subgraphs. No real PII utilized.
               </div>
             </div>

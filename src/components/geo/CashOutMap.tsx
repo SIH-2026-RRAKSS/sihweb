@@ -249,32 +249,32 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
   const isATM = selectedEntity?.entity_type === 'ATM_TERMINAL';
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 h-[calc(100vh-6.5rem)] font-mono text-xs">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 h-[calc(100vh-6.5rem)] font-sans text-xs">
       
       {/* ── LEFT PANEL: ENTITY SELECTOR ROSTER (3 COLS) ── */}
-      <div className="lg:col-span-3 bg-[#0C0E12] border border-white/10 rounded-lg p-3 flex flex-col space-y-3 shadow-industrial-sm overflow-hidden">
-        <div className="flex items-center justify-between border-b border-white/10 pb-2 flex-shrink-0">
+      <div className="lg:col-span-3 bg-white border border-slate-200 rounded-2xl p-3 flex flex-col space-y-3 shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-2 flex-shrink-0">
           <div className="flex items-center gap-2">
             <Radio className="w-3.5 h-3.5 text-[#FF5500] animate-pulse" />
-            <span className="font-bold text-white tracking-tight">ENTITY SELECTOR</span>
+            <span className="font-bold text-slate-900 tracking-tight">ENTITY SELECTOR</span>
           </div>
-          <span className="text-[10px] text-zinc-400">{locations.length} LOCATIONS</span>
+          <span className="text-[10px] text-slate-500">{locations.length} LOCATIONS</span>
         </div>
 
         {/* Search */}
         <div className="relative flex-shrink-0">
-          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500" />
+          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500" />
           <input
             type="text"
             placeholder="SEARCH CITY / ENTITY / ATM..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#060709] border border-white/10 pl-8 pr-3 py-1.5 rounded text-[11px] text-white placeholder-zinc-600 focus:border-[#FF5500] focus:outline-none"
+            className="w-full bg-slate-50 border border-slate-200 pl-8 pr-3 py-1.5 rounded text-[11px] text-slate-900 placeholder-zinc-600 focus:border-[#FF5500] focus:outline-none"
           />
         </div>
 
         {/* Filter Pills */}
-        <div className="flex border border-white/10 bg-[#060709] rounded p-0.5 text-[10px] flex-shrink-0">
+        <div className="flex border border-slate-200 bg-slate-50 rounded p-0.5 text-[10px] flex-shrink-0">
           {['ALL', 'MULES', 'ATMs'].map((t) => (
             <button
               key={t}
@@ -284,7 +284,7 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
                 (typeFilter === 'MULE_ACCOUNT' && t === 'MULES') ||
                 (typeFilter === 'ATM_TERMINAL' && t === 'ATMs')
                   ? 'bg-white text-black shadow-sm'
-                  : 'text-zinc-500 hover:text-zinc-300'
+                  : 'text-slate-500 hover:text-slate-700'
               }`}
             >
               {t}
@@ -308,8 +308,8 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
                   onClick={() => handleSelectFromList(loc)}
                   className={`p-2 rounded border cursor-pointer transition-all ${
                     isSelected
-                      ? 'bg-white/10 border-white/30 text-white'
-                      : 'bg-[#060709] border-white/5 text-zinc-400 hover:border-white/15'
+                      ? 'bg-slate-100 border-white/30 text-slate-900'
+                      : 'bg-slate-50 border-slate-100 text-slate-500 hover:border-white/15'
                   }`}
                 >
                   <div className="flex items-center justify-between text-[11px] font-bold">
@@ -322,12 +322,12 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
                       {(loc.risk_probability * 100).toFixed(0)}%
                     </span>
                   </div>
-                  <div className="text-[10px] text-zinc-300 truncate mt-0.5">
+                  <div className="text-[10px] text-slate-700 truncate mt-0.5">
                     {loc.holder_name}
                   </div>
-                  <div className="flex justify-between items-center text-[9px] text-zinc-500 mt-1">
+                  <div className="flex justify-between items-center text-[9px] text-slate-500 mt-1">
                     <span>{loc.city}, {loc.state}</span>
-                    <span className="text-white font-sans font-bold">₹{(loc.flagged_amount || 0).toLocaleString('en-IN')}</span>
+                    <span className="text-slate-900 font-sans font-bold">₹{(loc.flagged_amount || 0).toLocaleString('en-IN')}</span>
                   </div>
                 </div>
               );
@@ -336,11 +336,11 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
       </div>
 
       {/* ── CENTER: LEAFLET INTERACTIVE MAP (6 COLS) ── */}
-      <div className="lg:col-span-6 bg-[#0C0E12] border border-white/10 rounded-lg overflow-hidden relative shadow-industrial-sm flex flex-col">
+      <div className="lg:col-span-6 bg-white border border-slate-200 rounded-2xl overflow-hidden relative shadow-sm flex flex-col">
         <div ref={mapContainerRef} className="w-full h-full min-h-[400px]" />
 
         {/* Map Legend Floating Bar */}
-        <div className="absolute bottom-3 left-3 right-3 bg-[#0C0E12]/90 border border-white/15 p-2 rounded backdrop-blur-md flex flex-wrap items-center justify-between text-[10px] text-zinc-300 font-mono z-[1000]">
+        <div className="absolute bottom-3 left-3 right-3 bg-white/90 border border-white/15 p-2 rounded  flex flex-wrap items-center justify-between text-[10px] text-slate-700 font-sans z-[1000]">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-[#FF5500]" />
@@ -355,64 +355,64 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
               <span>Cash-Out ATM</span>
             </div>
           </div>
-          <div className="text-zinc-500">
+          <div className="text-slate-500">
             Animated Corridors Active
           </div>
         </div>
       </div>
 
       {/* ── RIGHT PANEL: INSPECTOR DOSSIER (3 COLS) ── */}
-      <div className="lg:col-span-3 bg-[#0C0E12] border border-white/10 rounded-lg p-3.5 flex flex-col space-y-3.5 shadow-industrial-sm overflow-y-auto">
-        <div className="flex items-center justify-between border-b border-white/10 pb-2">
-          <div className="flex items-center gap-1.5 text-white font-bold">
+      <div className="lg:col-span-3 bg-white border border-slate-200 rounded-2xl p-3.5 flex flex-col space-y-3.5 shadow-sm overflow-y-auto">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+          <div className="flex items-center gap-1.5 text-slate-900 font-bold">
             <Navigation className="w-3.5 h-3.5 text-[#38BDF8]" />
             <span>INSPECTOR DOSSIER</span>
           </div>
-          <span className="text-[9px] bg-white/5 border border-white/10 text-zinc-400 px-1.5 py-0.5 rounded font-bold">
+          <span className="text-[9px] bg-slate-100 border border-slate-200 text-slate-500 px-1.5 py-0.5 rounded font-bold">
             GPS TRACKED
           </span>
         </div>
 
         {selectedEntity ? (
           <div className="space-y-3 text-[11px]">
-            <div className="bg-[#060709] p-3 border border-white/10 rounded space-y-1.5">
-              <div className="flex justify-between text-zinc-400">
+            <div className="bg-slate-50 p-3 border border-slate-200 rounded space-y-1.5">
+              <div className="flex justify-between text-slate-500">
                 <span>ENTITY ID:</span>
-                <span className="text-white font-bold">{selectedEntity.entity_id}</span>
+                <span className="text-slate-900 font-bold">{selectedEntity.entity_id}</span>
               </div>
-              <div className="flex justify-between text-zinc-400">
+              <div className="flex justify-between text-slate-500">
                 <span>TYPE:</span>
                 <span className={isATM ? 'text-amber-400 font-bold' : 'text-[#38BDF8] font-bold'}>
                   {selectedEntity.entity_type}
                 </span>
               </div>
-              <div className="flex justify-between text-zinc-400">
+              <div className="flex justify-between text-slate-500">
                 <span>HOLDER:</span>
-                <span className="text-white font-bold">{selectedEntity.holder_name}</span>
+                <span className="text-slate-900 font-bold">{selectedEntity.holder_name}</span>
               </div>
-              <div className="flex justify-between text-zinc-400">
+              <div className="flex justify-between text-slate-500">
                 <span>LOCATION:</span>
-                <span className="text-zinc-200">{selectedEntity.city}, {selectedEntity.state}</span>
+                <span className="text-slate-800">{selectedEntity.city}, {selectedEntity.state}</span>
               </div>
-              <div className="flex justify-between text-zinc-400">
+              <div className="flex justify-between text-slate-500">
                 <span>GPS COORDINATES:</span>
-                <span className="text-zinc-400">{selectedEntity.latitude.toFixed(4)}, {selectedEntity.longitude.toFixed(4)}</span>
+                <span className="text-slate-500">{selectedEntity.latitude.toFixed(4)}, {selectedEntity.longitude.toFixed(4)}</span>
               </div>
-              <div className="flex justify-between text-zinc-400 pt-1 border-t border-white/5">
+              <div className="flex justify-between text-slate-500 pt-1 border-t border-slate-100">
                 <span>FLAGGED EXPOSURE:</span>
-                <span className="text-white font-bold font-sans">₹{(selectedEntity.flagged_amount || 0).toLocaleString('en-IN')}</span>
+                <span className="text-slate-900 font-bold font-sans">₹{(selectedEntity.flagged_amount || 0).toLocaleString('en-IN')}</span>
               </div>
             </div>
 
             {/* Risk Gauge */}
-            <div className="bg-[#060709] p-3 border border-white/10 rounded space-y-2">
+            <div className="bg-slate-50 p-3 border border-slate-200 rounded space-y-2">
               <div className="flex justify-between items-baseline">
-                <span className="text-zinc-400 text-[10px]">GRAPHSAGE RISK SCORE:</span>
-                <span className="text-xl font-bold font-sans text-white">
+                <span className="text-slate-500 text-[10px]">GRAPHSAGE RISK SCORE:</span>
+                <span className="text-xl font-bold font-sans text-slate-900">
                   {(selectedEntity.risk_probability * 100).toFixed(1)}%
                 </span>
               </div>
-              <div className="w-full bg-[#1A1E26] h-1.5 rounded overflow-hidden">
+              <div className="w-full bg-slate-100 h-1.5 rounded overflow-hidden">
                 <div
                   className={`h-full ${isHighRisk ? 'bg-[#FF5500]' : 'bg-emerald-400'}`}
                   style={{ width: `${selectedEntity.risk_probability * 100}%` }}
@@ -424,21 +424,21 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
             </div>
 
             {/* Suspected Corridor */}
-            <div className="bg-[#060709] p-3 border border-white/10 rounded space-y-1.5">
+            <div className="bg-slate-50 p-3 border border-slate-200 rounded space-y-1.5">
               <div className="text-[10px] text-amber-400 font-bold flex items-center gap-1">
                 <Flame className="w-3 h-3" />
                 <span>SUSPECTED CASH-OUT CORRIDOR:</span>
               </div>
-              <p className="text-xs text-white font-bold leading-relaxed">
+              <p className="text-xs text-slate-900 font-bold leading-relaxed">
                 {getCorridorText(selectedEntity)}
               </p>
-              <div className="text-[10px] text-zinc-400 pt-1">
+              <div className="text-[10px] text-slate-500 pt-1">
                 Velocity: 92.4% funds moved out within 45 mins.
               </div>
             </div>
           </div>
         ) : (
-          <div className="text-center py-12 text-zinc-500">
+          <div className="text-center py-12 text-slate-500">
             Select an entity from the list or map to inspect details.
           </div>
         )}

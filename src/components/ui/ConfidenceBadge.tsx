@@ -13,29 +13,29 @@ const tierConfig = {
     label: 'CRITICAL THREAT // HIGH CONFIDENCE',
     shortLabel: 'HIGH CONFIDENCE',
     icon: ShieldAlert,
-    className: 'tag-label tag-red shadow-neon-red',
-    dot: 'bg-crimson-alert animate-ping',
+    className: 'rounded-full border bg-tactical-critical/10 text-tactical-critical border-tactical-critical/20 font-bold',
+    dot: 'bg-tactical-critical animate-ping rounded-full',
   },
   MEDIUM_CONFIDENCE: {
     label: 'SUSPICIOUS RING // MEDIUM CONFIDENCE',
     shortLabel: 'MEDIUM CONFIDENCE',
     icon: AlertTriangle,
-    className: 'tag-label tag-amber shadow-neon-amber',
-    dot: 'bg-amber-cash',
+    className: 'rounded-full border bg-tactical-warning/10 text-tactical-warning border-tactical-warning/20 font-bold',
+    dot: 'bg-tactical-warning rounded-full',
   },
   NORMAL: {
     label: 'CLEARED // NORMAL ACTIVITY',
     shortLabel: 'NORMAL',
     icon: CheckCircle,
-    className: 'tag-label tag-green shadow-neon-green',
-    dot: 'bg-acid-green',
+    className: 'rounded-full border bg-tactical-safe/10 text-tactical-safe border-tactical-safe/20 font-bold',
+    dot: 'bg-tactical-safe rounded-full',
   },
   UNCLASSIFIED: {
     label: 'UNCLASSIFIED ENTITY',
     shortLabel: 'UNCLASSIFIED',
     icon: HelpCircle,
-    className: 'tag-label bg-slate-800 text-slate-400 border-slate-700',
-    dot: 'bg-slate-500',
+    className: 'rounded-full border bg-slate-50 text-slate-500 border-slate-200 font-bold',
+    dot: 'bg-slate-500 rounded-full',
   },
 };
 
@@ -55,7 +55,7 @@ export const ConfidenceBadge: React.FC<ConfidenceBadgeProps> = ({
   const Icon = config.icon;
 
   return (
-    <span className={`inline-flex items-center gap-1.5 font-mono ${config.className} ${s.text} ${s.px}`}>
+    <span className={`inline-flex items-center gap-1.5 font-sans ${config.className} ${s.text} ${s.px}`}>
       <span className={`w-1.5 h-1.5 rounded-none ${config.dot}`} />
       {showIcon && <Icon className={s.icon} />}
       <span>{size === 'sm' ? config.shortLabel : config.label}</span>
