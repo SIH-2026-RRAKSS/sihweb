@@ -109,6 +109,15 @@ export class ApiService {
         (i.scam_category && i.scam_category.toLowerCase().includes(q))
       );
     }
+    filtered = filtered.map((i, index) => {
+      const isAuto = i.graphsage_risk_probability >= 0.8;
+      return {
+        ...i,
+        trigger_source: isAuto ? 'DYNAMIC_ANOMALY' : 'CITIZEN_COMPLAINT',
+        anomaly_reason: isAuto ? `Z=+3.82 (₹${((i.reported_amount || 0)/1000).toFixed(0)}k vs ₹2.4k avg)` : undefined,
+        intercepted_in_flight: index % 4 === 0
+      };
+    });
     return { total_count: filtered.length, items: filtered };
   }
 
@@ -175,10 +184,19 @@ export class ApiService {
       },
       model_prediction: {
         graphsage_risk_probability: score,
+        node_mule_probability_head2: isHigh ? 0.94 : (isMedium ? 0.62 : 0.12),
         confidence_tier: tier,
         top_terminal_id: isHigh ? (fallbackInc.top_terminal_id || 'ATM_029') : (isMedium ? (fallbackInc.top_terminal_id || 'ATM_018') : 'NONE'),
         top_terminal_score: isHigh ? 0.95 : (isMedium ? 0.65 : 0.05),
         top_terminal_city: isHigh ? (fallbackInc.top_terminal_city || 'Mumbai') : (isMedium ? (fallbackInc.top_terminal_city || 'Pune') : 'NONE'),
+        top_terminals: isHigh ? [
+          { id: fallbackInc.top_terminal_id || 'ATM_029', city: fallbackInc.top_terminal_city || 'Mumbai', score: 0.95, distance_km: 2.4 },
+          { id: 'ATM_088', city: 'Thane', score: 0.72, distance_km: 15.1 },
+          { id: 'ATM_102', city: 'Navi Mumbai', score: 0.45, distance_km: 22.8 }
+        ] : (isMedium ? [
+          { id: fallbackInc.top_terminal_id || 'ATM_018', city: fallbackInc.top_terminal_city || 'Pune', score: 0.65, distance_km: 4.1 },
+          { id: 'ATM_055', city: 'Pune', score: 0.42, distance_km: 8.5 }
+        ] : []),
         executive_summary: isHigh
           ? `High-confidence laundering ring confirmed for incident ${incidentId}. GraphSAGE evaluated risk at ${(score * 100).toFixed(2)}%, detecting rapid multi-hop fan-out layering across downstream intermediate accounts.`
           : (isMedium

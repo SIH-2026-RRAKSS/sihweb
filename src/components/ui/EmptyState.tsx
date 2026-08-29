@@ -22,7 +22,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       <div className="bg-accent-500/10 ring-1 ring-accent-500/20 rounded-2xl p-4 mb-4">
         <Icon className="w-8 h-8 text-accent-400/60" />
       </div>
-      <h3 className="text-sm font-semibold text-slate-300 mb-1">{title}</h3>
+      <h3 className="text-sm font-semibold text-slate-700 mb-1">{title}</h3>
       {description && (
         <p className="text-xs text-slate-500 max-w-xs">{description}</p>
       )}
@@ -30,7 +30,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         <button
           onClick={action.onClick}
           className="mt-4 px-4 py-2 text-xs font-medium text-accent-400 bg-accent-500/10
-                     ring-1 ring-accent-500/20 rounded-lg hover:bg-accent-500/20 transition-colors"
+                     ring-1 ring-accent-500/20 rounded-2xl hover:bg-accent-500/20 transition-colors"
         >
           {action.label}
         </button>

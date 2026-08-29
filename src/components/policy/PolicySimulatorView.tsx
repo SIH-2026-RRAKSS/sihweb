@@ -17,13 +17,15 @@ import { ApiService } from '../../services/api';
 import { MOCK_POLICY_TABLE } from '../../services/mockData';
 
 export const PolicySimulatorView: React.FC = () => {
-  const [threshold, setThreshold] = useState<number>(0.50);
+  const [tauGraph, setTauGraph] = useState<number>(0.70); // Filter ring-level alerts
+  const [tauNode, setTauNode] = useState<number>(0.85); // Immediate account freezing
   const [activeDataset, setActiveDataset] = useState<string>('synthetic');
   const [policyResult, setPolicyResult] = useState<PolicyTuneResult | null>(null);
 
   useEffect(() => {
-    ApiService.tunePolicy(threshold, activeDataset).then(setPolicyResult);
-  }, [threshold, activeDataset]);
+    // API tune endpoint drives macro queue alerts (tauGraph)
+    ApiService.tunePolicy(tauGraph, activeDataset).then(setPolicyResult);
+  }, [tauGraph, activeDataset]);
 
   // Curve data
   const prCurveData = MOCK_POLICY_TABLE.map(p => ({
@@ -38,24 +40,24 @@ export const PolicySimulatorView: React.FC = () => {
   return (
     <div className="space-y-6 pb-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-cyber-700 pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
         <div>
-          <h2 className="text-base font-bold font-mono text-slate-100 uppercase tracking-wide flex items-center gap-2">
+          <h2 className="text-base font-bold font-sans text-slate-900 uppercase tracking-wide flex items-center gap-2">
             <Sliders className="w-5 h-5 text-cyber-cyan" />
             Alert Threshold Calibration & Caseload Policy Simulator
           </h2>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500">
             Navigate the operational tradeoff between detection sensitivity (recall) and investigator caseload triage capacity.
           </p>
         </div>
 
         {/* Dataset selector */}
         <div className="flex items-center gap-2">
-          <label className="text-xs font-mono text-slate-400">Policy Corpus:</label>
+          <label className="text-xs font-sans text-slate-500">Policy Corpus:</label>
           <select
             value={activeDataset}
             onChange={(e) => setActiveDataset(e.target.value)}
-            className="px-3 py-1.5 text-xs font-mono bg-cyber-950 border border-cyber-700 rounded-lg text-cyber-cyan focus:border-cyber-cyan focus:outline-none"
+            className="px-3 py-1.5 text-xs font-sans bg-white border border-slate-200 rounded-2xl text-cyber-cyan focus:border-cyber-cyan focus:outline-none"
           >
             <option value="synthetic">Dataset A: Synthetic Domestic (200 Holdout)</option>
             <option value="ibm">Dataset B: IBM AML Multi-Bank (200 Holdout)</option>
@@ -64,105 +66,132 @@ export const PolicySimulatorView: React.FC = () => {
       </div>
 
       {/* Interactive Dial & Slider Card */}
-      <div className="cyber-card p-6 bg-gradient-to-r from-cyber-900 via-cyber-850 to-cyber-900 border-cyber-cyan/40 glow-cyan space-y-5">
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 bg-gradient-to-r from-cyber-900 via-cyber-850 to-cyber-900 border-cyber-cyan/40 glow-cyan space-y-5">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="text-xs font-mono uppercase text-slate-400">
-              Investigator Decision Cutoff (τ)
+            <div className="text-xs font-sans uppercase text-slate-500">
+              Graph Alert Threshold (τ_graph)
             </div>
-            <div className="text-3xl font-black font-mono text-cyber-cyan mt-1 flex items-baseline gap-2">
-              τ = {threshold.toFixed(2)}
+            <div className="text-3xl font-black font-sans text-cyber-cyan mt-1 flex items-baseline gap-2">
+              τ_g = {tauGraph.toFixed(2)}
               <span className="text-xs font-semibold px-2 py-0.5 rounded bg-cyber-cyan/10 text-cyber-cyan border border-cyber-cyan/30">
                 {policyResult?.policy_tier_name || 'BALANCED_TRIAGE'}
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 text-xs font-mono">
-            <div className="p-3 bg-cyber-950 rounded-lg border border-cyber-800 text-center min-w-[120px]">
+          <div className="flex items-center gap-4 text-xs font-sans">
+            <div className="p-3 bg-white rounded-2xl border border-slate-200 text-center min-w-[120px]">
               <div className="text-[10px] text-slate-500 uppercase">Alert Caseload</div>
               <div className="text-lg font-bold text-amber-400">{policyResult?.alerts_generated || 44} / 200</div>
-              <div className="text-[9px] text-slate-400">({policyResult?.alert_rate_percent || 22.0}% Rate)</div>
+              <div className="text-[9px] text-slate-500">({policyResult?.alert_rate_percent || 22.0}% Rate)</div>
             </div>
 
-            <div className="p-3 bg-cyber-950 rounded-lg border border-cyber-800 text-center min-w-[120px]">
+            <div className="p-3 bg-white rounded-2xl border border-slate-200 text-center min-w-[120px]">
               <div className="text-[10px] text-slate-500 uppercase">Expected F1-Score</div>
               <div className="text-lg font-bold text-emerald-400">{policyResult?.f1_score_percent.toFixed(2) || '88.89'}%</div>
-              <div className="text-[9px] text-slate-400">Harmonic Mean</div>
+              <div className="text-[9px] text-slate-500">Harmonic Mean</div>
             </div>
           </div>
         </div>
 
-        {/* Big Slider */}
-        <div className="space-y-2 pt-2">
-          <input
-            type="range"
-            min="0.10"
-            max="0.90"
-            step="0.05"
-            value={threshold}
-            onChange={(e) => setThreshold(parseFloat(e.target.value))}
-            className="w-full h-3 bg-cyber-950 rounded-lg appearance-none cursor-pointer accent-cyber-cyan"
-          />
-          <div className="flex justify-between text-[10px] font-mono text-slate-500">
-            <span>0.10 (High Sensitivity / Catch All)</span>
-            <span>0.50 (Balanced Operational Triage)</span>
-            <span>0.90 (High Precision / Low False Alerts)</span>
+        {/* Dual Sliders */}
+        <div className="space-y-6 pt-2">
+          {/* Tau Graph Slider */}
+          <div className="space-y-2">
+            <div className="flex justify-between text-xs font-sans font-bold text-cyber-cyan">
+              <span>Macro Alert Cutoff (τ_graph)</span>
+              <span>{tauGraph.toFixed(2)}</span>
+            </div>
+            <input
+              type="range"
+              min="0.10"
+              max="0.90"
+              step="0.05"
+              value={tauGraph}
+              onChange={(e) => setTauGraph(parseFloat(e.target.value))}
+              className="w-full h-2 bg-white rounded-2xl appearance-none cursor-pointer accent-cyber-cyan"
+            />
+            <div className="flex justify-between text-[10px] font-sans text-slate-500">
+              <span>0.10 (High Sensitivity)</span>
+              <span>0.90 (High Precision)</span>
+            </div>
+          </div>
+
+          {/* Tau Node Slider */}
+          <div className="space-y-2">
+            <div className="flex justify-between text-xs font-sans font-bold text-amber-400">
+              <span>Account Freeze Cutoff (τ_node)</span>
+              <span>{tauNode.toFixed(2)}</span>
+            </div>
+            <input
+              type="range"
+              min="0.50"
+              max="0.99"
+              step="0.01"
+              value={tauNode}
+              onChange={(e) => setTauNode(parseFloat(e.target.value))}
+              className="w-full h-2 bg-white rounded-2xl appearance-none cursor-pointer accent-amber-400"
+            />
+            <div className="flex justify-between text-[10px] font-sans text-slate-500">
+              <span>0.50 (Aggressive Freezing)</span>
+              <span>0.99 (Conservative / Sure Bets)</span>
+            </div>
           </div>
         </div>
       </div>
 
       {/* 4 Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="cyber-card p-4">
-          <div className="text-[10px] font-mono text-slate-400 uppercase">Alert Precision</div>
-          <div className="text-2xl font-bold font-mono text-emerald-400 mt-1">
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4">
+          <div className="text-[10px] font-sans text-slate-500 uppercase">Alert Precision</div>
+          <div className="text-2xl font-bold font-sans text-emerald-400 mt-1">
             {policyResult?.precision_percent.toFixed(2) || '81.82'}%
           </div>
-          <div className="text-[11px] text-slate-400 font-mono mt-1">
+          <div className="text-[11px] text-slate-500 font-sans mt-1">
             {policyResult?.false_positives || 8} False Positives out of {policyResult?.alerts_generated || 44}
           </div>
         </div>
 
-        <div className="cyber-card p-4">
-          <div className="text-[10px] font-mono text-slate-400 uppercase">Laundering Recall</div>
-          <div className="text-2xl font-bold font-mono text-cyber-cyan mt-1">
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4">
+          <div className="text-[10px] font-sans text-slate-500 uppercase">Laundering Recall</div>
+          <div className="text-2xl font-bold font-sans text-cyber-cyan mt-1">
             {policyResult?.recall_percent.toFixed(2) || '97.30'}%
           </div>
-          <div className="text-[11px] text-slate-400 font-mono mt-1">
+          <div className="text-[11px] text-slate-500 font-sans mt-1">
             {policyResult?.true_positives || 36} of 37 Illicit Chains Caught
           </div>
         </div>
 
-        <div className="cyber-card p-4">
-          <div className="text-[10px] font-mono text-slate-400 uppercase">Investigation Workload</div>
-          <div className="text-2xl font-bold font-mono text-amber-400 mt-1">
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4">
+          <div className="text-[10px] font-sans text-slate-500 uppercase">Investigation Workload</div>
+          <div className="text-2xl font-bold font-sans text-amber-400 mt-1">
             {policyResult?.alert_rate_percent || 22.0}%
           </div>
-          <div className="text-[11px] text-slate-400 font-mono mt-1">
+          <div className="text-[11px] text-slate-500 font-sans mt-1">
             78.0% Benign Incidents Auto-Filtered
           </div>
         </div>
 
-        <div className="cyber-card p-4">
-          <div className="text-[10px] font-mono text-slate-400 uppercase">Recommended Policy Tier</div>
-          <div className="text-sm font-bold font-mono text-purple-300 mt-2">
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4">
+          <div className="text-[10px] font-sans text-slate-500 uppercase">Recommended Policy Tier</div>
+          <div className="text-sm font-bold font-sans text-purple-300 mt-2">
             {policyResult?.policy_tier_name || 'BALANCED_TRIAGE'}
           </div>
-          <div className="text-[11px] text-slate-400 font-mono mt-1">
+          <div className="text-[11px] text-slate-500 font-sans mt-1">
             Calibrated on Holdout Subgraphs
           </div>
         </div>
       </div>
 
       {/* Precision-Recall Curve Visualization */}
-      <div className="cyber-card p-5 space-y-3">
-        <div className="flex items-center justify-between border-b border-cyber-700 pb-2.5">
-          <h3 className="text-xs font-bold font-mono text-slate-200 uppercase flex items-center gap-2">
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 space-y-3">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
+          <h3 className="text-xs font-bold font-sans text-slate-800 uppercase flex items-center gap-2">
             <Scale className="w-4 h-4 text-cyber-cyan" />
             Precision vs Recall Tradeoff Across Decision Cutoffs (τ)
           </h3>
-          <span className="text-[10px] font-mono text-slate-400">PR-AUC = 0.9782</span>
+          <span className="text-[10px] font-sans text-slate-500">PR-AUC = 0.9782</span>
         </div>
 
         <div className="h-64 mt-2">
@@ -183,17 +212,17 @@ export const PolicySimulatorView: React.FC = () => {
       </div>
 
       {/* Pre-Evaluated Matrix Table */}
-      <div className="cyber-card p-5 space-y-3">
-        <div className="flex items-center justify-between border-b border-cyber-700 pb-2.5">
-          <h3 className="text-xs font-bold font-mono text-slate-200 uppercase">
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 space-y-3">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
+          <h3 className="text-xs font-bold font-sans text-slate-800 uppercase">
             Operational Policy Calibration Matrix (Holdout N = 200)
           </h3>
-          <span className="text-[10px] font-mono text-slate-400">Synthetic Ground Truth</span>
+          <span className="text-[10px] font-sans text-slate-500">Synthetic Ground Truth</span>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs font-mono">
-            <thead className="bg-cyber-950 text-slate-400 border-b border-cyber-800 text-[10px] uppercase">
+          <table className="w-full text-left text-xs font-sans">
+            <thead className="bg-white text-slate-500 border-b border-slate-200 text-[10px] uppercase">
               <tr>
                 <th className="py-2.5 px-3">Cutoff (τ)</th>
                 <th className="py-2.5 px-3">Policy Tier</th>
@@ -207,11 +236,11 @@ export const PolicySimulatorView: React.FC = () => {
             </thead>
             <tbody className="divide-y divide-cyber-800">
               {MOCK_POLICY_TABLE.map((row) => {
-                const isSelected = Math.abs(row.threshold - threshold) < 0.04;
+                const isSelected = Math.abs(row.threshold - tauGraph) < 0.04;
                 return (
                   <tr
                     key={row.threshold}
-                    className={`transition-colors ${isSelected ? 'bg-cyber-cyan/15 text-cyber-cyan font-bold' : 'hover:bg-cyber-800/40 text-slate-300'}`}
+                    className={`transition-colors ${isSelected ? 'bg-cyber-cyan/15 text-cyber-cyan font-bold' : 'hover:bg-slate-50 text-slate-700'}`}
                   >
                     <td className="py-2.5 px-3">τ = {row.threshold.toFixed(2)}</td>
                     <td className="py-2.5 px-3">{row.policy_tier_name}</td>

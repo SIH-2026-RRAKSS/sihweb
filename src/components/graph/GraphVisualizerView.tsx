@@ -321,24 +321,24 @@ export const GraphVisualizerView: React.FC<GraphVisualizerProps> = ({
   return (
     <div className="space-y-4 pb-8">
       {/* Header & Controls Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-cyber-700 pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
         <div>
-          <h2 className="text-base font-bold font-mono text-slate-100 uppercase tracking-wide flex items-center gap-2">
+          <h2 className="text-base font-bold font-sans text-slate-900 uppercase tracking-wide flex items-center gap-2">
             <Share2 className="w-5 h-5 text-cyber-cyan" />
             Topological Incident Subgraph Visualizer
           </h2>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500">
             Interactive multi-hop laundering network with flow velocities, transfer amounts, and terminal exit nodes.
           </p>
         </div>
 
         {/* Incident Switcher */}
         <div className="flex items-center gap-2">
-          <label className="text-xs font-mono text-slate-400">Select Subgraph:</label>
+          <label className="text-xs font-sans text-slate-500">Select Subgraph:</label>
           <select
             value={selectedIncident}
             onChange={(e) => setSelectedIncident(e.target.value)}
-            className="px-3 py-1.5 text-xs font-mono bg-cyber-950 border border-cyber-700 rounded-lg text-cyber-cyan focus:border-cyber-cyan focus:outline-none"
+            className="px-3 py-1.5 text-xs font-sans bg-white border border-slate-200 rounded-2xl text-cyber-cyan focus:border-cyber-cyan focus:outline-none"
           >
             {availableIncidents.map(id => (
               <option key={id} value={id}>{id} (Sub-network)</option>
@@ -350,35 +350,35 @@ export const GraphVisualizerView: React.FC<GraphVisualizerProps> = ({
       {/* Main Visualizer Area */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         {/* Left 3 Cols: Interactive Canvas Container */}
-        <div className="lg:col-span-3 cyber-card relative overflow-hidden flex flex-col items-center justify-center min-h-[540px]">
+        <div className="lg:col-span-3 bg-white border border-slate-200 rounded-2xl shadow-sm relative overflow-hidden flex flex-col items-center justify-center min-h-[540px]">
           {/* Top Controls Overlay */}
-          <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 bg-cyber-950/90 border border-cyber-700/80 p-1 rounded-lg backdrop-blur-md">
+          <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 bg-white border border-slate-200 p-1 rounded-2xl ">
             <button
               onClick={() => setZoomLevel(z => Math.min(2.5, z + 0.15))}
-              className="p-1.5 hover:bg-cyber-800 text-slate-300 rounded"
+              className="p-1.5 hover:bg-slate-50 text-slate-700 rounded"
               title="Zoom In"
             >
               <ZoomIn className="w-4 h-4" />
             </button>
             <button
               onClick={() => setZoomLevel(z => Math.max(0.4, z - 0.15))}
-              className="p-1.5 hover:bg-cyber-800 text-slate-300 rounded"
+              className="p-1.5 hover:bg-slate-50 text-slate-700 rounded"
               title="Zoom Out"
             >
               <ZoomOut className="w-4 h-4" />
             </button>
             <button
               onClick={handleResetCamera}
-              className="p-1.5 hover:bg-cyber-800 text-slate-300 rounded"
+              className="p-1.5 hover:bg-slate-50 text-slate-700 rounded"
               title="Reset Camera View"
             >
               <RotateCcw className="w-4 h-4" />
             </button>
-            <div className="w-[1px] h-4 bg-cyber-700 mx-1"></div>
+            <div className="w-[1px] h-4 bg-slate-100 mx-1"></div>
             <button
               onClick={() => setIsPhysicsRunning(r => !r)}
-              className={`p-1.5 rounded flex items-center gap-1 text-[11px] font-mono ${
-                isPhysicsRunning ? 'bg-cyber-cyan/20 text-cyber-cyan' : 'text-slate-400 hover:bg-cyber-800'
+              className={`p-1.5 rounded flex items-center gap-1 text-[11px] font-sans ${
+                isPhysicsRunning ? 'bg-cyber-cyan/20 text-cyber-cyan' : 'text-slate-500 hover:bg-slate-50'
               }`}
               title="Toggle Force Physics Simulation"
             >
@@ -388,19 +388,19 @@ export const GraphVisualizerView: React.FC<GraphVisualizerProps> = ({
           </div>
 
           {/* Top Right Legend Overlay */}
-          <div className="absolute top-3 right-3 z-10 bg-cyber-950/90 border border-cyber-700/80 p-2.5 rounded-lg backdrop-blur-md font-mono text-[10px] space-y-1 hidden sm:block">
-            <div className="font-bold text-slate-400 uppercase tracking-wider mb-1">Entity Roles</div>
+          <div className="absolute top-3 right-3 z-10 bg-white border border-slate-200 p-2.5 rounded-2xl  font-sans text-[10px] space-y-1 hidden sm:block">
+            <div className="font-bold text-slate-500 uppercase tracking-wider mb-1">Entity Roles</div>
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-cyber-red"></span>
-              <span className="text-slate-200">Incident Seed / Victim</span>
+              <span className="text-slate-800">Incident Seed / Victim</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-cyber-blue"></span>
-              <span className="text-slate-200">1-Hop Mule Account</span>
+              <span className="text-slate-800">1-Hop Mule Account</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
-              <span className="text-slate-200">2+ Hop Layering Node</span>
+              <span className="text-slate-800">2+ Hop Layering Node</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 bg-amber-500 rounded-sm"></span>
@@ -417,43 +417,43 @@ export const GraphVisualizerView: React.FC<GraphVisualizerProps> = ({
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
-            className="w-full h-[520px] cursor-grab active:cursor-grabbing bg-cyber-950/80 rounded-xl"
+            className="w-full h-[520px] cursor-grab active:cursor-grabbing bg-white rounded-xl"
           />
 
-          <div className="absolute bottom-3 left-3 text-[10px] font-mono text-slate-500 bg-cyber-950/80 px-2 py-1 rounded border border-cyber-800">
+          <div className="absolute bottom-3 left-3 text-[10px] font-sans text-slate-500 bg-white px-2 py-1 rounded border border-slate-200">
             Drag nodes to rearrange • Click node to inspect details • Drag background to pan
           </div>
         </div>
 
         {/* Right 1 Col: Node Inspector Panel */}
-        <div className="cyber-card p-5 space-y-4 flex flex-col justify-between">
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 space-y-4 flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between border-b border-cyber-700 pb-3">
-              <div className="flex items-center gap-2 text-slate-200 font-mono font-bold text-xs">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <div className="flex items-center gap-2 text-slate-800 font-sans font-bold text-xs">
                 <Info className="w-4 h-4 text-cyber-cyan" />
                 Entity Inspector
               </div>
-              <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
+              <span className="text-[10px] font-sans text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
                 Resolved
               </span>
             </div>
 
             {selectedNode ? (
-              <div className="space-y-3.5 mt-3 text-xs font-mono">
+              <div className="space-y-3.5 mt-3 text-xs font-sans">
                 <div>
                   <div className="text-[10px] text-slate-500 uppercase">Entity Master ID</div>
                   <div className="text-sm font-bold text-cyber-cyan">{selectedNode.id}</div>
-                  <div className="text-[11px] text-slate-300 font-sans mt-0.5">{selectedNode.label}</div>
+                  <div className="text-[11px] text-slate-700 font-sans mt-0.5">{selectedNode.label}</div>
                 </div>
 
-                <div className="p-2.5 bg-cyber-950 rounded-lg border border-cyber-800 space-y-1.5">
+                <div className="p-2.5 bg-white rounded-2xl border border-slate-200 space-y-1.5">
                   <div className="flex justify-between">
                     <span className="text-slate-500">Node Type:</span>
-                    <span className="font-bold text-slate-200">{selectedNode.node_type}</span>
+                    <span className="font-bold text-slate-800">{selectedNode.node_type}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Hop Distance:</span>
-                    <span className="text-slate-200">{selectedNode.hop_distance} hops</span>
+                    <span className="text-slate-800">{selectedNode.hop_distance} hops</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">City / Region:</span>
@@ -461,7 +461,7 @@ export const GraphVisualizerView: React.FC<GraphVisualizerProps> = ({
                   </div>
                 </div>
 
-                <div className="p-2.5 bg-cyber-950 rounded-lg border border-cyber-800 space-y-1.5">
+                <div className="p-2.5 bg-white rounded-2xl border border-slate-200 space-y-1.5">
                   <div className="flex justify-between">
                     <span className="text-slate-500">In-Degree / Incoming:</span>
                     <span className="text-emerald-400 font-bold">{selectedNode.in_degree} (₹{selectedNode.total_incoming_amount.toLocaleString()})</span>
@@ -473,7 +473,7 @@ export const GraphVisualizerView: React.FC<GraphVisualizerProps> = ({
                 </div>
 
                 {selectedNode.is_terminal && (
-                  <div className="p-2.5 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-300 text-[11px]">
+                  <div className="p-2.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-amber-300 text-[11px]">
                     <div className="font-bold flex items-center gap-1 mb-1">
                       <Building className="w-3.5 h-3.5" />
                       Terminal Withdrawal Point
@@ -483,16 +483,16 @@ export const GraphVisualizerView: React.FC<GraphVisualizerProps> = ({
                 )}
               </div>
             ) : (
-              <div className="py-12 text-center text-slate-500 font-mono text-xs">
+              <div className="py-12 text-center text-slate-500 font-sans text-xs">
                 Click any node in the graph to inspect structural and transaction flow metrics.
               </div>
             )}
           </div>
 
-          <div className="space-y-2 pt-4 border-t border-cyber-700">
+          <div className="space-y-2 pt-4 border-t border-slate-200">
             <button
               onClick={() => onOpenDossier(selectedIncident)}
-              className="w-full py-2 bg-cyber-cyan text-cyber-950 font-mono font-bold text-xs rounded-lg hover:bg-cyber-cyan/90 transition-all flex items-center justify-center gap-2"
+              className="w-full py-2 bg-cyber-cyan text-cyber-950 font-sans font-bold text-xs rounded-2xl hover:bg-cyber-cyan/90 transition-all flex items-center justify-center gap-2"
             >
               <ShieldAlert className="w-4 h-4" />
               Open Full Case Dossier
