@@ -9,6 +9,7 @@ import { CashOutMap } from './components/geo/CashOutMap';
 import { PolicyBenchmark } from './components/policy/PolicyBenchmark';
 import { CaseDossier } from './components/dossier/CaseDossier';
 import { SystemHealth } from './components/health/SystemHealth';
+import { LiveDemoView } from './components/demo/LiveDemoView';
 import { ApiService } from './services/api';
 
 const App: React.FC = () => {

@@ -14,7 +14,8 @@ import {
   Clock,
   Radio,
   Wifi,
-  Database
+  Database,
+  Zap
 } from 'lucide-react';
 
 import { TrinetraLogo } from '../ui/TrinetraLogo';
@@ -28,7 +29,7 @@ export type NavPage =
   | 'policy'
   | 'dossier'
   | 'health'
-  | 'splash';
+  | 'splash' | 'live-demo';
 
 interface AppShellProps {
   activePage: NavPage;
@@ -48,6 +49,7 @@ const NAV_ITEMS: { id: NavPage; label: string; code: string; icon: any; is3D?: b
   { id: 'policy', label: 'Threshold Policy', code: 'POL-TUNE', icon: SlidersHorizontal },
   { id: 'dossier', label: 'Case Dossiers', code: 'CASE-DOS', icon: FileText },
   { id: 'health', label: 'System Telemetry', code: 'SYS-MON', icon: Activity },
+  { id: 'live-demo', label: 'Live Backend Demo', code: 'API-DEMO', icon: Zap },
 ];
 
 export const AppShell: React.FC<AppShellProps> = ({
