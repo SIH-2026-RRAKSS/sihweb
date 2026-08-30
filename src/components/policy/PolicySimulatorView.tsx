@@ -21,10 +21,16 @@ export const PolicySimulatorView: React.FC = () => {
   const [tauNode, setTauNode] = useState<number>(0.85); // Immediate account freezing
   const [activeDataset, setActiveDataset] = useState<string>('synthetic');
   const [policyResult, setPolicyResult] = useState<PolicyTuneResult | null>(null);
+  const [policyError, setPolicyError] = useState<string | null>(null);
 
   useEffect(() => {
-    // API tune endpoint drives macro queue alerts (tauGraph)
-    ApiService.tunePolicy(tauGraph, activeDataset).then(setPolicyResult);
+    setPolicyError(null);
+    ApiService.tunePolicy(tauGraph, activeDataset)
+      .then(setPolicyResult)
+      .catch(() => {
+        setPolicyResult(null);
+        setPolicyError('Simulation failed — backend unreachable');
+      });
   }, [tauGraph, activeDataset]);
 
   // Curve data
@@ -65,6 +71,12 @@ export const PolicySimulatorView: React.FC = () => {
         </div>
       </div>
 
+      {policyError && (
+        <div className="bg-red-50 p-4 rounded-xl border border-red-200 text-sm font-bold text-red-600">
+          {policyError}
+        </div>
+      )}
+
       {/* Interactive Dial & Slider Card */}
       <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 bg-gradient-to-r from-cyber-900 via-cyber-850 to-cyber-900 border-cyber-cyan/40 glow-cyan space-y-5">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -83,13 +95,13 @@ export const PolicySimulatorView: React.FC = () => {
           <div className="flex items-center gap-4 text-xs font-sans">
             <div className="p-3 bg-white rounded-2xl border border-slate-200 text-center min-w-[120px]">
               <div className="text-[10px] text-slate-500 uppercase">Alert Caseload</div>
-              <div className="text-lg font-bold text-amber-400">{policyResult?.alerts_generated || 44} / 200</div>
-              <div className="text-[9px] text-slate-500">({policyResult?.alert_rate_percent || 22.0}% Rate)</div>
+              <div className="text-lg font-bold text-amber-400">{policyResult?.alerts_generated || 0} / 200</div>
+              <div className="text-[9px] text-slate-500">({policyResult?.alert_rate_percent || 0}% Rate)</div>
             </div>
 
             <div className="p-3 bg-white rounded-2xl border border-slate-200 text-center min-w-[120px]">
               <div className="text-[10px] text-slate-500 uppercase">Expected F1-Score</div>
-              <div className="text-lg font-bold text-emerald-400">{policyResult?.f1_score_percent.toFixed(2) || '88.89'}%</div>
+              <div className="text-lg font-bold text-emerald-400">{policyResult?.f1_score_percent.toFixed(2) || 'N/A'}%</div>
               <div className="text-[9px] text-slate-500">Harmonic Mean</div>
             </div>
           </div>
@@ -146,27 +158,27 @@ export const PolicySimulatorView: React.FC = () => {
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4">
           <div className="text-[10px] font-sans text-slate-500 uppercase">Alert Precision</div>
           <div className="text-2xl font-bold font-sans text-emerald-400 mt-1">
-            {policyResult?.precision_percent.toFixed(2) || '81.82'}%
+            {policyResult?.precision_percent.toFixed(2) || 'N/A'}%
           </div>
           <div className="text-[11px] text-slate-500 font-sans mt-1">
-            {policyResult?.false_positives || 8} False Positives out of {policyResult?.alerts_generated || 44}
+            {policyResult?.false_positives || 0} False Positives out of {policyResult?.alerts_generated || 0}
           </div>
         </div>
 
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4">
           <div className="text-[10px] font-sans text-slate-500 uppercase">Laundering Recall</div>
           <div className="text-2xl font-bold font-sans text-cyber-cyan mt-1">
-            {policyResult?.recall_percent.toFixed(2) || '97.30'}%
+            {policyResult?.recall_percent.toFixed(2) || 'N/A'}%
           </div>
           <div className="text-[11px] text-slate-500 font-sans mt-1">
-            {policyResult?.true_positives || 36} of 37 Illicit Chains Caught
+            {policyResult?.true_positives || 0} of 37 Illicit Chains Caught
           </div>
         </div>
 
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4">
           <div className="text-[10px] font-sans text-slate-500 uppercase">Investigation Workload</div>
           <div className="text-2xl font-bold font-sans text-amber-400 mt-1">
-            {policyResult?.alert_rate_percent || 22.0}%
+            {policyResult?.alert_rate_percent || 0}%
           </div>
           <div className="text-[11px] text-slate-500 font-sans mt-1">
             78.0% Benign Incidents Auto-Filtered
@@ -192,6 +204,15 @@ export const PolicySimulatorView: React.FC = () => {
             Precision vs Recall Tradeoff Across Decision Cutoffs (τ)
           </h3>
           <span className="text-[10px] font-sans text-slate-500">PR-AUC = 0.9782</span>
+        </div>
+        
+        {/* EXPLICIT UX DECEPTION WARNING / LABEL */}
+        <div className="bg-amber-50 border border-amber-200 p-3 rounded-lg flex items-start gap-2 mt-2">
+          <span className="text-amber-500 font-bold text-lg leading-none">⚠</span>
+          <p className="text-amber-800 text-xs font-medium leading-tight">
+            <strong>STATIC REFERENCE ONLY:</strong> This curve and matrix represent a pre-computed holdout evaluation on Dataset A (Synthetic). 
+            They do <strong>not</strong> dynamically update based on the live model execution or dataset toggling above.
+          </p>
         </div>
 
         <div className="h-64 mt-2">

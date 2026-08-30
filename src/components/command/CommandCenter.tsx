@@ -39,6 +39,7 @@ const formatCurrency = (amount: number): string => {
 
 export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNavigate }) => {
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState<PipelineStats | null>(null);
   const [incidents, setIncidents] = useState<IncidentSummary[]>([]);
   const [tierFilter, setTierFilter] = useState<string>('ALL');
@@ -66,7 +67,8 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
           fetchDetail(topId);
         }
       } catch (err) {
-        console.error('Failed to load command center data:', err);
+        setError('Investigation data unavailable - backend unreachable');
+        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -81,8 +83,9 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
       const detail = await ApiService.getIncidentDetail(id);
       setIncidentDetail(detail);
     } catch (err) {
-      console.error(`Failed to load incident detail for ${id}:`, err);
-    } finally {
+        setError('Investigation data unavailable - backend unreachable');
+        console.error(err);
+      } finally {
       setDetailLoading(false);
     }
   };
@@ -113,6 +116,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
 
   return (
     <div className="space-y-4 font-sans">
+      {error && <div className="bg-red-50 p-4 m-4 rounded-xl border border-red-200 text-red-600 font-bold text-sm z-50">{error}</div>}
       {/* ── IMMERSIVE COMMAND HERO BANNER ── */}
       <CommandHeroBanner onNavigate={onNavigate} />
 
@@ -146,7 +150,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
             <span className="text-amber-400 font-bold">PRIORITY</span>
           </div>
           <div className="text-2xl font-bold font-sans text-slate-900">
-            {formatCurrency(highRiskExposure || 48200000)}
+            {formatCurrency(highRiskExposure || 0)}
           </div>
           <div className="text-[10px] text-slate-500">ESTIMATED LAUNDERED SUM</div>
         </div>
@@ -418,8 +422,8 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
                     {(incidentDetail.investigative_evidence_bullets && incidentDetail.investigative_evidence_bullets.length > 0
                       ? incidentDetail.investigative_evidence_bullets
                       : [
-                          `GraphSAGE risk probability evaluated at ${((incidentDetail.model_prediction.graphsage_risk_probability || 0.95) * 100).toFixed(2)}%.`,
-                          `Disputed amount of ₹${(incidentDetail.complaint.reported_amount || 150000).toLocaleString('en-IN')}.`,
+                          `GraphSAGE risk probability evaluated at ${((incidentDetail.model_prediction.graphsage_risk_probability || 0) * 100).toFixed(2)}%.`,
+                          `Disputed amount of ₹${(incidentDetail.complaint.reported_amount || 0).toLocaleString('en-IN')}.`,
                         ]
                     ).map((bullet, idx) => (
                       <div key={idx} className="flex items-start gap-2 bg-slate-50 p-2 border border-slate-100 rounded">

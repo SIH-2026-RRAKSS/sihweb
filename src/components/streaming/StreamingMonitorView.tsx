@@ -52,6 +52,7 @@ export const StreamingMonitorView: React.FC = () => {
   const [gnnRuns, setGnnRuns] = useState<number>(0);
   const [avgGnnLat, setAvgGnnLat] = useState<number>(0.70);
   const [liveStreamEvents, setLiveStreamEvents] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const [progressPercent, setProgressPercent] = useState<number>(0);
 
   // Risk Factor Visibility & Threshold Controls
@@ -73,7 +74,10 @@ export const StreamingMonitorView: React.FC = () => {
   const animationTimerRef = useRef<any>(null);
 
   useEffect(() => {
-    ApiService.getStreamingBenchmark().then(setBench);
+    ApiService.getStreamingBenchmark().then(setBench).catch((err) => {
+      console.error(err);
+      setError("Backend API offline");
+    });
     return () => {
       if (animationTimerRef.current) clearInterval(animationTimerRef.current);
     };

@@ -29,6 +29,7 @@ export const CaseDossierModal: React.FC<CaseDossierModalProps> = ({
   onViewGraph
 }) => {
   const [detail, setDetail] = useState<IncidentDetail | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [actionNotice, setActionNotice] = useState<string | null>(null);
 
@@ -297,7 +298,7 @@ ${detail.investigative_evidence_bullets.map((b, i) => `${i + 1}. ${b}`).join('\n
                     </div>
                     <div>
                       <span className="text-slate-500">Terminal Score: </span>
-                      <span className="text-amber-400 font-bold">{detail.top_terminal_details.terminal_score || 0.72}</span>
+                      <span className="text-amber-400 font-bold">{detail.top_terminal_details.terminal_score || 0}</span>
                     </div>
                   </div>
                   <p className="text-xs text-slate-700 pt-1">
