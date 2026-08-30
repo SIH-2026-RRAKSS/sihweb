@@ -34,11 +34,15 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase }) =>
   const [sortMode, setSortMode] = useState<SortMode>('SERIAL');
 
   useEffect(() => {
-    let intervalId: ReturnType<typeof setTimeout>;
+    let intervalId: ReturnType<typeof setInterval>;
+    let isInitial = true;
 
     const fetchIncidents = async () => {
       try {
-        setLoading(true);
+        if (isInitial) {
+          setLoading(true);
+        }
+        
         if (search) {
           const val = InputValidator.validateSearchQuery(search);
           if (!val.isValid) {
@@ -51,7 +55,7 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase }) =>
 
         const result = await ApiService.getIncidents({
           page: 1,
-          page_size: 1000, // Fetch all to allow client-side flexible sorting across all 1000 records
+          page_size: 1000,
           tier: tierFilter,
           search: search || undefined
         });
@@ -78,12 +82,15 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase }) =>
         setError('Investigation data unavailable - backend unreachable');
         console.error(err);
       } finally {
-        setLoading(false);
+        if (isInitial) {
+          setLoading(false);
+          isInitial = false;
+        }
       }
     };
 
     fetchIncidents();
-    intervalId = setInterval(fetchIncidents, 2000); // Poll every 2 seconds
+    intervalId = setInterval(fetchIncidents, 10000);
 
     return () => clearInterval(intervalId);
   }, [page, pageSize, tierFilter, search, sortMode]);
