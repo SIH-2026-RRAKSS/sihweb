@@ -155,4 +155,14 @@ export class ApiService {
   public static async getThreeWayBenchmark(): Promise<ThreeWayBenchmarkRow[]> {
     return this.getThreeWayBenchmarks();
   }
+
+  public static async simulateStreamBatch(dataset: 'synthetic' | 'ibm' = 'synthetic', numTx: number = 50, offset: number = 0): Promise<any> {
+    const res = await fetch(${BASE_URL}/simulate/stream?dataset=&num_tx=&offset=, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: AbortSignal.timeout(30000)
+    });
+    if (!res.ok) throw new Error(API Error: );
+    return await res.json();
+  }
 }
