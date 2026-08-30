@@ -9,9 +9,10 @@ import { ApiService } from '../../services/api';
 
 export const ThreeWayBenchmarkView: React.FC = () => {
   const [rows, setRows] = useState<ThreeWayBenchmarkRow[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    ApiService.getThreeWayBenchmarks().then(setRows);
+    ApiService.getThreeWayBenchmarks().then(setRows).catch(() => setError('Failed to load data — backend unreachable'));
   }, []);
 
   return (
@@ -153,6 +154,7 @@ export const ThreeWayBenchmarkView: React.FC = () => {
           <span className="text-[10px] font-sans text-slate-500">5 Random Seeds (Mean ± Std)</span>
         </div>
 
+        {error && <div className="bg-red-50 p-3 m-4 rounded text-red-600 font-bold text-sm">{error}</div>}
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs font-sans">
             <thead className="bg-white text-slate-500 border-b border-slate-200 text-[10px] uppercase">

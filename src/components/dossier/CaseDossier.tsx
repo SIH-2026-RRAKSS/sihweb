@@ -33,6 +33,7 @@ export const CaseDossier: React.FC<CaseDossierProps> = ({ caseId, onBack }) => {
   const [detail, setDetail] = useState<IncidentDetail | null>(null);
   const [graph, setGraph] = useState<GraphStructure | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const [copiedType, setCopiedType] = useState<string | null>(null);
 
   useEffect(() => {
@@ -49,6 +50,7 @@ export const CaseDossier: React.FC<CaseDossierProps> = ({ caseId, onBack }) => {
         setGraph(graphData);
       } catch (err) {
         console.error(err);
+        setError("Failed to load Case Dossier");
       } finally {
         setLoading(false);
       }
@@ -115,6 +117,8 @@ ${detail.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
 
   return (
     <div className="space-y-4 font-sans text-xs">
+      {error && (<div className="bg-red-50 text-red-600 p-4 rounded-lg font-bold border border-red-200 mb-4">⚠ {error}</div>)}
+
       {/* ── TOP ACTION HEADER BAR ── */}
       <div className="bg-white border border-slate-200 p-3.5 rounded-2xl flex flex-wrap items-center justify-between gap-3 shadow-sm">
         <div className="flex items-center gap-3">

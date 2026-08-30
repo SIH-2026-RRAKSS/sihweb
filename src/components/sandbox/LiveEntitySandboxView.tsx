@@ -12,6 +12,7 @@ import {
   Share2
 } from 'lucide-react';
 import { ApiService } from '../../services/api';
+import { InputValidator } from '../../utils/validation';
 
 interface LiveEntitySandboxProps {
   onViewGraph?: (id: string) => void;
@@ -23,6 +24,7 @@ export const LiveEntitySandboxView: React.FC<LiveEntitySandboxProps> = ({
   onOpenDossier
 }) => {
   const [seedEntity, setSeedEntity] = useState<string>('ENT_000185');
+  const [error, setError] = useState<string | null>(null);
   const [maxHops, setMaxHops] = useState<number>(3);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [prediction, setPrediction] = useState<any>(null);
@@ -53,6 +55,7 @@ export const LiveEntitySandboxView: React.FC<LiveEntitySandboxProps> = ({
 
   return (
     <div className="space-y-6 pb-8">
+      {error && <div className="bg-red-50 p-4 rounded-xl border border-red-200 text-red-600 font-bold text-sm mb-4">{error}</div>}
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
         <div>
@@ -147,7 +150,7 @@ export const LiveEntitySandboxView: React.FC<LiveEntitySandboxProps> = ({
             </div>
             <div className="flex items-center gap-1.5 text-xs font-sans text-emerald-400">
               <Clock className="w-3.5 h-3.5" />
-              <span>Inference SLA: {latencyMs || 54} ms (Passed)</span>
+              <span>Inference SLA: {latencyMs || 0} ms (Passed)</span>
             </div>
           </div>
 

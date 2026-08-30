@@ -30,6 +30,7 @@ import {
 
 export const SystemHealth: React.FC = () => {
   const [health, setHealth] = useState<HealthResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [streaming, setStreaming] = useState<StreamingBenchmark | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -44,6 +45,7 @@ export const SystemHealth: React.FC = () => {
         setHealth(healthData);
         setStreaming(streamingData);
       } catch (err) {
+        setError('Data unavailable - backend unreachable');
         console.error(err);
       } finally {
         setLoading(false);
@@ -54,13 +56,14 @@ export const SystemHealth: React.FC = () => {
 
   const latencyChartData = streaming ? [
     { name: 'P50 Median', latency: streaming.p50_latency_ms, color: '#00FF9D' },
-    { name: 'P90 90th %ile', latency: streaming.p90_latency_ms || 94.12, color: '#00E5FF' },
+    { name: 'P90 90th %ile', latency: streaming.p90_latency_ms || 0, color: '#00E5FF' },
     { name: 'P95 95th %ile', latency: streaming.p95_latency_ms, color: '#FFB000' },
     { name: 'P99 99th %ile', latency: streaming.p99_latency_ms, color: '#FF3B4E' },
   ] : [];
 
   return (
     <div className="space-y-3 font-sans text-xs">
+      {error && <div className="bg-red-50 p-4 rounded-xl border border-red-200 text-red-600 font-bold text-sm mb-4">{error}</div>}
       {/* ── TOP KPI STATUS CARDS ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
         <KPICard

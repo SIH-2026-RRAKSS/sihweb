@@ -180,6 +180,7 @@ const FRONTLINE_TESTIMONIALS = [
 
 export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
   const [realIncidents, setRealIncidents] = useState<IncidentSummary[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const [activeIncidentIdx, setActiveIncidentIdx] = useState<number>(0);
 
   // ── Smooth Global Scroll Transformations ──
@@ -252,6 +253,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
           setRealIncidents(highRisk.length > 0 ? highRisk : res.items);
         }
       } catch (err) {
+        setError('Data unavailable - backend unreachable');
         console.error('Failed to load incident stream for landing:', err);
       }
     };
@@ -458,7 +460,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
 
                 <div className="text-right flex-shrink-0">
                   <div className="text-xs font-bold text-slate-900 font-sans">
-                    ₹{(curInc.reported_amount || 450000).toLocaleString('en-IN')}
+                    ₹{(curInc.reported_amount || 0).toLocaleString('en-IN')}
                   </div>
                   <div className="text-[8px] text-slate-500 font-sans">{curInc.complaint_id}</div>
                 </div>

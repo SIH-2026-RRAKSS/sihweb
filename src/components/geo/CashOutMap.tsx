@@ -50,6 +50,7 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
   const [typeFilter, setTypeFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Fetch Entity Locations
   useEffect(() => {
@@ -71,7 +72,8 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
           setSelectedEntity(data[0]);
         }
       } catch (err) {
-        console.error('Failed to load entity locations:', err);
+        console.error(err);
+        setError("Map Data Unavailable");
       } finally {
         setLoading(false);
       }
@@ -337,7 +339,13 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
 
       {/* ── CENTER: LEAFLET INTERACTIVE MAP (6 COLS) ── */}
       <div className="lg:col-span-6 bg-white border border-slate-200 rounded-2xl overflow-hidden relative shadow-sm flex flex-col">
-        <div ref={mapContainerRef} className="w-full h-full min-h-[400px]" />
+        
+      {error && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-red-50 text-red-600 px-4 py-2 rounded-lg border border-red-200 font-bold shadow-lg flex items-center gap-2">
+          <span>⚠ {error}</span>
+        </div>
+      )}
+      <div ref={mapContainerRef} className="w-full h-full min-h-[400px]" />
 
         {/* Map Legend Floating Bar */}
         <div className="absolute bottom-3 left-3 right-3 bg-white/90 border border-white/15 p-2 rounded  flex flex-wrap items-center justify-between text-[10px] text-slate-700 font-sans z-[1000]">
