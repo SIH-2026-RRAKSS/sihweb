@@ -27,7 +27,7 @@ export class ApiService {
 
   public static async checkHealth(): Promise<HealthResponse> {
     try {
-      const res = await fetch(`${BASE_URL}/health`, { signal: AbortSignal.timeout(2000) });
+      const res = await fetch(`${BASE_URL}/health`, { signal: AbortSignal.timeout(5000) });
       if (res.ok) {
         this.backendOnline = true;
         return await res.json();
@@ -44,7 +44,7 @@ export class ApiService {
 
   public static async getPipelineStats(): Promise<PipelineStats> {
     try {
-      const res = await fetch(`${BASE_URL}/stats`, { signal: AbortSignal.timeout(2000) });
+      const res = await fetch(`${BASE_URL}/stats`, { signal: AbortSignal.timeout(6000) });
       if (res.ok) {
         return await res.json();
       }
@@ -80,7 +80,7 @@ export class ApiService {
         query.append('page_size', (resolvedParams.page_size || 50).toString());
       }
 
-      const res = await fetch(`${BASE_URL}/incidents?${query.toString()}`, { signal: AbortSignal.timeout(2500) });
+      const res = await fetch(`${BASE_URL}/incidents?${query.toString()}`, { signal: AbortSignal.timeout(8000) });
       if (res.ok) {
         const data = await res.json();
         if (data.items && data.items.length > 0) {
