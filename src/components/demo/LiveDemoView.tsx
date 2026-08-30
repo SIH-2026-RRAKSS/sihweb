@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { InputValidator } from '../../utils/validation';
 import { Activity, ShieldAlert, Network, Settings, FileText, Search, Play, ServerCrash, CheckCircle2 } from 'lucide-react';
 
 const BASE_URL = ((import.meta as any).env?.VITE_API_BASE_URL as string) || '/api';
@@ -12,6 +13,7 @@ export const LiveDemoView: React.FC = () => {
   const [seedEntity, setSeedEntity] = useState('C000854');
   const [maxHops, setMaxHops] = useState(2);
   const [manualResult, setManualResult] = useState<any | null>(null);
+  const [manualError, setManualError] = useState<string | null>(null);
   
   // Policy simulator state
   const [threshold, setThreshold] = useState(0.85);
@@ -34,12 +36,7 @@ export const LiveDemoView: React.FC = () => {
         }
       } catch (err) {
         setServerOnline(false);
-        // Fallback for visual demo purposes
-        setIncidents([
-          { incident_id: "INC_000854", entity_id: "C000854", risk_probability: 0.98, confidence_tier: "HIGH_CONFIDENCE_ALERT", timestamp: "2026-08-29T10:15:30Z", predicted_terminal: "ATM_014" },
-          { incident_id: "INC_000912", entity_id: "C000912", risk_probability: 0.89, confidence_tier: "HIGH_CONFIDENCE_ALERT", timestamp: "2026-08-29T10:18:12Z", predicted_terminal: "ATM_055" },
-          { incident_id: "INC_000945", entity_id: "C000945", risk_probability: 0.65, confidence_tier: "MEDIUM_CONFIDENCE", timestamp: "2026-08-29T10:22:45Z", predicted_terminal: "ATM_102" }
-        ]);
+        setIncidents([]);
       }
     };
 
@@ -60,23 +57,20 @@ export const LiveDemoView: React.FC = () => {
         throw new Error('Failed to fetch graph');
       }
     } catch (err) {
-      // Fallback mock graph data
-      setGraphData({
-        num_nodes: 12,
-        num_edges: 15,
-        nodes: [
-          { id: inc.reported_account_number || inc.entity_id || 'ACC_01', label: "Suspect Node", color: "red" },
-          { id: inc.top_terminal_id || inc.predicted_terminal || 'ATM_014', label: "Cash Out", color: "black" }
-        ],
-        edges: [
-          { source: inc.reported_account_number || inc.entity_id || 'ACC_01', target: inc.top_terminal_id || inc.predicted_terminal || 'ATM_014', amount: 45000.0 }
-        ]
-      });
+      setGraphData(null);
     }
   };
 
   // 3. Manual Investigation Trigger
   const handleManualTrigger = async () => {
+    setManualError(null);
+    setManualResult(null);
+
+    const val = InputValidator.validateEntityId(seedEntity);
+    if (!val.isValid) {
+      setManualError(val.error || 'Invalid input');
+      return;
+    }
     try {
       const res = await fetch(`${BASE_URL}/predict/subgraph`, {
         method: 'POST',
@@ -89,13 +83,7 @@ export const LiveDemoView: React.FC = () => {
         throw new Error('Failed to trigger');
       }
     } catch (err) {
-      setManualResult({
-        seed_entity_id: seedEntity,
-        risk_probability: 0.98,
-        confidence_tier: "HIGH_CONFIDENCE_ALERT",
-        is_suspicious: true,
-        terminals: [{ terminal_id: "ATM_014", terminal_score: 0.91 }]
-      });
+      setManualError('Investigation failed — backend unreachable');
     }
   };
 
@@ -118,12 +106,7 @@ export const LiveDemoView: React.FC = () => {
         throw new Error('Policy tune failed');
       }
     } catch (err) {
-      setPolicyResult({
-        policy_tier_name: threshold > 0.8 ? "HIGH_CONFIDENCE_ALERT" : "MEDIUM_CONFIDENCE",
-        alerts_generated: Math.floor(100 * (1 - threshold)),
-        precision_percent: 91.5 + (threshold * 5),
-        recall_percent: 95.0 - (threshold * 10)
-      });
+      setPolicyResult(null);
     }
   };
 
@@ -208,6 +191,11 @@ export const LiveDemoView: React.FC = () => {
                 </button>
               </div>
             </div>
+            {manualError && (
+              <div className="bg-red-50 p-3 rounded-lg border border-red-200 text-xs font-bold text-red-600">
+                {manualError}
+              </div>
+            )}
             {manualResult && (
               <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs font-mono text-slate-700 overflow-x-auto">
                 <pre>{JSON.stringify(manualResult, null, 2)}</pre>

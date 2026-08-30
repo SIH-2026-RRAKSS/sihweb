@@ -35,9 +35,9 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({
   const normalIncidents = incidents.filter(i => i.confidence_tier === 'NORMAL');
 
   const pieData = [
-    { name: 'High Confidence Alerts', value: stats?.tier_breakdown?.HIGH_CONFIDENCE || highConfIncidents.length || 142, color: '#EF4444' },
-    { name: 'Medium Confidence Triage', value: stats?.tier_breakdown?.MEDIUM_CONFIDENCE || medConfIncidents.length || 218, color: '#F59E0B' },
-    { name: 'Normal / Benign Flows', value: stats?.tier_breakdown?.NORMAL || normalIncidents.length || 640, color: '#10B981' }
+    { name: 'High Confidence Alerts', value: stats?.tier_breakdown?.HIGH_CONFIDENCE || highConfIncidents.length || 0, color: '#EF4444' },
+    { name: 'Medium Confidence Triage', value: stats?.tier_breakdown?.MEDIUM_CONFIDENCE || medConfIncidents.length || 0, color: '#F59E0B' },
+    { name: 'Normal / Benign Flows', value: stats?.tier_breakdown?.NORMAL || normalIncidents.length || 0, color: '#10B981' }
   ];
 
   return (
@@ -92,7 +92,7 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({
             </div>
           </div>
           <div className="text-2xl font-bold font-sans text-slate-900">
-            {stats?.total_incidents_monitored || 1000}
+            {stats?.total_incidents_monitored || 0}
           </div>
           <div className="flex items-center gap-1.5 mt-2 text-[11px] text-emerald-400 font-sans">
             <CheckCircle className="w-3.5 h-3.5" />
@@ -109,7 +109,7 @@ export const CommandCenterView: React.FC<CommandCenterProps> = ({
             </div>
           </div>
           <div className="text-2xl font-bold font-sans text-cyber-red">
-            {stats?.tier_breakdown?.HIGH_CONFIDENCE || highConfIncidents.length || 142}
+            {stats?.tier_breakdown?.HIGH_CONFIDENCE || highConfIncidents.length || 0}
           </div>
           <div className="flex items-center gap-1.5 mt-2 text-[11px] text-slate-700 font-sans">
             <span className="text-cyber-red font-bold">94.12% Precision</span>

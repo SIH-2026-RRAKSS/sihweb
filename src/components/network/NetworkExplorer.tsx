@@ -22,6 +22,7 @@ import { IncidentSummary, GraphStructure, GraphNode, GraphEdge } from '../../typ
 export const NetworkExplorer: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [incidents, setIncidents] = useState<IncidentSummary[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const [selectedIncidentId, setSelectedIncidentId] = useState<string>('C000047');
   const [graphData, setGraphData] = useState<GraphStructure | null>(null);
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
@@ -36,6 +37,7 @@ export const NetworkExplorer: React.FC = () => {
         const res = await ApiService.getIncidents({ page: 1, page_size: 50 });
         setIncidents(res.items || []);
       } catch (err) {
+        setError('Data unavailable - backend unreachable');
         console.error(err);
       }
     };
@@ -54,6 +56,7 @@ export const NetworkExplorer: React.FC = () => {
           setSelectedNode(data.nodes[0]);
         }
       } catch (err) {
+        setError('Data unavailable - backend unreachable');
         console.error(err);
       } finally {
         setLoading(false);
@@ -260,6 +263,7 @@ export const NetworkExplorer: React.FC = () => {
 
   return (
     <div className="flex flex-col lg:flex-row h-full gap-3 font-sans text-xs overflow-hidden">
+      {error && <div className="bg-red-50 p-4 m-4 rounded-xl border border-red-200 text-red-600 font-bold text-sm w-full absolute z-50">{error}</div>}
       {/* ── LEFT / MAIN: 3D THREE.JS GRAPH CANVAS ── */}
       <div className="flex-1 flex flex-col bg-white border border-cyan-500/30 p-3 hud-bracket relative overflow-hidden">
         {/* Filter Controls Header */}
@@ -301,7 +305,7 @@ export const NetworkExplorer: React.FC = () => {
 
           {/* Top HUD Overlay */}
           <div className="absolute top-2 left-2 bg-white/90 px-2.5 py-1 border border-slate-200 text-[10px] text-slate-700 pointer-events-none">
-            NODES: <span className="text-neon-cyan font-bold">{graphData?.num_nodes || 9}</span> | EDGES: <span className="text-neon-cyan font-bold">{graphData?.num_edges || 10}</span>
+            NODES: <span className="text-neon-cyan font-bold">{graphData?.num_nodes || 0}</span> | EDGES: <span className="text-neon-cyan font-bold">{graphData?.num_edges || 0}</span>
           </div>
         </div>
       </div>

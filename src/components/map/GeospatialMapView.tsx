@@ -19,11 +19,12 @@ interface GeospatialMapProps {
 
 export const GeospatialMapView: React.FC<GeospatialMapProps> = () => {
   const [locations, setLocations] = useState<EntityLocation[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const [selectedCity, setSelectedCity] = useState<string>('ALL');
   const [selectedEntity, setSelectedEntity] = useState<EntityLocation | null>(null);
 
   useEffect(() => {
-    ApiService.getEntityLocations().then(setLocations);
+    ApiService.getEntityLocations().then(setLocations).catch(() => setError('Failed to load data — backend unreachable'));
   }, []);
 
   const cities = Array.from(new Set(locations.map(l => l.city)));

@@ -28,6 +28,7 @@ import { ApiService } from '../../services/api';
 
 export const StreamingMonitorView: React.FC = () => {
   const [bench, setBench] = useState<StreamingBenchmark | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [isSimulating, setIsSimulating] = useState<boolean>(false);
   const [streamedTxCount, setStreamedTxCount] = useState<number>(5000);
   const [liveRate, setLiveRate] = useState<number>(1448.9);
@@ -36,7 +37,7 @@ export const StreamingMonitorView: React.FC = () => {
   const [testLatency, setTestLatency] = useState<number | null>(null);
 
   useEffect(() => {
-    ApiService.getStreamingBenchmark().then(setBench);
+    ApiService.getStreamingBenchmark().then(setBench).catch(() => setError('Failed to load data — backend unreachable'));
   }, []);
 
   const handleRunSimulation = () => {
@@ -63,10 +64,10 @@ export const StreamingMonitorView: React.FC = () => {
 
   // Latency percentile chart data
   const latencyData = [
-    { metric: 'p50 Median', latency: bench?.p50_latency_ms || 2.14, fill: '#10B981' },
-    { metric: 'p90 90th', latency: bench?.p90_latency_ms || 3.41, fill: '#38BDF8' },
-    { metric: 'p95 95th', latency: bench?.p95_latency_ms || 4.05, fill: '#F59E0B' },
-    { metric: 'p99 99th', latency: bench?.p99_latency_ms || 4.88, fill: '#EF4444' }
+    { metric: 'p50 Median', latency: bench?.p50_latency_ms || 0, fill: '#10B981' },
+    { metric: 'p90 90th', latency: bench?.p90_latency_ms || 0, fill: '#38BDF8' },
+    { metric: 'p95 95th', latency: bench?.p95_latency_ms || 0, fill: '#F59E0B' },
+    { metric: 'p99 99th', latency: bench?.p99_latency_ms || 0, fill: '#EF4444' }
   ];
 
   // Window degradation curve
@@ -103,6 +104,7 @@ export const StreamingMonitorView: React.FC = () => {
       </div>
 
       {/* SLA Metric Cards */}
+      {error && <div className="bg-red-50 p-3 mb-4 rounded text-red-600 font-bold text-sm">{error}</div>}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4">
           <div className="flex items-center justify-between text-slate-500 mb-1.5">
@@ -137,7 +139,7 @@ export const StreamingMonitorView: React.FC = () => {
             <Clock className="w-4 h-4 text-emerald-400" />
           </div>
           <div className="text-2xl font-bold font-sans text-emerald-400">
-            {bench?.p50_latency_ms || 2.14} <span className="text-xs font-normal text-slate-500">ms</span>
+            {bench?.p50_latency_ms || 0} <span className="text-xs font-normal text-slate-500">ms</span>
           </div>
           <div className="text-[11px] text-slate-500 font-sans mt-1.5">
             Sub-5ms Temporal Dual-Head
@@ -264,7 +266,7 @@ export const StreamingMonitorView: React.FC = () => {
               <span className="text-slate-700 font-bold">Dynamic GNN Inference Result:</span>
               <span className="text-emerald-400 font-bold flex items-center gap-1">
                 <Clock className="w-3.5 h-3.5" />
-                Query Executed in {testLatency || 58} ms
+                Query Executed in {testLatency || 0} ms
               </span>
             </div>
 

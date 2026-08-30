@@ -13,6 +13,7 @@ import {
 import { LoadingSkeleton } from '../ui/LoadingSkeleton';
 import { EmptyState } from '../ui/EmptyState';
 import { ApiService } from '../../services/api';
+import { InputValidator } from '../../utils/validation';
 import { IncidentSummary } from '../../types';
 
 interface IncidentQueueProps {
@@ -24,6 +25,7 @@ export type SortMode = 'SERIAL' | 'RISK' | 'AMOUNT';
 export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase }) => {
   const [incidents, setIncidents] = useState<IncidentSummary[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(15);
@@ -32,11 +34,21 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase }) =>
   const [sortMode, setSortMode] = useState<SortMode>('SERIAL');
 
   useEffect(() => {
-    let intervalId: NodeJS.Timeout;
+    let intervalId: ReturnType<typeof setTimeout>;
 
     const fetchIncidents = async () => {
       try {
         setLoading(true);
+        if (search) {
+          const val = InputValidator.validateSearchQuery(search);
+          if (!val.isValid) {
+            setError(val.error || 'Invalid search query');
+            setLoading(false);
+            return;
+          }
+          setError(null);
+        }
+
         const result = await ApiService.getIncidents({
           page: 1,
           page_size: 1000, // Fetch all to allow client-side flexible sorting across all 1000 records
@@ -63,7 +75,8 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase }) =>
         const start = (page - 1) * pageSize;
         setIncidents(items.slice(start, start + pageSize));
       } catch (err) {
-        console.error('Failed to load incidents:', err);
+        setError('Investigation data unavailable - backend unreachable');
+        console.error(err);
       } finally {
         setLoading(false);
       }

@@ -27,6 +27,7 @@ export const GraphVisualizerView: React.FC<GraphVisualizerProps> = ({
   onOpenDossier
 }) => {
   const [selectedIncident, setSelectedIncident] = useState<string>(initialIncidentId);
+  const [error, setError] = useState<string | null>(null);
   const [graphData, setGraphData] = useState<GraphStructure | null>(null);
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [isPhysicsRunning, setIsPhysicsRunning] = useState<boolean>(true);
