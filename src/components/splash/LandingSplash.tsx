@@ -36,10 +36,10 @@ interface LandingSplashProps {
 
 const BENCHMARK_METRICS = [
   {
-    value: '90.14%',
+    value: '89.77%',
     label: 'GNN F1 Score',
     badge: 'STAGE 3B INDUCTIVE',
-    desc: '2-Layer Inductive SAGEConv on 1,000 subgraphs with zero data leakage.',
+    desc: '3-Layer Inductive SAGEConv on 1,000 subgraphs (clean 70/12.5/17.5 val-split evaluation).',
     script: 'src/graphsage_classifier.py',
     accent: '#EA580C',
   },
@@ -94,7 +94,7 @@ const PIPELINE_MODULES = [
     file: 'src/graphsage_classifier.py',
     icon: Cpu,
     desc: 'Inductive node embeddings across 13 engineered topological & velocity features.',
-    metric: '90.14% Test F1',
+    metric: '89.77% Test F1',
     accent: '#2563EB',
   },
   {
@@ -162,7 +162,7 @@ const FRONTLINE_TESTIMONIALS = [
   },
   {
     quote:
-      'Replacing batch rule-based alerts with continuous ±72-hour temporal subgraphs reduced our false alarm rate by 33% while elevating true mule ring detection to 90.14% Test F1.',
+      'Replacing batch rule-based alerts with continuous ±72-hour temporal subgraphs reduced our false alarm rate by 33% while elevating true mule ring detection to 89.77% Test F1 (Dataset A; clean 5-seed evaluation, p=0.0398 vs XGBoost).',
     officer: 'Dr. Priya Nambiar',
     role: 'Head of AML Analytics',
     dept: 'National Banking Security Alliance',
