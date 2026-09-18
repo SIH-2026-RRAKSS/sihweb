@@ -86,6 +86,7 @@ export interface GraphNode {
   total_incoming_amount: number;
   total_outgoing_amount: number;
   color: string;
+  node_mule_score?: number;
   x?: number;
   y?: number;
   vx?: number;

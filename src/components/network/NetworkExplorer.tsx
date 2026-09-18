@@ -355,6 +355,20 @@ export const NetworkExplorer: React.FC = () => {
                   <span className="text-slate-500">TOTAL OUTFLOW:</span>
                   <span className="text-crimson-alert font-bold">₹{selectedNode.total_outgoing_amount.toLocaleString('en-IN')}</span>
                 </div>
+                {selectedNode.node_mule_score !== undefined && (
+                  <div className="flex justify-between border-b border-slate-200 pb-1 items-center">
+                    <span className="text-slate-500">MULE RISK (HEAD 2):</span>
+                    <span className={`font-mono font-bold px-1.5 py-0.5 rounded text-[11px] ${
+                      selectedNode.node_mule_score > 0.7
+                        ? 'bg-red-500/10 text-crimson-alert border border-red-500/30'
+                        : selectedNode.node_mule_score > 0.4
+                        ? 'bg-amber-500/10 text-amber-600 border border-amber-500/30'
+                        : 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/30'
+                    }`}>
+                      {(selectedNode.node_mule_score * 100).toFixed(2)}%
+                    </span>
+                  </div>
+                )}
               </div>
 
               {selectedNode.is_incident && (
