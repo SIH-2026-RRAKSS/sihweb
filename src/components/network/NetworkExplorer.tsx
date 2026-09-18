@@ -29,6 +29,7 @@ export const NetworkExplorer: React.FC = () => {
   const [searchEntity, setSearchEntity] = useState<string>('');
   const [showLabels, setShowLabels] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(false);
+  const [isHistoricalExpanded, setIsHistoricalExpanded] = useState<boolean>(false);
 
   // Fetch Incident options
   useEffect(() => {
@@ -50,7 +51,7 @@ export const NetworkExplorer: React.FC = () => {
     const fetchGraph = async () => {
       setLoading(true);
       try {
-        const data = await ApiService.getIncidentGraph(selectedIncidentId);
+        const data = await ApiService.getIncidentGraph(selectedIncidentId, isHistoricalExpanded);
         setGraphData(data);
         if (data.nodes.length > 0) {
           setSelectedNode(data.nodes[0]);
@@ -63,7 +64,7 @@ export const NetworkExplorer: React.FC = () => {
       }
     };
     fetchGraph();
-  }, [selectedIncidentId]);
+  }, [selectedIncidentId, isHistoricalExpanded]);
 
   // 3D Three.js Graph Visualization
   useEffect(() => {
@@ -287,7 +288,10 @@ export const NetworkExplorer: React.FC = () => {
             <span className="text-[10px] text-slate-500">SELECT INCIDENT:</span>
             <select
               value={selectedIncidentId}
-              onChange={(e) => setSelectedIncidentId(e.target.value)}
+              onChange={(e) => {
+                setSelectedIncidentId(e.target.value);
+                setIsHistoricalExpanded(false);
+              }}
               className="bg-white border border-cyan-500/40 text-neon-cyan px-2 py-1 text-xs font-bold focus:outline-none"
             >
               {incidents.map((inc) => (
@@ -304,9 +308,73 @@ export const NetworkExplorer: React.FC = () => {
           <div ref={containerRef} className="w-full h-full cursor-grab" />
 
           {/* Top HUD Overlay */}
-          <div className="absolute top-2 left-2 bg-white/90 px-2.5 py-1 border border-slate-200 text-[10px] text-slate-700 pointer-events-none">
-            NODES: <span className="text-neon-cyan font-bold">{graphData?.num_nodes || 0}</span> | EDGES: <span className="text-neon-cyan font-bold">{graphData?.num_edges || 0}</span>
+          <div className="absolute top-2 left-2 bg-white/95 px-2.5 py-1 border border-slate-200 text-[10px] text-slate-700 pointer-events-none z-10 flex items-center gap-2">
+            <div>
+              NODES: <span className="text-neon-cyan font-bold">{graphData?.num_nodes || 0}</span> | EDGES: <span className="text-neon-cyan font-bold">{graphData?.num_edges || 0}</span>
+            </div>
+            {graphData?.is_historical_expanded && (
+              <span className="text-blue-600 font-bold bg-blue-50 px-1.5 py-0.2 rounded border border-blue-200">
+                EXPANDED HISTORICAL VIEW
+              </span>
+            )}
           </div>
+
+          {/* Dormant Account HUD Alert Banner */}
+          {graphData?.is_dormant && !graphData.is_historical_expanded && (
+            <div className="absolute top-10 left-2 right-2 z-20 bg-slate-900/90 border border-amber-500/50 text-slate-200 p-3 rounded-lg backdrop-blur shadow-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="p-1.5 rounded bg-amber-500/20 text-amber-400 shrink-0">
+                  <ShieldAlert className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-amber-300 font-mono flex items-center gap-2">
+                    SURVEILLANCE WINDOW DORMANT // ZERO TRANSFERS DETECTED
+                    <span className="text-[10px] bg-amber-500/20 px-1.5 py-0.5 rounded text-amber-200 font-normal">
+                      BENIGN RISK 0.00%
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-0.5 font-sans">
+                    {graphData.dormant_reason || 'No transactions recorded within the ±72-hour window around complaint date.'}
+                    {graphData.nearest_activity && ` (Last active: ${graphData.nearest_activity.split('.')[0]})`}
+                  </p>
+                </div>
+              </div>
+              {(graphData.lifetime_tx_count ?? 0) > 0 && (
+                <button
+                  onClick={() => setIsHistoricalExpanded(true)}
+                  className="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 rounded text-xs font-mono font-semibold transition-all whitespace-nowrap flex items-center gap-1.5 shadow-sm cursor-pointer"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  VIEW LIFETIME ACTIVITY ({graphData.lifetime_tx_count} TXS)
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Expanded Historical View Banner */}
+          {graphData?.is_historical_expanded && (
+            <div className="absolute top-10 left-2 right-2 z-20 bg-slate-900/90 border border-blue-500/50 text-slate-200 p-3 rounded-lg backdrop-blur shadow-2xl flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="p-1.5 rounded bg-blue-500/20 text-blue-400 shrink-0">
+                  <Zap className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-blue-300 font-mono">
+                    EXPANDED HISTORICAL ACTIVITY // ALL-TIME FOOTPRINT
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-0.5 font-sans">
+                    Viewing {graphData.edges.length} lifetime transactions outside the primary ±72h surveillance window.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsHistoricalExpanded(false)}
+                className="px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/50 rounded text-xs font-mono font-semibold transition-all whitespace-nowrap cursor-pointer"
+              >
+                RETURN TO 72H WINDOW
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -380,6 +448,12 @@ export const NetworkExplorer: React.FC = () => {
               {selectedNode.is_terminal && (
                 <div className="p-2 bg-amber-500/10 border border-amber-cash text-amber-cash text-[10px]">
                   EXIT CASH-OUT TERMINAL // PHYSICAL ATM POINT
+                </div>
+              )}
+
+              {selectedNode.is_dormant && (
+                <div className="p-2 bg-amber-500/10 border border-amber-500/40 text-amber-700 text-[10px] font-mono">
+                  DORMANT SEED // NO RECORDED TRANSFERS IN 72H SURVEILLANCE WINDOW
                 </div>
               )}
             </div>

@@ -87,6 +87,8 @@ export interface GraphNode {
   total_outgoing_amount: number;
   color: string;
   node_mule_score?: number;
+  is_dormant?: boolean;
+  isolation_reason?: string;
   x?: number;
   y?: number;
   vx?: number;
@@ -107,6 +109,11 @@ export interface GraphStructure {
   incident_id: string;
   num_nodes: number;
   num_edges: number;
+  is_dormant?: boolean;
+  dormant_reason?: string;
+  lifetime_tx_count?: number;
+  nearest_activity?: string;
+  is_historical_expanded?: boolean;
   nodes: GraphNode[];
   edges: GraphEdge[];
 }

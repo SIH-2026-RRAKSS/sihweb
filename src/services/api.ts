@@ -100,8 +100,11 @@ export class ApiService {
     return await res.json();
   }
 
-  public static async getIncidentGraph(incidentId: string): Promise<GraphStructure> {
-    const res = await fetch(`${BASE_URL}/incidents/${incidentId}/graph`, { signal: AbortSignal.timeout(6000) });
+  public static async getIncidentGraph(incidentId: string, expandHistorical: boolean = false): Promise<GraphStructure> {
+    const url = expandHistorical
+      ? `${BASE_URL}/incidents/${incidentId}/graph?expand_historical=true`
+      : `${BASE_URL}/incidents/${incidentId}/graph`;
+    const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
     if (!res.ok) throw new Error(`API Error: ${res.status}`);
     return await res.json();
   }
