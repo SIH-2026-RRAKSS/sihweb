@@ -139,7 +139,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
             <span className="text-amber-400 font-bold">72H WIN</span>
           </div>
           <div className="text-2xl font-bold font-sans text-amber-400">
-            48 RINGS
+            {stats ? stats.tier_breakdown.HIGH_CONFIDENCE : '48'} RINGS
           </div>
           <div className="text-[10px] text-slate-500">COORDINATED GRAPH TOPOLOGY</div>
         </div>
@@ -169,10 +169,10 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
         <div className="bg-white border border-slate-200 p-3.5 rounded-2xl space-y-1 shadow-sm">
           <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider flex items-center justify-between">
             <span>GNN F1 ACCURACY</span>
-            <span className="text-emerald-400 font-bold">MRR 1.0</span>
+            <span className="text-emerald-400 font-bold">MRR {stats?.model_comparison?.Terminal_Prediction_MRR || '1.0'}</span>
           </div>
           <div className="text-2xl font-bold font-sans text-emerald-400">
-            90.14%
+            {stats ? stats.model_comparison.GraphSAGE_Test_F1 : '89.77%'}
           </div>
           <div className="text-[10px] text-slate-500">GraphSAGE INDUCTIVE TEST</div>
         </div>

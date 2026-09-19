@@ -33,39 +33,43 @@ export const PolicyBenchmark: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [currentPolicy, benchmarks] = await Promise.all([
-          ApiService.tunePolicy(threshold),
-          ApiService.getThreeWayBenchmark()
-        ]);
-        
-        setPolicyData(currentPolicy);
-        setBenchmarkData(benchmarks);
-        
-        // Fetch points for the chart
-        const points = [0.1, 0.3, 0.5, 0.7, 0.8, 0.9];
-        const chartPoints = await Promise.all(
-          points.map(async (t) => {
-            const res = await ApiService.tunePolicy(t);
-            return {
-              threshold: `τ=${t.toFixed(1)}`,
-              precision: Number(res.precision_percent.toFixed(1)),
-              recall: Number(res.recall_percent.toFixed(1)),
-              f1: Number(res.f1_score_percent.toFixed(1)),
-            };
-          })
-        );
-        setChartData(chartPoints);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
+    const timerId = setTimeout(() => {
+      const fetchData = async () => {
+        try {
+          setLoading(true);
+          const [currentPolicy, benchmarks] = await Promise.all([
+            ApiService.tunePolicy(threshold),
+            ApiService.getThreeWayBenchmark()
+          ]);
+          
+          setPolicyData(currentPolicy);
+          setBenchmarkData(benchmarks);
+          
+          // Fetch points for the chart
+          const points = [0.1, 0.3, 0.5, 0.7, 0.8, 0.9];
+          const chartPoints = await Promise.all(
+            points.map(async (t) => {
+              const res = await ApiService.tunePolicy(t);
+              return {
+                threshold: `τ=${t.toFixed(1)}`,
+                precision: Number(res.precision_percent.toFixed(1)),
+                recall: Number(res.recall_percent.toFixed(1)),
+                f1: Number(res.f1_score_percent.toFixed(1)),
+              };
+            })
+          );
+          setChartData(chartPoints);
+        } catch (err) {
+          console.error(err);
+        } finally {
+          setLoading(false);
+        }
+      };
 
-    fetchData();
+      fetchData();
+    }, 300);
+
+    return () => clearTimeout(timerId);
   }, [threshold]);
 
   const getOperationalMode = (t: number) => {

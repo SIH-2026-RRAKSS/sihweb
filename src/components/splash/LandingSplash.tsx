@@ -198,6 +198,19 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
   // Ambient HUD badges fade out cleanly
   const hudOpacity = useTransform(scrollYProgress, [0, 0.1], [1.0, 0.0]);
 
+  const [metrics, setMetrics] = useState(BENCHMARK_METRICS);
+
+  useEffect(() => {
+    ApiService.getPipelineStats().then(stats => {
+      setMetrics(prev => [
+        { ...prev[0], value: stats.model_comparison.GraphSAGE_Test_F1 || prev[0].value },
+        { ...prev[1], value: stats.model_comparison.Terminal_Prediction_MRR || prev[1].value },
+        { ...prev[2], value: '100%' }, // Entity resolution is still exact
+        { ...prev[3] }
+      ]);
+    }).catch(console.error);
+  }, []);
+
   // ── Dynamic Spring-Driven Mouse & Autonomous Idle Motion ──
   const mouseX = useMotionValue(typeof window !== 'undefined' ? window.innerWidth / 2 : 600);
   const mouseY = useMotionValue(typeof window !== 'undefined' ? window.innerHeight / 3 : 300);
@@ -556,7 +569,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 font-sans text-xs">
-            {BENCHMARK_METRICS.map((m) => (
+            {metrics.map((m) => (
               <motion.div
                 key={m.label}
                 whileHover={{ y: -3 }}
