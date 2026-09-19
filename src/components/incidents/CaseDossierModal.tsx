@@ -39,6 +39,9 @@ export const CaseDossierModal: React.FC<CaseDossierModalProps> = ({
     ApiService.getIncidentDetail(incidentId).then((data) => {
       setDetail(data);
       setLoading(false);
+    }).catch(err => {
+      setError(err.message);
+      setLoading(false);
     });
   }, [incidentId]);
 

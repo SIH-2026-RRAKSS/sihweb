@@ -83,6 +83,8 @@ export const GraphVisualizerView: React.FC<GraphVisualizerProps> = ({
       nodesRef.current = nodes;
       edgesRef.current = data.edges;
       setSelectedNode(nodes.find(n => n.is_incident) || nodes[0] || null);
+    }).catch(err => {
+      console.error(err);
     });
   }, [selectedIncident]);
 

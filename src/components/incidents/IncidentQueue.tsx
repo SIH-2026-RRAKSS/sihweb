@@ -200,6 +200,13 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase }) =>
         </div>
       </div>
 
+      {error && (
+        <div className="bg-red-50 border border-red-200 p-4 rounded-xl flex items-center gap-3 text-red-600">
+          <ShieldAlert className="w-5 h-5 text-red-500" />
+          <span className="font-bold text-sm">{error}</span>
+        </div>
+      )}
+
       {/* ── INCIDENTS TABLE ── */}
       <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-saas-card">
         <div className="overflow-x-auto">

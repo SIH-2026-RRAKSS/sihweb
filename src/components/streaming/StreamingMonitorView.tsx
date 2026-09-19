@@ -709,7 +709,7 @@ export const StreamingMonitorView: React.FC = () => {
             </ResponsiveContainer>
           </div>
           <div className="text-[10px] text-slate-400 text-center">
-            F1 accuracy peaks at 90.66% as temporal window reaches 72 hours, maintaining memory of multi-hop chains.
+            F1 accuracy peaks at 89.77% as temporal window reaches 72 hours, maintaining memory of multi-hop chains.
           </div>
         </div>
       </div>

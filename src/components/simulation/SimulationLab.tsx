@@ -10,13 +10,14 @@ export const SimulationLab: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [inputVal, setInputVal] = useState<string>('C000035');
 
-  const handleRunInference = async () => {
+  const handleRunInference = async (entityId: string = seedEntityId) => {
+    if (!entityId) return;
     setLoading(true);
     setError(null);
     setPredictionResult(null);
     try {
       // Actually fetch live prediction from the backend
-      const res = await ApiService.predictLiveEntity(seedEntityId, 3);
+      const res = await ApiService.predictLiveEntity(entityId, 3);
       setPredictionResult(res);
     } catch (err: any) {
       setError(err.message || 'Failed to reach backend');
@@ -46,7 +47,7 @@ export const SimulationLab: React.FC = () => {
           <button 
             onClick={() => {
               setSeedEntityId(inputVal);
-              handleRunInference();
+              handleRunInference(inputVal);
             }}
             disabled={loading}
             className="bg-[#FF5500] hover:bg-[#FF5500]/90 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 disabled:opacity-50"
