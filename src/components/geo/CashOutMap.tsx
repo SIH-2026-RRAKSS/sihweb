@@ -169,6 +169,17 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
       const isATM = loc.entity_type === 'ATM_TERMINAL';
       const isHighRisk = loc.confidence_tier === 'HIGH_CONFIDENCE';
       const isSelected = selectedEntity?.entity_id === loc.entity_id;
+      
+      const sanitizeHtml = (str: string) => str.replace(/[&<>'"]/g, 
+        tag => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#39;',
+            '"': '&quot;'
+          }[tag] || tag)
+      );
+      const safeEntityId = sanitizeHtml(loc.entity_id || '');
 
       let iconHtml = '';
       if (isATM) {
@@ -177,7 +188,7 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
             ${isSelected ? `<div style="position:absolute; width:36px; height:36px; border-radius:4px; border:2px solid #F59E0B; animation:ping 1.5s cubic-bezier(0,0,0.2,1) infinite; opacity:0.6;"></div>` : ''}
             <div style="width:16px; height:16px; background:#F59E0B; border:2px solid ${isSelected ? '#FFFFFF' : '#F59E0B'}; box-shadow:0 0 14px #F59E0B; border-radius:2px;"></div>
             <div style="position:absolute; top:-20px; background:#0C0E12; color:#F59E0B; border:1px solid #F59E0B; font-family:monospace; font-size:9px; font-weight:bold; padding:1px 4px; border-radius:2px; white-space:nowrap; box-shadow:0 2px 6px rgba(0,0,0,0.6);">
-              ${loc.entity_id}
+              ${safeEntityId}
             </div>
           </div>
         `;
@@ -188,7 +199,7 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
             ${isHighRisk ? `<div style="position:absolute; width:34px; height:34px; border-radius:50%; border:2px solid #FF5500; animation:ping 1.5s cubic-bezier(0,0,0.2,1) infinite; opacity:0.6;"></div>` : ''}
             <div style="width:14px; height:14px; border-radius:50%; background:${color}; border:2px solid ${isSelected ? '#FFFFFF' : color}; box-shadow:0 0 14px ${color};"></div>
             <div style="position:absolute; top:-20px; background:#0C0E12; color:${color}; border:1px solid ${color}; font-family:monospace; font-size:9px; font-weight:bold; padding:1px 4px; border-radius:2px; white-space:nowrap; box-shadow:0 2px 6px rgba(0,0,0,0.6);">
-              ${loc.entity_id}
+              ${safeEntityId}
             </div>
           </div>
         `;
