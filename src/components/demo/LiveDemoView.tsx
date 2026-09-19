@@ -149,7 +149,7 @@ export const LiveDemoView: React.FC = () => {
                   </div>
                   <div className="flex flex-col items-end gap-1">
                     <span className="text-xs font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full">{inc.confidence_tier}</span>
-                    <span className="text-xs text-slate-600 font-mono">{(inc.risk_probability * 100).toFixed(1)}% RISK</span>
+                    <span className="text-xs text-slate-600 font-mono">{(inc.graphsage_risk_probability * 100).toFixed(1)}% RISK</span>
                   </div>
                 </div>
               ))}
