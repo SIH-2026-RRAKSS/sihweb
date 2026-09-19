@@ -177,7 +177,12 @@ ${detail.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
         </div>
       </div>
 
-      {loading || !detail ? (
+      {error ? (
+        <div className="p-8 text-center text-red-400 bg-slate-900 rounded-lg mx-3.5 mt-4 border border-red-900/50">
+          <AlertTriangle size={32} className="mx-auto mb-3 opacity-50" />
+          <p className="font-mono text-sm">{error}</p>
+        </div>
+      ) : loading || !detail ? (
         <div className="p-8">
           <LoadingSkeleton variant="card" count={3} />
         </div>
