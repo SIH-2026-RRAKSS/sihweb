@@ -25,7 +25,7 @@ import {
   Legend
 } from 'recharts';
 
-export const PolicyBenchmark: React.FC = () => {
+export const PolicyBenchmark: React.FC<{ activeDataset?: string }> = ({ activeDataset }) => {
   const [threshold, setThreshold] = useState<number>(0.50);
   const [policyData, setPolicyData] = useState<PolicyTuneResult | null>(null);
   const [benchmarkData, setBenchmarkData] = useState<ThreeWayBenchmarkRow[]>([]);
@@ -38,7 +38,7 @@ export const PolicyBenchmark: React.FC = () => {
         try {
           setLoading(true);
           const [currentPolicy, benchmarks] = await Promise.all([
-            ApiService.tunePolicy(threshold),
+            ApiService.tunePolicy(threshold, activeDataset),
             ApiService.getThreeWayBenchmark()
           ]);
           
@@ -49,7 +49,7 @@ export const PolicyBenchmark: React.FC = () => {
           const points = [0.1, 0.3, 0.5, 0.7, 0.8, 0.9];
           const chartPoints = await Promise.all(
             points.map(async (t) => {
-              const res = await ApiService.tunePolicy(t);
+              const res = await ApiService.tunePolicy(t, activeDataset);
               return {
                 threshold: `τ=${t.toFixed(1)}`,
                 precision: Number(res.precision_percent.toFixed(1)),
@@ -70,7 +70,7 @@ export const PolicyBenchmark: React.FC = () => {
     }, 300);
 
     return () => clearTimeout(timerId);
-  }, [threshold]);
+  }, [threshold, activeDataset]);
 
   const getOperationalMode = (t: number) => {
     if (t <= 0.2) return { name: 'HIGH SENSITIVITY // ZERO TOLERANCE', color: 'text-amber-cash border-amber-500/50 bg-amber-500/10' };

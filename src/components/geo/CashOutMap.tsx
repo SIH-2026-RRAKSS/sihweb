@@ -23,6 +23,7 @@ import { EntityLocation, ConfidenceTier } from '../../types';
 interface CashOutMapProps {
   targetEntityId?: string | null;
   onNavigateToCase?: (complaintId: string) => void;
+  activeDataset?: string;
 }
 
 // Real multi-hop laundering corridors connecting source cities to destination cash-out ATMs
@@ -38,7 +39,7 @@ const CORRIDORS: { from: [number, number]; to: [number, number]; fromCity: strin
   { from: [9.9312, 76.2673], to: [9.9723, 76.2789], fromCity: 'Kochi (KL)', toCity: 'Kochi (MG Road ATM_014)', amount: '₹25k', risk: 'NORMAL', entityId: 'ENT_000325', atmId: 'ATM_014' },
 ];
 
-export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNavigateToCase }) => {
+export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNavigateToCase, activeDataset }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersLayerRef = useRef<L.LayerGroup | null>(null);

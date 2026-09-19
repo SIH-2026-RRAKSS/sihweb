@@ -18,11 +18,12 @@ import { IncidentSummary } from '../../types';
 
 interface IncidentQueueProps {
   onSelectCase: (id: string) => void;
+  activeDataset?: string;
 }
 
 export type SortMode = 'SERIAL' | 'RISK' | 'AMOUNT';
 
-export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase }) => {
+export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase, activeDataset }) => {
   const [incidents, setIncidents] = useState<IncidentSummary[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -53,31 +54,29 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase }) =>
           setError(null);
         }
 
-        const result = await ApiService.getIncidents({
+        // Note: Sort is handled locally since backend doesn't implement dynamic sort fully
+        const { items, total_count } = await ApiService.getIncidents({
           page: 1,
           page_size: 1000,
           tier: tierFilter,
-          search: search || undefined
+          search: search || undefined,
+          dataset: activeDataset
         });
 
-        let items = result.items || [];
+        let itemList = items || [];
 
-        // Apply selected Sort Mode
+        // Local sort
         if (sortMode === 'SERIAL') {
-          items.sort((a, b) => {
-            const numA = parseInt(a.complaint_id.replace(/\D/g, ''), 10) || 0;
-            const numB = parseInt(b.complaint_id.replace(/\D/g, ''), 10) || 0;
-            return numA - numB;
-          });
+          itemList.sort((a, b) => a.complaint_id.localeCompare(b.complaint_id));
         } else if (sortMode === 'RISK') {
-          items.sort((a, b) => (b.graphsage_risk_probability || 0) - (a.graphsage_risk_probability || 0));
+          itemList.sort((a, b) => (b.graphsage_risk_probability || 0) - (a.graphsage_risk_probability || 0));
         } else if (sortMode === 'AMOUNT') {
-          items.sort((a, b) => (b.reported_amount || 0) - (a.reported_amount || 0));
+          itemList.sort((a, b) => (b.reported_amount || 0) - (a.reported_amount || 0));
         }
 
-        setTotalCount(items.length);
+        setTotalCount(itemList.length);
         const start = (page - 1) * pageSize;
-        setIncidents(items.slice(start, start + pageSize));
+        setIncidents(itemList.slice(start, start + pageSize));
       } catch (err) {
         setError('Investigation data unavailable - backend unreachable');
         console.error(err);
@@ -93,7 +92,7 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase }) =>
     intervalId = setInterval(fetchIncidents, 10000);
 
     return () => clearInterval(intervalId);
-  }, [page, pageSize, tierFilter, search, sortMode]);
+  }, [page, pageSize, tierFilter, search, sortMode, activeDataset]);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 

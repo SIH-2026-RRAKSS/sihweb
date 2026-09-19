@@ -25,6 +25,7 @@ import { NavPage } from '../layout/AppShell';
 interface CommandCenterProps {
   onSelectCase: (id: string) => void;
   onNavigate?: (page: NavPage) => void;
+  activeDataset?: string;
 }
 
 const formatCurrency = (amount: number): string => {
@@ -37,7 +38,7 @@ const formatCurrency = (amount: number): string => {
   return `₹${amount.toLocaleString('en-IN')}`;
 };
 
-export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNavigate }) => {
+export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNavigate, activeDataset }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState<PipelineStats | null>(null);
@@ -54,7 +55,12 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
         setLoading(true);
         const [statsData, incidentsResult] = await Promise.all([
           ApiService.getPipelineStats(),
-          ApiService.getIncidents({ page: 1, page_size: 1000 })
+          ApiService.getIncidents({ 
+            page: 1, 
+            page_size: 1000, 
+            tier: tierFilter !== 'ALL' ? tierFilter : undefined,
+            dataset: activeDataset 
+          })
         ]);
         
         setStats(statsData);
@@ -75,7 +81,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
     };
 
     fetchDashboardData();
-  }, []);
+  }, [activeDataset]);
 
   const fetchDetail = async (id: string) => {
     try {

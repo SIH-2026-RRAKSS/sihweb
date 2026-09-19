@@ -60,17 +60,17 @@ const App: React.FC = () => {
   const renderPage = () => {
     switch (activePage) {
       case 'command':
-        return <CommandCenter onSelectCase={handleSelectCase} onNavigate={handleNavigate} />;
+        return <CommandCenter onSelectCase={handleSelectCase} onNavigate={handleNavigate} activeDataset={activeDataset} />;
       case 'simulation':
         return <SimulationLab />;
       case 'incidents':
-        return <IncidentQueue onSelectCase={handleSelectCase} />;
+        return <IncidentQueue onSelectCase={handleSelectCase} activeDataset={activeDataset} />;
       case 'network':
         return <NetworkExplorer />;
       case 'cashout-map':
-        return <CashOutMap targetEntityId={selectedMapTarget} onNavigateToCase={handleSelectCase} />;
+        return <CashOutMap targetEntityId={selectedMapTarget} onNavigateToCase={handleSelectCase} activeDataset={activeDataset} />;
       case 'policy':
-        return <PolicyBenchmark />;
+        return <PolicyBenchmark activeDataset={activeDataset} />;
       case 'dossier':
         return <CaseDossier caseId={selectedCaseId} onBack={handleBackFromDossier} />;
       case 'health':
@@ -78,7 +78,7 @@ const App: React.FC = () => {
       case 'live-demo':
         return <StreamingMonitorView />;
       default:
-        return <CommandCenter onSelectCase={handleSelectCase} onNavigate={handleNavigate} />;
+        return <CommandCenter onSelectCase={handleSelectCase} onNavigate={handleNavigate} activeDataset={activeDataset} />;
     }
   };
 

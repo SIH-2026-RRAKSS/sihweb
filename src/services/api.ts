@@ -44,19 +44,23 @@ export class ApiService {
     tier?: string;
     min_risk?: number;
     search?: string;
+    dataset?: string;
+    sort?: 'SERIAL' | 'RISK' | 'AMOUNT';
   }): Promise<{ total_count: number; items: IncidentSummary[] }> {
     const resolvedParams = params || {};
     const query = new URLSearchParams();
     if (resolvedParams.tier && resolvedParams.tier.toUpperCase() !== 'ALL') query.append('tier', resolvedParams.tier);
     if (resolvedParams.min_risk !== undefined && resolvedParams.min_risk > 0) query.append('min_risk', resolvedParams.min_risk.toString());
     if (resolvedParams.search) query.append('search', resolvedParams.search);
+    if (resolvedParams.dataset) query.append('dataset', resolvedParams.dataset);
+    if (resolvedParams.sort) query.append('sort', resolvedParams.sort);
     if (resolvedParams.page) query.append('page', resolvedParams.page.toString());
     if (resolvedParams.page_size) query.append('page_size', (resolvedParams.page_size || 50).toString());
 
     const res = await fetch(`${BASE_URL}/incidents?${query.toString()}`, { signal: AbortSignal.timeout(8000) });
     if (!res.ok) throw new Error("Failed to fetch incidents");
     const data = await res.json();
-    return { total_count: data.total_count || 0, items: data.items || [] };
+    return { total_count: data.total_count || 0, items: data.items || data.incidents || [] };
   }
 
   public static async getIncidentDetail(incidentId: string): Promise<IncidentDetail> {
