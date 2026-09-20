@@ -98,7 +98,7 @@ export const LiveDemoView: React.FC = () => {
       const res = await fetch(`${BASE_URL}/policy/tune`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ threshold, dataset: 'synthetic' })
+        body: JSON.stringify({ threshold, dataset })
       });
       if (res.ok) {
         setPolicyResult(await res.json());

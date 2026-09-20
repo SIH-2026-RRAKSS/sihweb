@@ -26,7 +26,6 @@ interface CashOutMapProps {
   activeDataset?: string;
 }
 
-];
 
 export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNavigateToCase, activeDataset }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
