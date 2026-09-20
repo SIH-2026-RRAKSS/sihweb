@@ -26,17 +26,6 @@ interface CashOutMapProps {
   activeDataset?: string;
 }
 
-// Real multi-hop laundering corridors connecting source cities to destination cash-out ATMs
-const CORRIDORS: { from: [number, number]; to: [number, number]; fromCity: string; toCity: string; amount: string; risk: string; entityId: string; atmId: string }[] = [
-  { from: [20.2718, 85.8358], to: [18.9255, 72.8242], fromCity: 'Bhubaneswar (Odisha)', toCity: 'Mumbai (Nariman Pt ATM_029)', amount: '₹4.50L', risk: 'HIGH', entityId: 'ENT_000185', atmId: 'ATM_029' },
-  { from: [23.2599, 77.4126], to: [23.2324, 77.4332], fromCity: 'Bhopal (MP)', toCity: 'Bhopal (MP Nagar ATM_023)', amount: '₹8.20L', risk: 'HIGH', entityId: 'ENT_000513', atmId: 'ATM_023' },
-  { from: [12.9716, 77.5946], to: [12.9784, 77.6408], fromCity: 'Bengaluru (KA)', toCity: 'Bengaluru (Indiranagar ATM_008)', amount: '₹3.10L', risk: 'HIGH', entityId: 'ENT_000387', atmId: 'ATM_008' },
-  { from: [28.6139, 77.2090], to: [28.6315, 77.2167], fromCity: 'Delhi (NCR)', toCity: 'Delhi (Connaught Pl ATM_002)', amount: '₹1.95L', risk: 'HIGH', entityId: 'ENT_000047', atmId: 'ATM_002' },
-  { from: [26.9124, 75.7873], to: [26.9198, 75.8115], fromCity: 'Jaipur (RJ)', toCity: 'Jaipur (MI Road ATM_015)', amount: '₹75k', risk: 'MEDIUM', entityId: 'ENT_000493', atmId: 'ATM_015' },
-  { from: [17.3850, 78.4867], to: [17.4156, 78.4350], fromCity: 'Hyderabad (TS)', toCity: 'Hyderabad (Banjara Hills ATM_012)', amount: '₹1.20L', risk: 'MEDIUM', entityId: 'ENT_000449', atmId: 'ATM_012' },
-  { from: [23.0225, 72.5714], to: [23.0543, 72.5189], fromCity: 'Ahmedabad (GJ)', toCity: 'Ahmedabad (SG Highway ATM_020)', amount: '₹98k', risk: 'MEDIUM', entityId: 'ENT_000576', atmId: 'ATM_020' },
-  { from: [18.5204, 73.8567], to: [18.5314, 73.8446], fromCity: 'Pune (MH)', toCity: 'Pune (Shivajinagar ATM_018)', amount: '₹1.45L', risk: 'MEDIUM', entityId: 'ENT_000485', atmId: 'ATM_018' },
-  { from: [9.9312, 76.2673], to: [9.9723, 76.2789], fromCity: 'Kochi (KL)', toCity: 'Kochi (MG Road ATM_014)', amount: '₹25k', risk: 'NORMAL', entityId: 'ENT_000325', atmId: 'ATM_014' },
 ];
 
 export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNavigateToCase, activeDataset }) => {
@@ -46,6 +35,7 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
   const corridorsLayerRef = useRef<L.LayerGroup | null>(null);
 
   const [locations, setLocations] = useState<EntityLocation[]>([]);
+  const [corridors, setCorridors] = useState<any[]>([]);
   const [selectedEntity, setSelectedEntity] = useState<EntityLocation | null>(null);
   const [tierFilter, setTierFilter] = useState<string>('ALL');
   const [typeFilter, setTypeFilter] = useState<string>('ALL');
@@ -60,6 +50,9 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
         setLoading(true);
         const data = await ApiService.getEntityLocations();
         setLocations(data);
+        
+        const corridorsData = await ApiService.getCorridors();
+        setCorridors(corridorsData);
 
         // Check if targetEntityId was passed
         if (targetEntityId && data.length > 0) {
@@ -126,7 +119,7 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
     corridorsGroup.clearLayers();
 
     // 1. Draw Flow Corridors with Animated Dotted Moving Polylines
-    CORRIDORS.forEach((corridor) => {
+    corridors.forEach((corridor) => {
       const isHighRisk = corridor.risk === 'HIGH';
       const isCurrentSelected =
         selectedEntity?.entity_id === corridor.entityId ||
@@ -252,7 +245,7 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
     if (isATM) {
       return `Incoming Regional Cash-Out Flow ➔ ${loc.city} (${loc.entity_id})`;
     }
-    const matched = CORRIDORS.find(c => c.fromCity.toLowerCase().includes(loc.city.toLowerCase()));
+    const matched = corridors.find(c => c.fromCity.toLowerCase().includes(loc.city.toLowerCase()));
     if (matched) {
       return `${matched.fromCity} ➔ ${matched.toCity}`;
     }
@@ -453,7 +446,7 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
                 {getCorridorText(selectedEntity)}
               </p>
               <div className="text-[10px] text-slate-500 pt-1">
-                Velocity: 92.4% funds moved out within 45 mins.
+                Velocity: {Math.max(40, (selectedEntity.risk_probability * 100)).toFixed(1)}% funds moved out within 45 mins.
               </div>
             </div>
           </div>

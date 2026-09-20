@@ -29,8 +29,8 @@ export const MOCK_PIPELINE_STATS: PipelineStats = {
     NORMAL: 640
   },
   model_comparison: {
-    GraphSAGE_Test_F1: "90.66% ± 1.58%",
-    XGBoost_Baseline_F1: "86.98% ± 2.28%",
+    GraphSAGE_Test_F1: "89.77% ± 1.58%",
+    XGBoost_Baseline_F1: "86.87% ± 2.28%",
     Terminal_Prediction_MRR: "1.0000",
     Top1_CashOut_Accuracy: "100.0%"
   }
@@ -425,8 +425,8 @@ export const MOCK_THREE_WAY_BENCHMARK: ThreeWayBenchmarkRow[] = [
     dataset: "Dataset A (Synthetic Typologies)",
     evaluation_task: "Incident Subgraph Binary Classification",
     sample_size: "N = 200 (37 Illicit / 18.5%)",
-    xgboost_f1: "86.98% ± 2.28%",
-    graphsage_f1: "90.66% ± 1.58%",
+    xgboost_f1: "86.87% ± 2.28%",
+    graphsage_f1: "89.77% ± 1.58%",
     f1_delta: "+3.69% (p = 0.0231 < 0.05)",
     precision: "89.66% ± 3.54%",
     recall: "91.89% ± 3.82%",

@@ -24,7 +24,7 @@ interface IncidentQueueProps {
 export type SortMode = 'SERIAL' | 'RISK' | 'AMOUNT';
 
 export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase, activeDataset }) => {
-  const [incidents, setIncidents] = useState<IncidentSummary[]>([]);
+  const [allIncidents, setAllIncidents] = useState<IncidentSummary[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [totalCount, setTotalCount] = useState<number>(0);
@@ -75,8 +75,7 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase, acti
         }
 
         setTotalCount(itemList.length);
-        const start = (page - 1) * pageSize;
-        setIncidents(itemList.slice(start, start + pageSize));
+        setAllIncidents(itemList);
       } catch (err) {
         setError('Investigation data unavailable - backend unreachable');
         console.error(err);
@@ -92,9 +91,12 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase, acti
     intervalId = setInterval(fetchIncidents, 10000);
 
     return () => clearInterval(intervalId);
-  }, [page, pageSize, tierFilter, search, sortMode, activeDataset]);
+  }, [tierFilter, search, sortMode, activeDataset]);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  
+  const start = (page - 1) * pageSize;
+  const incidents = allIncidents.slice(start, start + pageSize);
 
   return (
     <div className="space-y-4 font-sans text-xs">

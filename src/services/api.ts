@@ -172,4 +172,14 @@ export class ApiService {
     if (!res.ok) throw new Error(`API Error: ${res.status}`);
     return await res.json();
   }
+
+  public static async getCorridors(): Promise<any[]> {
+    try {
+      const res = await fetch(`${BASE_URL}/geo/corridors`, { signal: AbortSignal.timeout(5000) });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch {}
+    return [];
+  }
 }

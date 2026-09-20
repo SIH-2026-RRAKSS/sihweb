@@ -93,7 +93,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="grid grid-cols-2 gap-2 text-center pt-1 border-t border-slate-200">
           <div className="p-1.5 bg-white rounded border border-slate-200">
             <div className="text-[9px] text-slate-500 uppercase">Test F1-Score</div>
-            <div className="text-xs font-sans font-bold text-cyber-cyan">90.66%</div>
+            <div className="text-xs font-sans font-bold text-cyber-cyan">89.77%</div>
           </div>
           <div className="p-1.5 bg-white rounded border border-slate-200">
             <div className="text-[9px] text-slate-500 uppercase">Terminal MRR</div>

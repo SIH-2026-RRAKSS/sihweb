@@ -61,7 +61,7 @@ export const ThreeWayBenchmarkView: React.FC = () => {
             </div>
             <div className="p-2 bg-white rounded border border-cyber-cyan/30">
               <div className="text-[9px] text-cyber-cyan uppercase">GraphSAGE GNN</div>
-              <div className="text-xs font-bold text-cyber-cyan">90.66% ± 1.58%</div>
+              <div className="text-xs font-bold text-cyber-cyan">89.77% ± 1.58%</div>
             </div>
           </div>
 
@@ -96,7 +96,7 @@ export const ThreeWayBenchmarkView: React.FC = () => {
             </div>
             <div className="p-2 bg-white rounded border border-purple-500/30">
               <div className="text-[9px] text-purple-300 uppercase">F1-Score</div>
-              <div className="text-xs font-bold text-purple-300">62.92%</div>
+              <div className="text-xs font-bold text-purple-300">73.57%</div>
             </div>
           </div>
 

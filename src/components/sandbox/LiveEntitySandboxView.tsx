@@ -46,8 +46,8 @@ export const LiveEntitySandboxView: React.FC<LiveEntitySandboxProps> = ({
       const end = performance.now();
       setLatencyMs(Math.round(end - start) + 14);
       setPrediction(res);
-    } catch {
-      // Handled in ApiService
+    } catch (err: any) {
+      setError(err.message || 'Live inference failed. Check backend connection.');
     } finally {
       setIsLoading(false);
     }
