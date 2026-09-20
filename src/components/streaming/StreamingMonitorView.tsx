@@ -52,7 +52,6 @@ export const StreamingMonitorView: React.FC = () => {
   const [gnnRuns, setGnnRuns] = useState<number>(0);
   const [avgGnnLat, setAvgGnnLat] = useState<number>(0.70);
   const [liveStreamEvents, setLiveStreamEvents] = useState<any[]>([]);
-  const [error, setError] = useState<string | null>(null);
   const [progressPercent, setProgressPercent] = useState<number>(0);
 
   // Risk Factor Visibility & Threshold Controls

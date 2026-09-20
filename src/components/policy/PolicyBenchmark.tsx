@@ -30,13 +30,11 @@ export const PolicyBenchmark: React.FC<{ activeDataset?: string }> = ({ activeDa
   const [policyData, setPolicyData] = useState<PolicyTuneResult | null>(null);
   const [benchmarkData, setBenchmarkData] = useState<ThreeWayBenchmarkRow[]>([]);
   const [chartData, setChartData] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const timerId = setTimeout(() => {
       const fetchData = async () => {
         try {
-          setLoading(true);
           const [currentPolicy, benchmarks] = await Promise.all([
             ApiService.tunePolicy(threshold, activeDataset),
             ApiService.getThreeWayBenchmark()
@@ -62,7 +60,6 @@ export const PolicyBenchmark: React.FC<{ activeDataset?: string }> = ({ activeDa
         } catch (err) {
           /* console.error */(err);
         } finally {
-          setLoading(false);
         }
       };
 

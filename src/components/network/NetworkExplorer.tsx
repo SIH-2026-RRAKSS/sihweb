@@ -26,9 +26,6 @@ export const NetworkExplorer: React.FC = () => {
   const [selectedIncidentId, setSelectedIncidentId] = useState<string>('C000047');
   const [graphData, setGraphData] = useState<GraphStructure | null>(null);
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
-  const [searchEntity, setSearchEntity] = useState<string>('');
-  const [showLabels, setShowLabels] = useState<boolean>(true);
-  const [loading, setLoading] = useState<boolean>(false);
   const [isHistoricalExpanded, setIsHistoricalExpanded] = useState<boolean>(false);
 
   // Fetch Incident options
@@ -49,7 +46,6 @@ export const NetworkExplorer: React.FC = () => {
   useEffect(() => {
     if (!selectedIncidentId) return;
     const fetchGraph = async () => {
-      setLoading(true);
       try {
         const data = await ApiService.getIncidentGraph(selectedIncidentId, isHistoricalExpanded);
         setGraphData(data);
@@ -60,7 +56,6 @@ export const NetworkExplorer: React.FC = () => {
         setError('Data unavailable - backend unreachable');
         /* console.error */(err);
       } finally {
-        setLoading(false);
       }
     };
     fetchGraph();
