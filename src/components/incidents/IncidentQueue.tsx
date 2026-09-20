@@ -78,7 +78,7 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase, acti
         setAllIncidents(itemList);
       } catch (err) {
         setError('Investigation data unavailable - backend unreachable');
-        console.error(err);
+        /* console.error */(err);
       } finally {
         if (isInitial) {
           setLoading(false);

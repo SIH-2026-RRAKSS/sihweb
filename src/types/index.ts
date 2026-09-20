@@ -11,8 +11,6 @@ export interface IncidentSummary {
   confidence_tier: ConfidenceTier;
   top_terminal_id?: string;
   top_terminal_city?: string;
-  trigger_source?: 'CITIZEN_COMPLAINT' | 'DYNAMIC_ANOMALY';
-  anomaly_reason?: string;
   intercepted_in_flight?: boolean;
 }
 
@@ -192,7 +190,5 @@ export interface ThreeWayBenchmarkRow {
   xgboost_f1: string;
   graphsage_f1: string;
   f1_delta: string;
-  precision: string;
-  recall: string;
   pr_auc: string;
 }

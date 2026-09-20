@@ -75,7 +75,7 @@ export const StreamingMonitorView: React.FC = () => {
 
   useEffect(() => {
     ApiService.getStreamingBenchmark().then(setBench).catch((err) => {
-      console.error(err);
+      /* console.error */(err);
       setError("Backend API offline");
     });
     return () => {
@@ -162,7 +162,7 @@ export const StreamingMonitorView: React.FC = () => {
         setIsSimulating(false);
       }
     } catch (e) {
-      console.error(e);
+      /* console.error */(e);
       setIsSimulating(false);
     }
   };
@@ -210,7 +210,6 @@ export const StreamingMonitorView: React.FC = () => {
 
   const latencyData = [
     { metric: 'p50 Median', latency: bench?.p50_latency_ms || 0.70, fill: '#10B981' },
-    { metric: 'p90 90th', latency: bench?.p90_latency_ms || 1.45, fill: '#38BDF8' },
     { metric: 'p95 95th', latency: bench?.p95_latency_ms || 2.15, fill: '#F59E0B' },
     { metric: 'p99 99th', latency: bench?.p99_latency_ms || 3.40, fill: '#EF4444' }
   ];

@@ -65,7 +65,7 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
           setSelectedEntity(data[0]);
         }
       } catch (err) {
-        console.error(err);
+        /* console.error */(err);
         setError("Map Data Unavailable");
       } finally {
         setLoading(false);

@@ -46,7 +46,7 @@ export const SystemHealth: React.FC = () => {
         setStreaming(streamingData);
       } catch (err) {
         setError('Data unavailable - backend unreachable');
-        console.error(err);
+        /* console.error */(err);
       } finally {
         setLoading(false);
       }
@@ -56,7 +56,6 @@ export const SystemHealth: React.FC = () => {
 
   const latencyChartData = streaming ? [
     { name: 'P50 Median', latency: streaming.p50_latency_ms, color: '#00FF9D' },
-    { name: 'P90 90th %ile', latency: streaming.p90_latency_ms || 0, color: '#00E5FF' },
     { name: 'P95 95th %ile', latency: streaming.p95_latency_ms, color: '#FFB000' },
     { name: 'P99 99th %ile', latency: streaming.p99_latency_ms, color: '#FF3B4E' },
   ] : [];
@@ -68,15 +67,15 @@ export const SystemHealth: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
         <KPICard
           icon={Radio}
-          value="OPERATIONAL"
+          value={health?.status === 'HEALTHY' ? 'OPERATIONAL' : 'DEGRADED'}
           label="FASTAPI BACKEND STATUS"
           code="API-SRV"
-          color="green"
+          color={health?.status === 'HEALTHY' ? 'green' : 'red'}
           trend={{ direction: 'stable', text: 'PORT 8000' }}
         />
         <KPICard
           icon={Cpu}
-          value="1,448.9 TX/S"
+          value={streaming ? `${streaming.transactions_per_second.toFixed(1)} TX/S` : '0 TX/S'}
           label="STREAMING INGESTION RATE"
           code="INGEST-RATE"
           color="cyan"
@@ -84,19 +83,19 @@ export const SystemHealth: React.FC = () => {
         />
         <KPICard
           icon={Zap}
-          value="71.67 MS"
+          value={streaming ? `${streaming.p50_latency_ms.toFixed(2)} MS` : '0 MS'}
           label="P50 INFERENCE LATENCY"
           code="LAT-P50"
           color="green"
-          trend={{ direction: 'stable', text: 'SUB-50MS SLA' }}
+          trend={{ direction: 'stable', text: 'SUB-100MS SLA' }}
         />
         <KPICard
           icon={Database}
-          value="750 / 5,000"
-          label="ACTIVE SUBGRAPH SCALE"
-          code="GRAPH-NODES"
-          color="amber"
-          trend={{ direction: 'stable', text: '72H WINDOW' }}
+          value={health?.database_connected ? 'CONNECTED' : 'OFFLINE'}
+          label="DATABASE STATE"
+          code="SQLITE-DB"
+          color={health?.database_connected ? 'green' : 'red'}
+          trend={{ direction: 'stable', text: 'DISK-PERSISTED' }}
         />
       </div>
 

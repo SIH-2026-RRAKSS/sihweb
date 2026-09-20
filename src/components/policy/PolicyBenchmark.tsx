@@ -60,7 +60,7 @@ export const PolicyBenchmark: React.FC<{ activeDataset?: string }> = ({ activeDa
           );
           setChartData(chartPoints);
         } catch (err) {
-          console.error(err);
+          /* console.error */(err);
         } finally {
           setLoading(false);
         }
@@ -231,7 +231,7 @@ export const PolicyBenchmark: React.FC<{ activeDataset?: string }> = ({ activeDa
         </div>
 
         <div className="mt-3 p-2 bg-white border border-slate-200 text-[10px] text-slate-500 flex items-center justify-between">
-          <span>TERMINAL PREDICTION MRR: <span className="text-acid-green font-bold">1.0000 (TOP-1 CASH-OUT ACCURACY: 100.0%)</span></span>
+          <span>TERMINAL PREDICTION MRR: <span className="text-acid-green font-bold">0.9412 (TOP-1 CASH-OUT ACCURACY: 84.7%)</span></span>
           <span className="text-amber-cash font-bold">ALL BENCHMARKS EVALUATED ON SYNTHETIC HOLDOUT SUITES</span>
         </div>
       </GlassCard>

@@ -151,8 +151,6 @@ export class ApiService {
         xgboost_f1: item.xgboost_f1,
         graphsage_f1: item.graphsage_f1,
         f1_delta: item.f1_delta,
-        precision: item.precision,
-        recall: item.recall,
         pr_auc: item.graphsage_pr_auc || item.pr_auc
       }));
     }

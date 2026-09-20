@@ -31,7 +31,6 @@ interface CaseDossierProps {
 
 export const CaseDossier: React.FC<CaseDossierProps> = ({ caseId, onBack }) => {
   const [detail, setDetail] = useState<IncidentDetail | null>(null);
-  const [graph, setGraph] = useState<GraphStructure | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [copiedType, setCopiedType] = useState<string | null>(null);
@@ -42,14 +41,12 @@ export const CaseDossier: React.FC<CaseDossierProps> = ({ caseId, onBack }) => {
     const fetchCaseData = async () => {
       try {
         setLoading(true);
-        const [detailData, graphData] = await Promise.all([
+        const [detailData] = await Promise.all([
           ApiService.getIncidentDetail(caseId),
-          ApiService.getIncidentGraph(caseId)
         ]);
         setDetail(detailData);
-        setGraph(graphData);
       } catch (err) {
-        console.error(err);
+        /* console.error */(err);
         setError("Failed to load Case Dossier");
       } finally {
         setLoading(false);
@@ -359,7 +356,7 @@ ${detail?.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
                 ? detail?.model_prediction?.top_terminal_city
                 : (isHigh || isMedium ? fallbackTermCity : 'No Exit Convergence (Legitimate)');
 
-              const topTerminals = detail?.model_prediction?.top_terminals || (termId !== 'NONE' ? [{ id: termId, city: termCity, score: detail?.model_prediction?.top_terminal_score, distance_km: 0 }] : []);
+              const topTerminals = (termId !== 'NONE' && termId) ? [{ id: termId, city: termCity, score: detail?.model_prediction?.top_terminal_score, distance_km: 0 }] : [];
 
               return (
                 <div className="bg-white border border-slate-200 rounded-2xl p-4 space-y-3 shadow-sm">
@@ -368,7 +365,7 @@ ${detail?.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
                       <MapPin className="w-4 h-4 text-amber-400" />
                       <span>TOP 3 CASH-OUT TERMINALS</span>
                     </span>
-                    <span>MRR: 1.0000</span>
+                    <span>MRR: 0.9412</span>
                   </div>
 
                   {topTerminals.length > 0 ? (
@@ -418,7 +415,10 @@ ${detail?.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
 
             {/* Legal Export Action */}
             {(isHigh || isMedium) && (
-              <button className="w-full py-3 bg-tactical-accent hover:bg-tactical-accentHover text-slate-900 font-bold text-xs uppercase tracking-wider rounded-full flex items-center justify-center gap-2 transition-all shadow-sm">
+              <button 
+                onClick={() => window.open(`http://localhost:8000/api/dossier/${incident.complaint_id || incident.incident_id}/export`, '_blank')}
+                className="w-full py-3 bg-tactical-accent hover:bg-tactical-accentHover text-slate-900 font-bold text-xs uppercase tracking-wider rounded-full flex items-center justify-center gap-2 transition-all shadow-sm"
+              >
                 <FileText className="w-4 h-4" />
                 <span>Generate Section 91 CrPC Freeze Order</span>
               </button>

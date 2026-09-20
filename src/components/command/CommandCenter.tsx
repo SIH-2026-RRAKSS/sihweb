@@ -74,7 +74,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
         }
       } catch (err) {
         setError('Investigation data unavailable - backend unreachable');
-        console.error(err);
+        /* console.error */(err);
       } finally {
         setLoading(false);
       }
@@ -90,7 +90,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
       setIncidentDetail(detail);
     } catch (err) {
         setError('Investigation data unavailable - backend unreachable');
-        console.error(err);
+        /* console.error */(err);
       } finally {
       setDetailLoading(false);
     }
