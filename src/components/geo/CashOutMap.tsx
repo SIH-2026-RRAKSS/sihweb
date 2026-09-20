@@ -56,7 +56,7 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
 
         // Check if targetEntityId was passed
         if (targetEntityId && data.length > 0) {
-          const match = data.find(l => l.entity_id.toUpperCase() === targetEntityId.toUpperCase() || l.city.toLowerCase() === targetEntityId.toLowerCase());
+          const match = data.find(l => l.entity_id.toUpperCase() === targetEntityId.toUpperCase() || l.city?.toLowerCase() === targetEntityId.toLowerCase());
           if (match) {
             setSelectedEntity(match);
           } else {
@@ -124,7 +124,7 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
       const isCurrentSelected =
         selectedEntity?.entity_id === corridor.entityId ||
         selectedEntity?.entity_id === corridor.atmId ||
-        selectedEntity?.city.toLowerCase().includes(corridor.fromCity.toLowerCase());
+        selectedEntity?.city?.toLowerCase().includes(corridor.fromCity.toLowerCase());
 
       const polyline = L.polyline([corridor.from, corridor.to], {
         color: isHighRisk ? '#FF5500' : '#38BDF8',
@@ -152,7 +152,7 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
         const q = searchQuery.toLowerCase();
         return (
           loc.entity_id.toLowerCase().includes(q) ||
-          loc.city.toLowerCase().includes(q) ||
+          loc.city?.toLowerCase().includes(q) ||
           (loc.holder_name && loc.holder_name.toLowerCase().includes(q))
         );
       }
@@ -245,7 +245,7 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
     if (isATM) {
       return `Incoming Regional Cash-Out Flow ➔ ${loc.city} (${loc.entity_id})`;
     }
-    const matched = corridors.find(c => c.fromCity.toLowerCase().includes(loc.city.toLowerCase()));
+    const matched = corridors.find(c => c.fromCity.toLowerCase().includes(loc.city?.toLowerCase()));
     if (matched) {
       return `${matched.fromCity} ➔ ${matched.toCity}`;
     }
@@ -303,7 +303,7 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
         <div className="flex-1 overflow-y-auto space-y-1.5 pr-1">
           {locations
             .filter(l => typeFilter === 'ALL' || l.entity_type === typeFilter)
-            .filter(l => !searchQuery || l.entity_id.toLowerCase().includes(searchQuery.toLowerCase()) || l.city.toLowerCase().includes(searchQuery.toLowerCase()))
+            .filter(l => !searchQuery || l.entity_id.toLowerCase().includes(searchQuery.toLowerCase()) || l.city?.toLowerCase().includes(searchQuery.toLowerCase()))
             .map((loc) => {
               const isSelected = selectedEntity?.entity_id === loc.entity_id;
               const isLocATM = loc.entity_type === 'ATM_TERMINAL';
