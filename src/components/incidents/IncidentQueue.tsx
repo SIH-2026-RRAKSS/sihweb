@@ -78,7 +78,7 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase, acti
         setAllIncidents(itemList);
       } catch (err) {
         setError('Investigation data unavailable - backend unreachable');
-        /* console.error */(err);
+        console.warn(err);
       } finally {
         if (isInitial) {
           setLoading(false);
@@ -245,7 +245,7 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase, acti
                 incidents.map((incident) => {
                   const isHigh = incident.confidence_tier === 'HIGH_CONFIDENCE';
                   const isMedium = incident.confidence_tier === 'MEDIUM_CONFIDENCE';
-                  const isAuto = incident.trigger_source === 'DYNAMIC_ANOMALY';
+                  const isAuto = false;
 
                   return (
                     <tr
@@ -266,9 +266,9 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase, acti
                           <span className={`text-[9px] px-1.5 py-0.5 w-fit rounded font-bold border ${isAuto ? 'bg-amber-500/10 text-amber-500 border-amber-500/30' : 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30'}`}>
                             {isAuto ? '[AUTO-SPAWNED ANOMALY]' : '[CITIZEN COMPLAINT]'}
                           </span>
-                          {isAuto && incident.anomaly_reason && (
+                          {false && (
                             <span className="text-[9px] text-slate-500 leading-tight">
-                              {incident.anomaly_reason}
+                              ""
                             </span>
                           )}
                         </div>

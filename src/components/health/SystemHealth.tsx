@@ -46,7 +46,7 @@ export const SystemHealth: React.FC = () => {
         setStreaming(streamingData);
       } catch (err) {
         setError('Data unavailable - backend unreachable');
-        /* console.error */(err);
+        console.warn(err);
       } finally {
         setLoading(false);
       }
@@ -75,7 +75,7 @@ export const SystemHealth: React.FC = () => {
         />
         <KPICard
           icon={Cpu}
-          value={streaming ? `${streaming.transactions_per_second.toFixed(1)} TX/S` : '0 TX/S'}
+          value={streaming ? `${streaming.ingestion_rate_tx_per_sec.toFixed(1)} TX/S` : '0 TX/S'}
           label="STREAMING INGESTION RATE"
           code="INGEST-RATE"
           color="cyan"

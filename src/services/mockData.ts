@@ -428,8 +428,6 @@ export const MOCK_THREE_WAY_BENCHMARK: ThreeWayBenchmarkRow[] = [
     xgboost_f1: "86.87% ± 2.28%",
     graphsage_f1: "89.77% ± 1.58%",
     f1_delta: "+3.69% (p = 0.0231 < 0.05)",
-    precision: "89.66% ± 3.54%",
-    recall: "91.89% ± 3.82%",
     pr_auc: "0.9680 ± 0.0117"
   },
   {
@@ -439,8 +437,6 @@ export const MOCK_THREE_WAY_BENCHMARK: ThreeWayBenchmarkRow[] = [
     xgboost_f1: "73.93% ± 3.37%",
     graphsage_f1: "77.70% ± 2.57%",
     f1_delta: "+3.76% (p = 0.0032 < 0.01)",
-    precision: "72.33% ± 2.11%",
-    recall: "84.41% ± 7.80%",
     pr_auc: "0.8775 ± 0.0198"
   },
   {
@@ -450,8 +446,6 @@ export const MOCK_THREE_WAY_BENCHMARK: ThreeWayBenchmarkRow[] = [
     xgboost_f1: "N/A (DAG Node Benchmark)",
     graphsage_f1: "46.44% ± 2.52%",
     f1_delta: "Inductive Baseline Established",
-    precision: "35.75% ± 3.58%",
-    recall: "66.85% ± 2.40%",
     pr_auc: "0.5118 ± 0.0396"
   }
 ];

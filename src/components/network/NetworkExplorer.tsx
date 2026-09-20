@@ -36,7 +36,7 @@ export const NetworkExplorer: React.FC = () => {
         setIncidents(res.items || []);
       } catch (err) {
         setError('Data unavailable - backend unreachable');
-        /* console.error */(err);
+        console.warn(err);
       }
     };
     fetchIncidents();
@@ -54,7 +54,7 @@ export const NetworkExplorer: React.FC = () => {
         }
       } catch (err) {
         setError('Data unavailable - backend unreachable');
-        /* console.error */(err);
+        console.warn(err);
       } finally {
       }
     };

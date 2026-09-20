@@ -74,8 +74,7 @@ export const StreamingMonitorView: React.FC = () => {
 
   useEffect(() => {
     ApiService.getStreamingBenchmark().then(setBench).catch((err) => {
-      /* console.error */(err);
-      setError("Backend API offline");
+      console.warn(err);
     });
     return () => {
       if (animationTimerRef.current) clearInterval(animationTimerRef.current);
@@ -161,7 +160,7 @@ export const StreamingMonitorView: React.FC = () => {
         setIsSimulating(false);
       }
     } catch (e) {
-      /* console.error */(e);
+      console.warn(e);
       setIsSimulating(false);
     }
   };

@@ -74,7 +74,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
         }
       } catch (err) {
         setError('Investigation data unavailable - backend unreachable');
-        /* console.error */(err);
+        console.warn(err);
       } finally {
         setLoading(false);
       }
@@ -90,7 +90,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
       setIncidentDetail(detail);
     } catch (err) {
         setError('Investigation data unavailable - backend unreachable');
-        /* console.error */(err);
+        console.warn(err);
       } finally {
       setDetailLoading(false);
     }
@@ -286,10 +286,8 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
                             </span>
                           )}
                         </span>
-                        <span className={`text-[9px] px-1 py-0.2 rounded font-bold border ${
-                          incident.trigger_source === 'DYNAMIC_ANOMALY' ? 'bg-amber-500/10 text-amber-500 border-amber-500/30' : 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30'
-                        }`}>
-                          {incident.trigger_source === 'DYNAMIC_ANOMALY' ? 'AUTO' : 'CITIZEN'}
+                        <span className="text-[9px] px-1 py-0.2 rounded font-bold border bg-cyan-500/10 text-cyan-400 border-cyan-500/30">
+                          CITIZEN
                         </span>
                         <span className={`text-[9px] px-1.5 py-0.2 rounded border font-bold ${
                           isHigh ? 'bg-[#FF5500]/15 text-[#FF5500] border-[#FF5500]/30' : isMedium ? 'bg-amber-500/15 text-amber-400 border-amber-500/30' : 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'

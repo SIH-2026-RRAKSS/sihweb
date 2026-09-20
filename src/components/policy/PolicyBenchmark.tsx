@@ -58,7 +58,7 @@ export const PolicyBenchmark: React.FC<{ activeDataset?: string }> = ({ activeDa
           );
           setChartData(chartPoints);
         } catch (err) {
-          /* console.error */(err);
+          console.warn(err);
         } finally {
         }
       };

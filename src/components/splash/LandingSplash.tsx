@@ -208,7 +208,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
         { ...prev[2], value: '100%' }, // Entity resolution is still exact
         { ...prev[3] }
       ]);
-    }).catch(/* console.error */);
+    }).catch(console.warn);
   }, []);
 
   // ── Dynamic Spring-Driven Mouse & Autonomous Idle Motion ──
@@ -267,7 +267,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
         }
       } catch (err) {
         setError('Data unavailable - backend unreachable');
-        /* console.error */('Failed to load incident stream for landing:', err);
+        console.warn('Failed to load incident stream for landing:', err);
       }
     };
     loadData();

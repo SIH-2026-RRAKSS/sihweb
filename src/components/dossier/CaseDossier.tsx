@@ -46,7 +46,7 @@ export const CaseDossier: React.FC<CaseDossierProps> = ({ caseId, onBack }) => {
         ]);
         setDetail(detailData);
       } catch (err) {
-        /* console.error */(err);
+        console.warn(err);
         setError("Failed to load Case Dossier");
       } finally {
         setLoading(false);
@@ -334,6 +334,7 @@ ${detail?.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
             </div>
 
             {/* Exit Terminal Prediction Card */}
+            {(() => {
               const termId = (detail?.model_prediction?.top_terminal_id && detail?.model_prediction?.top_terminal_id !== 'NONE' && detail?.model_prediction?.top_terminal_id !== 'N/A')
                 ? detail?.model_prediction?.top_terminal_id : 'NONE';
 
@@ -400,7 +401,7 @@ ${detail?.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
             {/* Legal Export Action */}
             {(isHigh || isMedium) && (
               <button 
-                onClick={() => window.open(`http://localhost:8000/api/dossier/${incident.complaint_id || incident.incident_id}/export`, '_blank')}
+                onClick={() => window.open(`http://localhost:8000/api/dossier/${caseId}/export`, '_blank')}
                 className="w-full py-3 bg-tactical-accent hover:bg-tactical-accentHover text-slate-900 font-bold text-xs uppercase tracking-wider rounded-full flex items-center justify-center gap-2 transition-all shadow-sm"
               >
                 <FileText className="w-4 h-4" />
