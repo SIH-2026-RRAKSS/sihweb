@@ -36,7 +36,7 @@ export const CaseDossier: React.FC<CaseDossierProps> = ({ caseId, onBack }) => {
   const [copiedType, setCopiedType] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!caseId) return;
+    if (!caseId) { setLoading(false); return; }
 
     const fetchCaseData = async () => {
       try {
@@ -179,6 +179,8 @@ ${detail?.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
           <AlertTriangle size={32} className="mx-auto mb-3 opacity-50" />
           <p className="font-mono text-sm">{error}</p>
         </div>
+      ) : !caseId ? (
+        <div className="p-8 text-center text-slate-500 font-bold">Select a case from the Incident Queue to view its dossier.</div>
       ) : loading || !detail ? (
         <div className="p-8">
           <LoadingSkeleton variant="card" count={3} />
@@ -332,29 +334,11 @@ ${detail?.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
             </div>
 
             {/* Exit Terminal Prediction Card */}
-            {(() => {
-              const locStr = (detail?.complaint?.location || '').toLowerCase();
-              let fallbackTermId = 'ATM_029';
-              let fallbackTermCity = 'Mumbai (Nariman Point)';
-
-              if (locStr.includes('bengaluru') || locStr.includes('varanasi') || locStr.includes('karnataka')) {
-                fallbackTermId = 'ATM_008';
-                fallbackTermCity = 'Bengaluru (Indiranagar)';
-              } else if (locStr.includes('bhopal') || locStr.includes('madhya pradesh') || locStr.includes('rajasthan')) {
-                fallbackTermId = 'ATM_023';
-                fallbackTermCity = 'Bhopal (MP Nagar)';
-              } else if (locStr.includes('delhi') || locStr.includes('haryana')) {
-                fallbackTermId = 'ATM_002';
-                fallbackTermCity = 'Delhi (Connaught Place)';
-              }
-
               const termId = (detail?.model_prediction?.top_terminal_id && detail?.model_prediction?.top_terminal_id !== 'NONE' && detail?.model_prediction?.top_terminal_id !== 'N/A')
-                ? detail?.model_prediction?.top_terminal_id
-                : (isHigh || isMedium ? fallbackTermId : 'NONE');
+                ? detail?.model_prediction?.top_terminal_id : 'NONE';
 
               const termCity = (detail?.model_prediction?.top_terminal_city && detail?.model_prediction?.top_terminal_city !== 'NONE' && detail?.model_prediction?.top_terminal_city !== 'N/A')
-                ? detail?.model_prediction?.top_terminal_city
-                : (isHigh || isMedium ? fallbackTermCity : 'No Exit Convergence (Legitimate)');
+                ? detail?.model_prediction?.top_terminal_city : 'No Exit Convergence (Legitimate)';
 
               const topTerminals = (termId !== 'NONE' && termId) ? [{ id: termId, city: termCity, score: detail?.model_prediction?.top_terminal_score, distance_km: 0 }] : [];
 
