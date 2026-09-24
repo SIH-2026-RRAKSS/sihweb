@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import L from 'leaflet';
-import correctBoundaryData from '../../assets/geo/india-boundary-correct.geojson?url';
+import correctBoundaryData from '../../assets/geo/india-boundary-heavy.geojson?url';
 
 import {
   MapPin,
