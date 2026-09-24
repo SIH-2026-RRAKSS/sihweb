@@ -114,7 +114,7 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
 
           L.geoJSON(borderJson, {
             style: {
-              color: '#1a73e8',
+              color: 'grey',
               weight: 1.5,
               fill: false
             },
