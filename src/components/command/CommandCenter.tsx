@@ -25,6 +25,7 @@ import { NavPage } from '../layout/AppShell';
 interface CommandCenterProps {
   onSelectCase: (id: string) => void;
   onNavigate?: (page: NavPage) => void;
+  activeDataset?: string;
 }
 
 const formatCurrency = (amount: number): string => {
@@ -37,7 +38,7 @@ const formatCurrency = (amount: number): string => {
   return `₹${amount.toLocaleString('en-IN')}`;
 };
 
-export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNavigate }) => {
+export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNavigate, activeDataset }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState<PipelineStats | null>(null);
@@ -54,7 +55,12 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
         setLoading(true);
         const [statsData, incidentsResult] = await Promise.all([
           ApiService.getPipelineStats(),
-          ApiService.getIncidents({ page: 1, page_size: 1000 })
+          ApiService.getIncidents({ 
+            page: 1, 
+            page_size: 1000, 
+            tier: tierFilter !== 'ALL' ? tierFilter : undefined,
+            dataset: activeDataset 
+          })
         ]);
         
         setStats(statsData);
@@ -68,14 +74,14 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
         }
       } catch (err) {
         setError('Investigation data unavailable - backend unreachable');
-        console.error(err);
+        console.warn(err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchDashboardData();
-  }, []);
+  }, [activeDataset]);
 
   const fetchDetail = async (id: string) => {
     try {
@@ -84,7 +90,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
       setIncidentDetail(detail);
     } catch (err) {
         setError('Investigation data unavailable - backend unreachable');
-        console.error(err);
+        console.warn(err);
       } finally {
       setDetailLoading(false);
     }
@@ -139,7 +145,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
             <span className="text-amber-400 font-bold">72H WIN</span>
           </div>
           <div className="text-2xl font-bold font-sans text-amber-400">
-            48 RINGS
+            {stats ? stats.tier_breakdown.HIGH_CONFIDENCE : '48'} RINGS
           </div>
           <div className="text-[10px] text-slate-500">COORDINATED GRAPH TOPOLOGY</div>
         </div>
@@ -169,10 +175,10 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
         <div className="bg-white border border-slate-200 p-3.5 rounded-2xl space-y-1 shadow-sm">
           <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider flex items-center justify-between">
             <span>GNN F1 ACCURACY</span>
-            <span className="text-emerald-400 font-bold">MRR 1.0</span>
+            <span className="text-emerald-400 font-bold">MRR {stats?.model_comparison?.Terminal_Prediction_MRR || '1.0'}</span>
           </div>
           <div className="text-2xl font-bold font-sans text-emerald-400">
-            90.14%
+            {stats ? stats.model_comparison.GraphSAGE_Test_F1 : '89.77%'}
           </div>
           <div className="text-[10px] text-slate-500">GraphSAGE INDUCTIVE TEST</div>
         </div>
@@ -280,10 +286,8 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
                             </span>
                           )}
                         </span>
-                        <span className={`text-[9px] px-1 py-0.2 rounded font-bold border ${
-                          incident.trigger_source === 'DYNAMIC_ANOMALY' ? 'bg-amber-500/10 text-amber-500 border-amber-500/30' : 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30'
-                        }`}>
-                          {incident.trigger_source === 'DYNAMIC_ANOMALY' ? 'AUTO' : 'CITIZEN'}
+                        <span className="text-[9px] px-1 py-0.2 rounded font-bold border bg-cyan-500/10 text-cyan-400 border-cyan-500/30">
+                          CITIZEN
                         </span>
                         <span className={`text-[9px] px-1.5 py-0.2 rounded border font-bold ${
                           isHigh ? 'bg-[#FF5500]/15 text-[#FF5500] border-[#FF5500]/30' : isMedium ? 'bg-amber-500/15 text-amber-400 border-amber-500/30' : 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'

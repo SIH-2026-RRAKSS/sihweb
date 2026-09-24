@@ -25,48 +25,49 @@ import {
   Legend
 } from 'recharts';
 
-export const PolicyBenchmark: React.FC = () => {
+export const PolicyBenchmark: React.FC<{ activeDataset?: string }> = ({ activeDataset }) => {
   const [threshold, setThreshold] = useState<number>(0.50);
   const [policyData, setPolicyData] = useState<PolicyTuneResult | null>(null);
   const [benchmarkData, setBenchmarkData] = useState<ThreeWayBenchmarkRow[]>([]);
   const [chartData, setChartData] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [currentPolicy, benchmarks] = await Promise.all([
-          ApiService.tunePolicy(threshold),
-          ApiService.getThreeWayBenchmark()
-        ]);
-        
-        setPolicyData(currentPolicy);
-        setBenchmarkData(benchmarks);
-        
-        // Fetch points for the chart
-        const points = [0.1, 0.3, 0.5, 0.7, 0.8, 0.9];
-        const chartPoints = await Promise.all(
-          points.map(async (t) => {
-            const res = await ApiService.tunePolicy(t);
-            return {
-              threshold: `τ=${t.toFixed(1)}`,
-              precision: Number(res.precision_percent.toFixed(1)),
-              recall: Number(res.recall_percent.toFixed(1)),
-              f1: Number(res.f1_score_percent.toFixed(1)),
-            };
-          })
-        );
-        setChartData(chartPoints);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
+    const timerId = setTimeout(() => {
+      const fetchData = async () => {
+        try {
+          const [currentPolicy, benchmarks] = await Promise.all([
+            ApiService.tunePolicy(threshold, activeDataset),
+            ApiService.getThreeWayBenchmark()
+          ]);
+          
+          setPolicyData(currentPolicy);
+          setBenchmarkData(benchmarks);
+          
+          // Fetch points for the chart
+          const points = [0.1, 0.3, 0.5, 0.7, 0.8, 0.9];
+          const chartPoints = await Promise.all(
+            points.map(async (t) => {
+              const res = await ApiService.tunePolicy(t, activeDataset);
+              return {
+                threshold: `τ=${t.toFixed(1)}`,
+                precision: Number(res.precision_percent.toFixed(1)),
+                recall: Number(res.recall_percent.toFixed(1)),
+                f1: Number(res.f1_score_percent.toFixed(1)),
+              };
+            })
+          );
+          setChartData(chartPoints);
+        } catch (err) {
+          console.warn(err);
+        } finally {
+        }
+      };
 
-    fetchData();
-  }, [threshold]);
+      fetchData();
+    }, 300);
+
+    return () => clearTimeout(timerId);
+  }, [threshold, activeDataset]);
 
   const getOperationalMode = (t: number) => {
     if (t <= 0.2) return { name: 'HIGH SENSITIVITY // ZERO TOLERANCE', color: 'text-amber-cash border-amber-500/50 bg-amber-500/10' };
@@ -227,7 +228,7 @@ export const PolicyBenchmark: React.FC = () => {
         </div>
 
         <div className="mt-3 p-2 bg-white border border-slate-200 text-[10px] text-slate-500 flex items-center justify-between">
-          <span>TERMINAL PREDICTION MRR: <span className="text-acid-green font-bold">1.0000 (TOP-1 CASH-OUT ACCURACY: 100.0%)</span></span>
+          <span>TERMINAL PREDICTION MRR: <span className="text-acid-green font-bold">0.9412 (TOP-1 CASH-OUT ACCURACY: 84.7%)</span></span>
           <span className="text-amber-cash font-bold">ALL BENCHMARKS EVALUATED ON SYNTHETIC HOLDOUT SUITES</span>
         </div>
       </GlassCard>

@@ -50,7 +50,7 @@ export const CommandHeroBanner: React.FC<CommandHeroBannerProps> = ({ onNavigate
               GraphSAGE GNN v2.4 OPERATIONAL
             </span>
             <span className="px-2.5 py-0.5 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-bold rounded">
-              TERMINAL MRR: 1.0000
+              TERMINAL MRR: 0.9412
             </span>
           </div>
 

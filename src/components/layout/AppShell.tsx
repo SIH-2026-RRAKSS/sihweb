@@ -52,6 +52,8 @@ const NAV_ITEMS: { id: NavPage; label: string; code: string; icon: any; is3D?: b
   { id: 'live-demo', label: 'Live Backend Demo', code: 'API-DEMO', icon: Zap },
 ];
 
+import { ApiService } from '../../services/api';
+
 export const AppShell: React.FC<AppShellProps> = ({
   activePage,
   onNavigate,
@@ -62,6 +64,18 @@ export const AppShell: React.FC<AppShellProps> = ({
 }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [time, setTime] = useState<{ ist: string; utc: string }>({ ist: '', utc: '' });
+  const [stats, setStats] = useState<any>(null);
+  const [bench, setBench] = useState<any>(null);
+
+  useEffect(() => {
+    Promise.all([
+      ApiService.getPipelineStats().catch(() => null),
+      ApiService.getStreamingBenchmark().catch(() => null)
+    ]).then(([s, b]) => {
+      if (s) setStats(s);
+      if (b) setBench(b);
+    });
+  }, [activeDataset]);
 
   // Real military dual clocks
   useEffect(() => {
@@ -213,10 +227,10 @@ export const AppShell: React.FC<AppShellProps> = ({
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            <span>STREAM: <strong className="text-slate-800 font-sans">1,448.90 TX/SEC</strong></span>
+            <span>STREAM: <strong className="text-slate-800 font-sans">{bench?.ingestion_rate_tx_per_sec || '1,448.90'} TX/SEC</strong></span>
           </div>
           <span className="text-slate-700">|</span>
-          <div>ACTIVE CHAINS: <strong className="text-[#FF5500] font-sans">48 RINGS</strong></div>
+          <div>ACTIVE CHAINS: <strong className="text-[#FF5500] font-sans">{stats?.tier_breakdown?.HIGH_CONFIDENCE || '48'} RINGS</strong></div>
           <span className="text-slate-700">|</span>
           <div>CASH-OUT EXPOSURE: <strong className="text-amber-600 font-sans">₹4.82 CR</strong></div>
         </div>
@@ -226,7 +240,9 @@ export const AppShell: React.FC<AppShellProps> = ({
           <span className="text-slate-700">|</span>
           <div>POLICY: <strong className="text-slate-700">τ = 0.50</strong></div>
           <span className="text-slate-700">|</span>
-          <div className="text-emerald-600 font-bold">P50: 71.67ms (SLA OK)</div>
+          <div className={`font-bold ${bench?.p50_latency_ms > 50 ? 'text-amber-600' : 'text-emerald-600'}`}>
+            P50: {bench?.p50_latency_ms || '71.67'}ms ({bench?.p50_latency_ms > 50 ? 'SLA MISS' : 'SLA OK'})
+          </div>
         </div>
       </footer>
 

@@ -1,22 +1,24 @@
 import React, { useState } from 'react';
 import { Play, ShieldAlert, Network } from 'lucide-react';
 import { ApiService } from '../../services/api';
+import { ThreeNetworkCanvas } from './ThreeNetworkCanvas';
 import { InputValidator } from '../../utils/validation';
 
 export const SimulationLab: React.FC = () => {
-  const [seedEntityId, setSeedEntityId] = useState<string>('C000035');
+  const [seedEntityId, setSeedEntityId] = useState<string>('ENT_000185');
   const [predictionResult, setPredictionResult] = useState<any | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [inputVal, setInputVal] = useState<string>('C000035');
+  const [inputVal, setInputVal] = useState<string>('ENT_000185');
 
-  const handleRunInference = async () => {
+  const handleRunInference = async (entityId: string = seedEntityId) => {
+    if (!entityId) return;
     setLoading(true);
     setError(null);
     setPredictionResult(null);
     try {
       // Actually fetch live prediction from the backend
-      const res = await ApiService.predictLiveEntity(seedEntityId, 3);
+      const res = await ApiService.predictLiveEntity(entityId, 3);
       setPredictionResult(res);
     } catch (err: any) {
       setError(err.message || 'Failed to reach backend');
@@ -46,7 +48,7 @@ export const SimulationLab: React.FC = () => {
           <button 
             onClick={() => {
               setSeedEntityId(inputVal);
-              handleRunInference();
+              handleRunInference(inputVal);
             }}
             disabled={loading}
             className="bg-[#FF5500] hover:bg-[#FF5500]/90 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 disabled:opacity-50"
@@ -74,11 +76,12 @@ export const SimulationLab: React.FC = () => {
              <div className="absolute top-4 left-4 z-10 bg-white/90 px-3 py-1 rounded shadow text-xs font-bold flex items-center gap-2">
                <Network className="w-4 h-4 text-purple-500" /> Graph Visualizer
              </div>
-             <div className="h-full flex flex-col items-center justify-center text-slate-400 p-8 text-center text-sm gap-2">
-                <Network className="w-12 h-12 text-slate-300" />
-                <p>Prediction complete.</p>
-                <p>To explore the 3D topology of this incident, navigate to the <b>Network Explorer</b> tab.</p>
-             </div>
+             <ThreeNetworkCanvas
+               currentStage={3}
+               seedEntityId={seedEntityId}
+               speed={1}
+               incidentDetail={null}
+             />
           </div>
         </div>
       )}

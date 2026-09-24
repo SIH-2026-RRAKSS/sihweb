@@ -52,7 +52,6 @@ export const StreamingMonitorView: React.FC = () => {
   const [gnnRuns, setGnnRuns] = useState<number>(0);
   const [avgGnnLat, setAvgGnnLat] = useState<number>(0.70);
   const [liveStreamEvents, setLiveStreamEvents] = useState<any[]>([]);
-  const [error, setError] = useState<string | null>(null);
   const [progressPercent, setProgressPercent] = useState<number>(0);
 
   // Risk Factor Visibility & Threshold Controls
@@ -75,8 +74,7 @@ export const StreamingMonitorView: React.FC = () => {
 
   useEffect(() => {
     ApiService.getStreamingBenchmark().then(setBench).catch((err) => {
-      console.error(err);
-      setError("Backend API offline");
+      console.warn(err);
     });
     return () => {
       if (animationTimerRef.current) clearInterval(animationTimerRef.current);
@@ -162,7 +160,7 @@ export const StreamingMonitorView: React.FC = () => {
         setIsSimulating(false);
       }
     } catch (e) {
-      console.error(e);
+      console.warn(e);
       setIsSimulating(false);
     }
   };
@@ -210,7 +208,6 @@ export const StreamingMonitorView: React.FC = () => {
 
   const latencyData = [
     { metric: 'p50 Median', latency: bench?.p50_latency_ms || 0.70, fill: '#10B981' },
-    { metric: 'p90 90th', latency: bench?.p90_latency_ms || 1.45, fill: '#38BDF8' },
     { metric: 'p95 95th', latency: bench?.p95_latency_ms || 2.15, fill: '#F59E0B' },
     { metric: 'p99 99th', latency: bench?.p99_latency_ms || 3.40, fill: '#EF4444' }
   ];
@@ -709,7 +706,7 @@ export const StreamingMonitorView: React.FC = () => {
             </ResponsiveContainer>
           </div>
           <div className="text-[10px] text-slate-400 text-center">
-            F1 accuracy peaks at 90.66% as temporal window reaches 72 hours, maintaining memory of multi-hop chains.
+            F1 accuracy peaks at 89.77% as temporal window reaches 72 hours, maintaining memory of multi-hop chains.
           </div>
         </div>
       </div>

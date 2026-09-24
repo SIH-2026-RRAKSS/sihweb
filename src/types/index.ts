@@ -11,8 +11,6 @@ export interface IncidentSummary {
   confidence_tier: ConfidenceTier;
   top_terminal_id?: string;
   top_terminal_city?: string;
-  trigger_source?: 'CITIZEN_COMPLAINT' | 'DYNAMIC_ANOMALY';
-  anomaly_reason?: string;
   intercepted_in_flight?: boolean;
 }
 
@@ -86,6 +84,9 @@ export interface GraphNode {
   total_incoming_amount: number;
   total_outgoing_amount: number;
   color: string;
+  node_mule_score?: number;
+  is_dormant?: boolean;
+  isolation_reason?: string;
   x?: number;
   y?: number;
   vx?: number;
@@ -106,6 +107,11 @@ export interface GraphStructure {
   incident_id: string;
   num_nodes: number;
   num_edges: number;
+  is_dormant?: boolean;
+  dormant_reason?: string;
+  lifetime_tx_count?: number;
+  nearest_activity?: string;
+  is_historical_expanded?: boolean;
   nodes: GraphNode[];
   edges: GraphEdge[];
 }
@@ -184,7 +190,5 @@ export interface ThreeWayBenchmarkRow {
   xgboost_f1: string;
   graphsage_f1: string;
   f1_delta: string;
-  precision: string;
-  recall: string;
   pr_auc: string;
 }

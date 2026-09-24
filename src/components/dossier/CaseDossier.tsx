@@ -31,25 +31,22 @@ interface CaseDossierProps {
 
 export const CaseDossier: React.FC<CaseDossierProps> = ({ caseId, onBack }) => {
   const [detail, setDetail] = useState<IncidentDetail | null>(null);
-  const [graph, setGraph] = useState<GraphStructure | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [copiedType, setCopiedType] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!caseId) return;
+    if (!caseId) { setLoading(false); return; }
 
     const fetchCaseData = async () => {
       try {
         setLoading(true);
-        const [detailData, graphData] = await Promise.all([
+        const [detailData] = await Promise.all([
           ApiService.getIncidentDetail(caseId),
-          ApiService.getIncidentGraph(caseId)
         ]);
         setDetail(detailData);
-        setGraph(graphData);
       } catch (err) {
-        console.error(err);
+        console.warn(err);
         setError("Failed to load Case Dossier");
       } finally {
         setLoading(false);
@@ -63,27 +60,27 @@ export const CaseDossier: React.FC<CaseDossierProps> = ({ caseId, onBack }) => {
     if (!detail) return;
     const md = `
 # [AML INVESTIGATION DOSSIER] // CASE ID: ${caseId}
-**Operational Tier:** ${detail.model_prediction.confidence_tier}
-**GraphSAGE Risk Probability:** ${((detail.model_prediction.graphsage_risk_probability || 0) * 100).toFixed(2)}%
+**Operational Tier:** ${detail?.model_prediction?.confidence_tier}
+**GraphSAGE Risk Probability:** ${((detail?.model_prediction?.graphsage_risk_probability || 0) * 100).toFixed(2)}%
 
 ## 1. COMPLAINT SUMMARY
-- Date: ${detail.complaint.complaint_date}
-- Disputed Amount: ₹${(detail.complaint.reported_amount || 0).toLocaleString('en-IN')}
-- Scam Category: ${detail.complaint.scam_category}
-- Origin Account: ${detail.complaint.reported_account_number} (IFSC: ${detail.complaint.reported_ifsc})
-- Jurisdiction: ${detail.complaint.location}
+- Date: ${detail?.complaint?.complaint_date}
+- Disputed Amount: ₹${(detail?.complaint?.reported_amount || 0).toLocaleString('en-IN')}
+- Scam Category: ${detail?.complaint?.scam_category}
+- Origin Account: ${detail?.complaint?.reported_account_number} (IFSC: ${detail?.complaint?.reported_ifsc})
+- Jurisdiction: ${detail?.complaint?.location}
 
 ## 2. CANONICAL ENTITY RESOLUTION
-- Entity ID: ${detail.resolved_canonical_entity.entity_id}
-- Master Name: ${detail.resolved_canonical_entity.canonical_holder_name}
-- Bank: ${detail.resolved_canonical_entity.bank_name}
+- Entity ID: ${detail?.resolved_canonical_entity?.entity_id}
+- Master Name: ${detail?.resolved_canonical_entity?.canonical_holder_name}
+- Bank: ${detail?.resolved_canonical_entity?.bank_name}
 
 ## 3. GNN INVESTIGATIVE EVIDENCE
-${detail.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
+${detail?.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
 
 ## 4. CASH-OUT TERMINAL PREDICTION
-- Exit Terminal: ${detail.model_prediction.top_terminal_id || 'N/A'} (${detail.model_prediction.top_terminal_city || 'N/A'})
-- Terminal Score: ${((detail.model_prediction.top_terminal_score || 0) * 100).toFixed(1)}%
+- Exit Terminal: ${detail?.model_prediction?.top_terminal_id || 'N/A'} (${detail?.model_prediction?.top_terminal_city || 'N/A'})
+- Terminal Score: ${((detail?.model_prediction?.top_terminal_score || 0) * 100).toFixed(1)}%
 
 ---
 *DECISION-SUPPORT OUTPUT. HUMAN AML INVESTIGATOR REVIEW REQUIRED.*
@@ -139,7 +136,7 @@ ${detail.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
                 <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${
                   isHigh ? 'bg-[#FF5500]/15 text-[#FF5500] border border-[#FF5500]/30' : isMedium ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
                 }`}>
-                  {detail.model_prediction.confidence_tier}
+                  {detail?.model_prediction?.confidence_tier}
                 </span>
               )}
             </div>
@@ -177,7 +174,14 @@ ${detail.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
         </div>
       </div>
 
-      {loading || !detail ? (
+      {error ? (
+        <div className="p-8 text-center text-red-400 bg-slate-900 rounded-lg mx-3.5 mt-4 border border-red-900/50">
+          <AlertTriangle size={32} className="mx-auto mb-3 opacity-50" />
+          <p className="font-mono text-sm">{error}</p>
+        </div>
+      ) : !caseId ? (
+        <div className="p-8 text-center text-slate-500 font-bold">Select a case from the Incident Queue to view its dossier.</div>
+      ) : loading || !detail ? (
         <div className="p-8">
           <LoadingSkeleton variant="card" count={3} />
         </div>
@@ -196,24 +200,24 @@ ${detail.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="p-2.5 bg-slate-50 border border-slate-200 rounded">
                   <div className="text-[10px] text-slate-500">COMPLAINT ID:</div>
-                  <div className="text-slate-900 font-bold">{detail.complaint.complaint_id}</div>
+                  <div className="text-slate-900 font-bold">{detail?.complaint?.complaint_id}</div>
                 </div>
 
                 <div className="p-2.5 bg-slate-50 border border-slate-200 rounded">
                   <div className="text-[10px] text-slate-500">DISPUTED SUM:</div>
                   <div className="text-slate-900 font-bold font-sans text-sm">
-                    ₹{(detail.complaint.reported_amount || 0).toLocaleString('en-IN')}
+                    ₹{(detail?.complaint?.reported_amount || 0).toLocaleString('en-IN')}
                   </div>
                 </div>
 
                 <div className="p-2.5 bg-slate-50 border border-slate-200 rounded">
                   <div className="text-[10px] text-slate-500">SCAM CATEGORY:</div>
-                  <div className="text-slate-800">{detail.complaint.scam_category}</div>
+                  <div className="text-slate-800">{detail?.complaint?.scam_category}</div>
                 </div>
 
                 <div className="p-2.5 bg-slate-50 border border-slate-200 rounded">
                   <div className="text-[10px] text-slate-500">JURISDICTION:</div>
-                  <div className="text-slate-800">{detail.complaint.location}</div>
+                  <div className="text-slate-800">{detail?.complaint?.location}</div>
                 </div>
               </div>
             </div>
@@ -228,23 +232,23 @@ ${detail.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="p-2.5 bg-slate-50 border border-slate-200 rounded">
                   <div className="text-[10px] text-slate-500">CANONICAL ENTITY ID:</div>
-                  <div className="text-[#38BDF8] font-bold">{detail.resolved_canonical_entity.entity_id}</div>
+                  <div className="text-[#38BDF8] font-bold">{detail?.resolved_canonical_entity?.entity_id}</div>
                 </div>
 
                 <div className="p-2.5 bg-slate-50 border border-slate-200 rounded">
                   <div className="text-[10px] text-slate-500">BENEFICIARY NAME:</div>
-                  <div className="text-slate-900 font-bold">{detail.resolved_canonical_entity.canonical_holder_name}</div>
+                  <div className="text-slate-900 font-bold">{detail?.resolved_canonical_entity?.canonical_holder_name}</div>
                 </div>
 
                 <div className="p-2.5 bg-slate-50 border border-slate-200 rounded">
                   <div className="text-[10px] text-slate-500">BANK & BRANCH:</div>
-                  <div className="text-slate-800">{detail.resolved_canonical_entity.bank_name}</div>
+                  <div className="text-slate-800">{detail?.resolved_canonical_entity?.bank_name}</div>
                 </div>
 
                 <div className="p-2.5 bg-slate-50 border border-slate-200 rounded">
                   <div className="text-[10px] text-slate-500">GPS COORDINATES:</div>
                   <div className="text-slate-700">
-                    {detail.resolved_canonical_entity.coordinates ? `${detail.resolved_canonical_entity.coordinates[0].toFixed(4)}, ${detail.resolved_canonical_entity.coordinates[1].toFixed(4)}` : 'N/A'}
+                    {detail?.resolved_canonical_entity?.coordinates ? `${detail?.resolved_canonical_entity?.coordinates[0].toFixed(4)}, ${detail?.resolved_canonical_entity?.coordinates[1].toFixed(4)}` : 'N/A'}
                   </div>
                 </div>
               </div>
@@ -258,7 +262,7 @@ ${detail.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
               </div>
 
               <div className="space-y-1.5 text-[11px] text-slate-700">
-                {detail.investigative_evidence_bullets.map((bullet, idx) => (
+                {detail?.investigative_evidence_bullets.map((bullet, idx) => (
                   <div key={idx} className="flex items-start gap-2 p-2 bg-slate-50 border border-slate-100 rounded">
                     <CheckCircle2 className={`w-3.5 h-3.5 flex-shrink-0 mt-0.5 ${isHigh ? 'text-[#FF5500]' : isMedium ? 'text-amber-400' : 'text-emerald-400'}`} />
                     <span className="leading-relaxed font-sans">{bullet}</span>
@@ -279,7 +283,7 @@ ${detail.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
                   <span className={`text-[10px] px-2 py-0.5 rounded ${
                     isHigh ? 'bg-[#FF5500]/15 text-[#FF5500]' : isMedium ? 'bg-amber-500/15 text-amber-400' : 'bg-emerald-500/15 text-emerald-400'
                   }`}>
-                    {detail.model_prediction.confidence_tier}
+                    {detail?.model_prediction?.confidence_tier}
                   </span>
                 </div>
                 <div className="text-[9px] text-cyan-400 font-bold uppercase tracking-widest flex items-center gap-1">
@@ -293,13 +297,13 @@ ${detail.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
                   <div className="flex flex-col">
                     <span className="text-slate-500 text-[9px] font-bold uppercase">Head 1: Macro Ring</span>
                     <span className="text-xl font-bold font-sans text-slate-900 mt-1">
-                      {((detail.model_prediction.graphsage_risk_probability || 0) * 100).toFixed(2)}%
+                      {((detail?.model_prediction?.graphsage_risk_probability || 0) * 100).toFixed(2)}%
                     </span>
                   </div>
                   <div className="w-full bg-slate-100 h-1.5 rounded overflow-hidden mt-1">
                     <div
                       className={`h-full ${isHigh ? 'bg-[#FF5500]' : isMedium ? 'bg-amber-400' : 'bg-emerald-400'}`}
-                      style={{ width: `${(detail.model_prediction.graphsage_risk_probability || 0) * 100}%` }}
+                      style={{ width: `${(detail?.model_prediction?.graphsage_risk_probability || 0) * 100}%` }}
                     />
                   </div>
                 </div>
@@ -308,13 +312,13 @@ ${detail.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
                   <div className="flex flex-col">
                     <span className="text-slate-500 text-[9px] font-bold uppercase">Head 2: Micro Node</span>
                     <span className="text-xl font-bold font-sans text-slate-900 mt-1">
-                      {((detail.model_prediction.node_mule_probability_head2 || 0) * 100).toFixed(2)}%
+                      {((detail?.model_prediction?.node_mule_probability_head2 || 0) * 100).toFixed(2)}%
                     </span>
                   </div>
                   <div className="w-full bg-slate-100 h-1.5 rounded overflow-hidden mt-1">
                     <div
-                      className={`h-full ${(detail.model_prediction.node_mule_probability_head2 || 0) > 0.7 ? 'bg-[#FF5500]' : 'bg-amber-400'}`}
-                      style={{ width: `${(detail.model_prediction.node_mule_probability_head2 || 0) * 100}%` }}
+                      className={`h-full ${(detail?.model_prediction?.node_mule_probability_head2 || 0) > 0.7 ? 'bg-[#FF5500]' : 'bg-amber-400'}`}
+                      style={{ width: `${(detail?.model_prediction?.node_mule_probability_head2 || 0) * 100}%` }}
                     />
                   </div>
                 </div>
@@ -324,37 +328,20 @@ ${detail.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
               <div className="p-3 bg-slate-50 border border-slate-200 rounded space-y-1">
                 <div className="text-[10px] text-slate-500 uppercase font-bold">Investigator Briefing:</div>
                 <p className="text-[11px] text-slate-700 leading-relaxed font-sans">
-                  {detail.model_prediction.executive_summary}
+                  {detail?.model_prediction?.executive_summary}
                 </p>
               </div>
             </div>
 
             {/* Exit Terminal Prediction Card */}
             {(() => {
-              const locStr = (detail.complaint.location || '').toLowerCase();
-              let fallbackTermId = 'ATM_029';
-              let fallbackTermCity = 'Mumbai (Nariman Point)';
+              const termId = (detail?.model_prediction?.top_terminal_id && detail?.model_prediction?.top_terminal_id !== 'NONE' && detail?.model_prediction?.top_terminal_id !== 'N/A')
+                ? detail?.model_prediction?.top_terminal_id : 'NONE';
 
-              if (locStr.includes('bengaluru') || locStr.includes('varanasi') || locStr.includes('karnataka')) {
-                fallbackTermId = 'ATM_008';
-                fallbackTermCity = 'Bengaluru (Indiranagar)';
-              } else if (locStr.includes('bhopal') || locStr.includes('madhya pradesh') || locStr.includes('rajasthan')) {
-                fallbackTermId = 'ATM_023';
-                fallbackTermCity = 'Bhopal (MP Nagar)';
-              } else if (locStr.includes('delhi') || locStr.includes('haryana')) {
-                fallbackTermId = 'ATM_002';
-                fallbackTermCity = 'Delhi (Connaught Place)';
-              }
+              const termCity = (detail?.model_prediction?.top_terminal_city && detail?.model_prediction?.top_terminal_city !== 'NONE' && detail?.model_prediction?.top_terminal_city !== 'N/A')
+                ? detail?.model_prediction?.top_terminal_city : 'No Exit Convergence (Legitimate)';
 
-              const termId = (detail.model_prediction.top_terminal_id && detail.model_prediction.top_terminal_id !== 'NONE' && detail.model_prediction.top_terminal_id !== 'N/A')
-                ? detail.model_prediction.top_terminal_id
-                : (isHigh || isMedium ? fallbackTermId : 'NONE');
-
-              const termCity = (detail.model_prediction.top_terminal_city && detail.model_prediction.top_terminal_city !== 'NONE' && detail.model_prediction.top_terminal_city !== 'N/A')
-                ? detail.model_prediction.top_terminal_city
-                : (isHigh || isMedium ? fallbackTermCity : 'No Exit Convergence (Legitimate)');
-
-              const topTerminals = detail.model_prediction.top_terminals || (termId !== 'NONE' ? [{ id: termId, city: termCity, score: detail.model_prediction.top_terminal_score, distance_km: 0 }] : []);
+              const topTerminals = (termId !== 'NONE' && termId) ? [{ id: termId, city: termCity, score: detail?.model_prediction?.top_terminal_score, distance_km: 0 }] : [];
 
               return (
                 <div className="bg-white border border-slate-200 rounded-2xl p-4 space-y-3 shadow-sm">
@@ -363,7 +350,7 @@ ${detail.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
                       <MapPin className="w-4 h-4 text-amber-400" />
                       <span>TOP 3 CASH-OUT TERMINALS</span>
                     </span>
-                    <span>MRR: 1.0000</span>
+                    <span>MRR: 0.9412</span>
                   </div>
 
                   {topTerminals.length > 0 ? (
@@ -377,7 +364,7 @@ ${detail.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
                           </div>
                           <div className="flex items-center gap-3">
                             <span className="text-slate-500 text-[10px]">{t.distance_km} km</span>
-                            <span className="text-amber-400 font-bold">{(t.score * 100).toFixed(1)}%</span>
+                            <span className="text-amber-400 font-bold">{t.score != null ? (t.score * 100).toFixed(1) + '%' : 'NOT PREDICTED'}</span>
                           </div>
                         </div>
                       ))}
@@ -413,7 +400,10 @@ ${detail.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
 
             {/* Legal Export Action */}
             {(isHigh || isMedium) && (
-              <button className="w-full py-3 bg-tactical-accent hover:bg-tactical-accentHover text-slate-900 font-bold text-xs uppercase tracking-wider rounded-full flex items-center justify-center gap-2 transition-all shadow-sm">
+              <button 
+                onClick={() => window.open(`http://localhost:8000/api/dossier/${caseId}/export`, '_blank')}
+                className="w-full py-3 bg-tactical-accent hover:bg-tactical-accentHover text-slate-900 font-bold text-xs uppercase tracking-wider rounded-full flex items-center justify-center gap-2 transition-all shadow-sm"
+              >
                 <FileText className="w-4 h-4" />
                 <span>Generate Section 91 CrPC Freeze Order</span>
               </button>

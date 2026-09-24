@@ -18,12 +18,13 @@ import { IncidentSummary } from '../../types';
 
 interface IncidentQueueProps {
   onSelectCase: (id: string) => void;
+  activeDataset?: string;
 }
 
 export type SortMode = 'SERIAL' | 'RISK' | 'AMOUNT';
 
-export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase }) => {
-  const [incidents, setIncidents] = useState<IncidentSummary[]>([]);
+export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase, activeDataset }) => {
+  const [allIncidents, setAllIncidents] = useState<IncidentSummary[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [totalCount, setTotalCount] = useState<number>(0);
@@ -53,34 +54,31 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase }) =>
           setError(null);
         }
 
-        const result = await ApiService.getIncidents({
+        // Note: Sort is handled locally since backend doesn't implement dynamic sort fully
+        const { items, total_count } = await ApiService.getIncidents({
           page: 1,
           page_size: 1000,
           tier: tierFilter,
-          search: search || undefined
+          search: search || undefined,
+          dataset: activeDataset
         });
 
-        let items = result.items || [];
+        let itemList = items || [];
 
-        // Apply selected Sort Mode
+        // Local sort
         if (sortMode === 'SERIAL') {
-          items.sort((a, b) => {
-            const numA = parseInt(a.complaint_id.replace(/\D/g, ''), 10) || 0;
-            const numB = parseInt(b.complaint_id.replace(/\D/g, ''), 10) || 0;
-            return numA - numB;
-          });
+          itemList.sort((a, b) => a.complaint_id.localeCompare(b.complaint_id));
         } else if (sortMode === 'RISK') {
-          items.sort((a, b) => (b.graphsage_risk_probability || 0) - (a.graphsage_risk_probability || 0));
+          itemList.sort((a, b) => (b.graphsage_risk_probability || 0) - (a.graphsage_risk_probability || 0));
         } else if (sortMode === 'AMOUNT') {
-          items.sort((a, b) => (b.reported_amount || 0) - (a.reported_amount || 0));
+          itemList.sort((a, b) => (b.reported_amount || 0) - (a.reported_amount || 0));
         }
 
-        setTotalCount(items.length);
-        const start = (page - 1) * pageSize;
-        setIncidents(items.slice(start, start + pageSize));
+        setTotalCount(itemList.length);
+        setAllIncidents(itemList);
       } catch (err) {
         setError('Investigation data unavailable - backend unreachable');
-        console.error(err);
+        console.warn(err);
       } finally {
         if (isInitial) {
           setLoading(false);
@@ -93,9 +91,12 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase }) =>
     intervalId = setInterval(fetchIncidents, 10000);
 
     return () => clearInterval(intervalId);
-  }, [page, pageSize, tierFilter, search, sortMode]);
+  }, [tierFilter, search, sortMode, activeDataset]);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  
+  const start = (page - 1) * pageSize;
+  const incidents = allIncidents.slice(start, start + pageSize);
 
   return (
     <div className="space-y-4 font-sans text-xs">
@@ -200,6 +201,13 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase }) =>
         </div>
       </div>
 
+      {error && (
+        <div className="bg-red-50 border border-red-200 p-4 rounded-xl flex items-center gap-3 text-red-600">
+          <ShieldAlert className="w-5 h-5 text-red-500" />
+          <span className="font-bold text-sm">{error}</span>
+        </div>
+      )}
+
       {/* ── INCIDENTS TABLE ── */}
       <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-saas-card">
         <div className="overflow-x-auto">
@@ -237,7 +245,7 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase }) =>
                 incidents.map((incident) => {
                   const isHigh = incident.confidence_tier === 'HIGH_CONFIDENCE';
                   const isMedium = incident.confidence_tier === 'MEDIUM_CONFIDENCE';
-                  const isAuto = incident.trigger_source === 'DYNAMIC_ANOMALY';
+                  const isAuto = false;
 
                   return (
                     <tr
@@ -258,9 +266,9 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase }) =>
                           <span className={`text-[9px] px-1.5 py-0.5 w-fit rounded font-bold border ${isAuto ? 'bg-amber-500/10 text-amber-500 border-amber-500/30' : 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30'}`}>
                             {isAuto ? '[AUTO-SPAWNED ANOMALY]' : '[CITIZEN COMPLAINT]'}
                           </span>
-                          {isAuto && incident.anomaly_reason && (
+                          {false && (
                             <span className="text-[9px] text-slate-500 leading-tight">
-                              {incident.anomaly_reason}
+                              ""
                             </span>
                           )}
                         </div>
