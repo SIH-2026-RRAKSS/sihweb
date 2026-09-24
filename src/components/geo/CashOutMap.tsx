@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import L from 'leaflet';
+import correctBoundaryData from '../../assets/geo/india-boundary-correct.geojson?url';
+import maskData from '../../assets/geo/india-mask.geojson?url';
+
 import {
   MapPin,
   Flame,
@@ -24,10 +27,11 @@ interface CashOutMapProps {
   targetEntityId?: string | null;
   onNavigateToCase?: (complaintId: string) => void;
   activeDataset?: string;
+  showIndiaBoundaryOverlay?: boolean;
 }
 
 
-export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNavigateToCase, activeDataset }) => {
+export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNavigateToCase, activeDataset, showIndiaBoundaryOverlay = true }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
@@ -91,6 +95,36 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
     }).addTo(map);
+
+    // Overlay to correct boundaries: OSM raster tiles render disputed boundaries per international convention.
+    // This mask covers those zones, and the boundary line draws India's officially claimed territory.
+    if (showIndiaBoundaryOverlay) {
+      fetch(maskData)
+        .then(res => res.json())
+        .then(maskJson => {
+          L.geoJSON(maskJson, {
+            style: {
+              fillColor: '#F8FAFC',
+              fillOpacity: 1.0,
+              stroke: false,
+            },
+            interactive: false
+          }).addTo(map);
+          
+          fetch(correctBoundaryData)
+            .then(res => res.json())
+            .then(borderJson => {
+              L.geoJSON(borderJson, {
+                style: {
+                  color: '#1a73e8',
+                  weight: 1.5,
+                  fill: false
+                },
+                interactive: false
+              }).addTo(map);
+            });
+        });
+    }
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
