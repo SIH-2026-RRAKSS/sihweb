@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import L from 'leaflet';
 import correctBoundaryData from '../../assets/geo/india-boundary-correct.geojson?url';
-import maskData from '../../assets/geo/india-mask.geojson?url';
 
 import {
   MapPin,
@@ -97,32 +96,30 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
     }).addTo(map);
 
     // Overlay to correct boundaries: OSM raster tiles render disputed boundaries per international convention.
-    // This mask covers those zones, and the boundary line draws India's officially claimed territory.
+    // This draws India's officially claimed territory vector on top.
     if (showIndiaBoundaryOverlay) {
-      fetch(maskData)
+      fetch(correctBoundaryData)
         .then(res => res.json())
-        .then(maskJson => {
-          L.geoJSON(maskJson, {
+        .then(borderJson => {
+          // Add a subtle thick halo behind the blue line to help visually separate it from OSM base maps
+          L.geoJSON(borderJson, {
             style: {
-              fillColor: '#F8FAFC',
-              fillOpacity: 1.0,
-              stroke: false,
+              color: '#ffffff',
+              weight: 4,
+              opacity: 0.6,
+              fill: false
             },
             interactive: false
           }).addTo(map);
-          
-          fetch(correctBoundaryData)
-            .then(res => res.json())
-            .then(borderJson => {
-              L.geoJSON(borderJson, {
-                style: {
-                  color: '#1a73e8',
-                  weight: 1.5,
-                  fill: false
-                },
-                interactive: false
-              }).addTo(map);
-            });
+
+          L.geoJSON(borderJson, {
+            style: {
+              color: '#1a73e8',
+              weight: 1.5,
+              fill: false
+            },
+            interactive: false
+          }).addTo(map);
         });
     }
 
