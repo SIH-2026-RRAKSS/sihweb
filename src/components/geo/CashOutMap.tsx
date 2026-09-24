@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import L from 'leaflet';
-import correctBoundaryData from '../../assets/geo/india-boundary-heavy.geojson?url';
 
 import {
   MapPin,
@@ -98,7 +97,7 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
     // Overlay to correct boundaries: OSM raster tiles render disputed boundaries per international convention.
     // This draws India's officially claimed territory vector on top.
     if (showIndiaBoundaryOverlay) {
-      fetch(correctBoundaryData)
+      fetch('/geo/india-boundary-heavy.geojson')
         .then(res => res.json())
         .then(borderJson => {
           // Add a subtle thick halo behind the blue line to help visually separate it from OSM base maps
