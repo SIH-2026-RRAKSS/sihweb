@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import L from 'leaflet';
+
 import {
   MapPin,
   Flame,
@@ -24,10 +25,11 @@ interface CashOutMapProps {
   targetEntityId?: string | null;
   onNavigateToCase?: (complaintId: string) => void;
   activeDataset?: string;
+  showIndiaBoundaryOverlay?: boolean;
 }
 
 
-export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNavigateToCase, activeDataset }) => {
+export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNavigateToCase, activeDataset, showIndiaBoundaryOverlay = true }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
@@ -91,6 +93,34 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
     }).addTo(map);
+
+    // Overlay to correct boundaries: OSM raster tiles render disputed boundaries per international convention.
+    // This draws India's officially claimed territory vector on top.
+    if (showIndiaBoundaryOverlay) {
+      fetch('/geo/india-boundary-heavy.geojson')
+        .then(res => res.json())
+        .then(borderJson => {
+          // Add a subtle thick halo behind the blue line to help visually separate it from OSM base maps
+          L.geoJSON(borderJson, {
+            style: {
+              color: '#ffffff',
+              weight: 4,
+              opacity: 0.6,
+              fill: false
+            },
+            interactive: false
+          }).addTo(map);
+
+          L.geoJSON(borderJson, {
+            style: {
+              color: 'grey',
+              weight: 1.5,
+              fill: false
+            },
+            interactive: false
+          }).addTo(map);
+        });
+    }
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
