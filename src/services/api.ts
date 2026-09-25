@@ -496,6 +496,7 @@ export class ApiService {
         user: {
           id: raw.userId || 'usr_unknown',
           name: raw.name || 'Unknown User',
+          email: raw.email || '',
           role: raw.role as UserRole,
           bankId: raw.bankId,
           jurisdictionId: raw.jurisdictionPath,
@@ -525,6 +526,7 @@ export class ApiService {
         user: {
           id: raw.userId || 'usr_cit_unknown',
           name: raw.name || 'Citizen User',
+          email: raw.email || '',
           role: (raw.role as UserRole) || 'COMPLAINANT'
         }
       };

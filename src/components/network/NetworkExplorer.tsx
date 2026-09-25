@@ -285,7 +285,7 @@ export const NetworkExplorer: React.FC = () => {
           <div className="flex items-center gap-2">
             <span className="text-[10px] text-slate-500">SELECT INCIDENT:</span>
             <select
-              value={selectedIncidentId}
+              value={selectedIncidentId ?? ''}
               onChange={(e) => {
                 setSelectedIncidentId(e.target.value);
                 setIsHistoricalExpanded(false);
