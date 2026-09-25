@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { InputValidator } from '../../utils/validation';
+import { ApiService } from '../../services/api';
 import { Activity, ShieldAlert, Network, Settings, FileText, Search, Play, ServerCrash, CheckCircle2 } from 'lucide-react';
 
 const BASE_URL = ((import.meta as any).env?.VITE_API_BASE_URL as string) || '/api';
@@ -26,14 +27,9 @@ export const LiveDemoView: React.FC = () => {
   useEffect(() => {
     const fetchIncidents = async () => {
       try {
-        const res = await fetch(`${BASE_URL}/incidents?page=1&page_size=50&min_risk=0.50`);
-        if (res.ok) {
-          const data = await res.json();
-          setIncidents(data.items || (Array.isArray(data) ? data : []));
-          setServerOnline(true);
-        } else {
-          throw new Error('Server returned error');
-        }
+        const data = await ApiService.getIncidents({ page: 1, page_size: 50, min_risk: 0.50 });
+        setIncidents(data.items || []);
+        setServerOnline(true);
       } catch (err) {
         setServerOnline(false);
         setIncidents([]);
@@ -48,14 +44,10 @@ export const LiveDemoView: React.FC = () => {
   // 2. Interactive Graph Fetch
   const handleSelectIncident = async (inc: any) => {
     setSelectedIncident(inc);
-    const incId = inc.complaint_id || inc.incident_id;
+    const incId = inc.complaint_id || inc.incident_id || inc.id;
     try {
-      const res = await fetch(`${BASE_URL}/incidents/${incId}/graph`);
-      if (res.ok) {
-        setGraphData(await res.json());
-      } else {
-        throw new Error('Failed to fetch graph');
-      }
+      const graph = await ApiService.getIncidentGraph(incId);
+      setGraphData(graph);
     } catch (err) {
       setGraphData(null);
     }
@@ -72,16 +64,8 @@ export const LiveDemoView: React.FC = () => {
       return;
     }
     try {
-      const res = await fetch(`${BASE_URL}/predict/subgraph`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ seed_entity_id: seedEntity, max_hops: maxHops })
-      });
-      if (res.ok) {
-        setManualResult(await res.json());
-      } else {
-        throw new Error('Failed to trigger');
-      }
+      const res = await ApiService.predictLiveEntity(seedEntity, maxHops);
+      setManualResult(res);
     } catch (err) {
       setManualError('Investigation failed — backend unreachable');
     }
@@ -89,22 +73,14 @@ export const LiveDemoView: React.FC = () => {
 
   // 4. Dossier Export
   const handleExportDossier = (incidentId: string) => {
-    window.open(`${BASE_URL}/dossier/${incidentId}/export?format=html`, '_blank');
+    window.open(`${BASE_URL}/incidents/${incidentId}/dossier?format=HTML`, '_blank');
   };
 
   // 5. Policy Tune
   const handleTunePolicy = async () => {
     try {
-      const res = await fetch(`${BASE_URL}/policy/tune`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ threshold, dataset })
-      });
-      if (res.ok) {
-        setPolicyResult(await res.json());
-      } else {
-        throw new Error('Policy tune failed');
-      }
+      const res = await ApiService.tunePolicy(threshold, dataset);
+      setPolicyResult(res);
     } catch (err) {
       setPolicyResult(null);
     }

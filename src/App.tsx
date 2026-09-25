@@ -10,11 +10,26 @@ import { PolicyBenchmark } from './components/policy/PolicyBenchmark';
 import { CaseDossier } from './components/dossier/CaseDossier';
 import { SystemHealth } from './components/health/SystemHealth';
 import { StreamingMonitorView } from './components/streaming/StreamingMonitorView';
-import { LiveDemoView } from './components/demo/LiveDemoView';
+import { FreezeRequestManager } from './components/freeze/FreezeRequestManager';
+import { BankFreezeInbox } from './components/bank/BankFreezeInbox';
+import { BankUploadPortal } from './components/bank/BankUploadPortal';
+import { CitizenPortal } from './components/complaints/CitizenPortal';
+import { AdminConsole } from './components/admin/AdminConsole';
+import { MlOpsDashboard } from './components/mlops/MlOpsDashboard';
+import { LoginPage } from './components/auth/LoginPage';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { ApiService } from './services/api';
 
-const App: React.FC = () => {
-  const [activePage, setActivePage] = useState<NavPage | 'splash'>('splash');
+const AppContent: React.FC = () => {
+  const { user, role, isAuthenticated } = useAuth();
+  const [activePage, setActivePage] = useState<NavPage | 'splash' | 'login'>(() => {
+    if (!isAuthenticated) return 'login';
+    if (role === 'COMPLAINANT') return 'citizen-portal';
+    if (role === 'BANK_MANAGER' || role === 'BANK_EMPLOYEE') return 'bank-freeze';
+    if (role === 'ADMIN') return 'admin-console';
+    return 'command';
+  });
   const [backendOnline, setBackendOnline] = useState(false);
   const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
   const [selectedMapTarget, setSelectedMapTarget] = useState<string | null>(null);
@@ -23,13 +38,25 @@ const App: React.FC = () => {
   // Health check polling
   useEffect(() => {
     const check = async () => {
-      await ApiService.checkHealth();
-      setBackendOnline(ApiService.getBackendStatus());
+      try {
+        await ApiService.checkHealth();
+        setBackendOnline(ApiService.getBackendStatus());
+      } catch {
+        setBackendOnline(false);
+      }
     };
     check();
     const interval = setInterval(check, 10000);
     return () => clearInterval(interval);
   }, []);
+
+  // Set initial landing page based on role when user authenticates
+  const handleLoginSuccess = useCallback(() => {
+    if (role === 'COMPLAINANT') setActivePage('citizen-portal');
+    else if (role === 'BANK_MANAGER' || role === 'BANK_EMPLOYEE') setActivePage('bank-freeze');
+    else if (role === 'ADMIN') setActivePage('admin-console');
+    else setActivePage('command');
+  }, [role]);
 
   // Navigate to case dossier when a case is selected
   const handleSelectCase = useCallback((id: string) => {
@@ -54,37 +81,175 @@ const App: React.FC = () => {
   }, []);
 
   if (activePage === 'splash') {
-    return <LandingSplash onEnterApp={(page) => setActivePage(page || 'command')} />;
+    return (
+      <LandingSplash
+        onEnterApp={(targetPage) => {
+          if (!isAuthenticated) {
+            setActivePage('login');
+          } else {
+            setActivePage((targetPage as NavPage) || 'command');
+          }
+        }}
+      />
+    );
+  }
+
+  if (activePage === 'login') {
+    return (
+      <LoginPage
+        onSuccess={handleLoginSuccess}
+        onCancel={() => setActivePage('splash')}
+      />
+    );
   }
 
   const renderPage = () => {
     switch (activePage) {
+      // ── LEO COMMAND VIEWS ──
       case 'command':
-        return <CommandCenter onSelectCase={handleSelectCase} onNavigate={handleNavigate} activeDataset={activeDataset} />;
-      case 'simulation':
-        return <SimulationLab />;
+        return (
+          <ProtectedRoute allowedRoles={['CYBER_OFFICER', 'ADMIN']}>
+            <CommandCenter
+              onSelectCase={handleSelectCase}
+              onNavigate={handleNavigate}
+              activeDataset={activeDataset}
+            />
+          </ProtectedRoute>
+        );
+
       case 'incidents':
-        return <IncidentQueue onSelectCase={handleSelectCase} activeDataset={activeDataset} />;
+        return (
+          <ProtectedRoute allowedRoles={['CYBER_OFFICER', 'POLICE', 'ADMIN']}>
+            <IncidentQueue
+              onSelectCase={handleSelectCase}
+              activeDataset={activeDataset}
+            />
+          </ProtectedRoute>
+        );
+
+      case 'freeze-leo':
+        return (
+          <ProtectedRoute allowedRoles={['CYBER_OFFICER', 'POLICE', 'ADMIN']}>
+            <FreezeRequestManager />
+          </ProtectedRoute>
+        );
+
       case 'network':
-        return <NetworkExplorer />;
+        return (
+          <ProtectedRoute allowedRoles={['CYBER_OFFICER', 'POLICE', 'ADMIN']}>
+            <NetworkExplorer />
+          </ProtectedRoute>
+        );
+
       case 'cashout-map':
-        return <CashOutMap targetEntityId={selectedMapTarget} onNavigateToCase={handleSelectCase} activeDataset={activeDataset} />;
-      case 'policy':
-        return <PolicyBenchmark activeDataset={activeDataset} />;
+        return (
+          <ProtectedRoute allowedRoles={['CYBER_OFFICER', 'POLICE', 'ADMIN']}>
+            <CashOutMap
+              targetEntityId={selectedMapTarget}
+              onNavigateToCase={handleSelectCase}
+              activeDataset={activeDataset}
+            />
+          </ProtectedRoute>
+        );
+
       case 'dossier':
-        return <CaseDossier caseId={selectedCaseId} onBack={handleBackFromDossier} />;
+        return (
+          <ProtectedRoute allowedRoles={['CYBER_OFFICER', 'POLICE', 'ADMIN']}>
+            <CaseDossier caseId={selectedCaseId} onBack={handleBackFromDossier} />
+          </ProtectedRoute>
+        );
+
+      case 'simulation':
+        return (
+          <ProtectedRoute allowedRoles={['CYBER_OFFICER', 'ADMIN']}>
+            <SimulationLab />
+          </ProtectedRoute>
+        );
+
+      case 'policy':
+        return (
+          <ProtectedRoute allowedRoles={['CYBER_OFFICER', 'ADMIN']}>
+            <PolicyBenchmark activeDataset={activeDataset} />
+          </ProtectedRoute>
+        );
+
+      // ── BANK OPERATIONS ──
+      case 'bank-freeze':
+        return (
+          <ProtectedRoute allowedRoles={['BANK_MANAGER', 'BANK_EMPLOYEE', 'ADMIN']}>
+            <BankFreezeInbox />
+          </ProtectedRoute>
+        );
+
+      case 'bank-uploads':
+        return (
+          <ProtectedRoute allowedRoles={['BANK_MANAGER', 'BANK_EMPLOYEE', 'ADMIN']}>
+            <BankUploadPortal />
+          </ProtectedRoute>
+        );
+
+      // ── CITIZEN COMPLAINT PORTAL ──
+      case 'citizen-portal':
+        return (
+          <ProtectedRoute allowedRoles={['COMPLAINANT']}>
+            <CitizenPortal initialView="home" />
+          </ProtectedRoute>
+        );
+
+      case 'new-complaint':
+        return (
+          <ProtectedRoute allowedRoles={['COMPLAINANT']}>
+            <CitizenPortal initialView="new-complaint" />
+          </ProtectedRoute>
+        );
+
+      case 'my-complaints':
+        return (
+          <ProtectedRoute allowedRoles={['COMPLAINANT']}>
+            <CitizenPortal initialView="my-complaints" />
+          </ProtectedRoute>
+        );
+
+      // ── ADMIN & MLOPS ──
+      case 'admin-console':
+        return (
+          <ProtectedRoute allowedRoles={['ADMIN']}>
+            <AdminConsole />
+          </ProtectedRoute>
+        );
+
+      case 'mlops-dashboard':
+        return (
+          <ProtectedRoute allowedRoles={['ADMIN', 'CYBER_OFFICER']}>
+            <MlOpsDashboard />
+          </ProtectedRoute>
+        );
+
+      // ── TELEMETRY & LIVE DEMO ──
       case 'health':
         return <SystemHealth />;
+
       case 'live-demo':
-        return <StreamingMonitorView />;
+        return (
+          <ProtectedRoute allowedRoles={['CYBER_OFFICER', 'ADMIN']}>
+            <StreamingMonitorView />
+          </ProtectedRoute>
+        );
+
       default:
-        return <CommandCenter onSelectCase={handleSelectCase} onNavigate={handleNavigate} activeDataset={activeDataset} />;
+        return (
+          <CommandCenter
+            onSelectCase={handleSelectCase}
+            onNavigate={handleNavigate}
+            activeDataset={activeDataset}
+          />
+        );
     }
   };
 
   return (
     <AppShell
-      activePage={activePage}
+      activePage={activePage as NavPage}
       onNavigate={handleNavigate}
       backendOnline={backendOnline}
       activeDataset={activeDataset}
@@ -92,6 +257,14 @@ const App: React.FC = () => {
     >
       {renderPage()}
     </AppShell>
+  );
+};
+
+export const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 };
 
