@@ -103,58 +103,61 @@ export const StreamingMonitorView: React.FC = () => {
     setLiveStreamEvents([]);
     setPage(1);
 
+    
     try {
-      const res = await ApiService.simulateStreamBatch(dataset, streamVolume, 0);
+      // FIX: Chunk the requests so Vercel Serverless (10s timeout) doesn't crash on large datasets
+      const CHUNK_SIZE = 100;
+      let allTx: any[] = [];
+      let finalAlerts = 0;
+      let finalGnnRuns = 0;
+      let totalTimeSec = 0;
       
-      if (res && Array.isArray(res.transactions) && res.transactions.length > 0) {
-        const allTx = res.transactions;
-        const total = allTx.length;
-        const finalAlerts = res.high_risk_alerts_emitted || 0;
-        const finalGnnRuns = res.stage_2_gnn_runs || 0;
-        const finalThroughput = res.throughput_tx_per_sec || 883.3;
-        const finalFilter = res.stage_1_benign_filter_rate || 88.86;
-        const finalAvgLat = res.avg_gnn_latency_ms || 0.70;
+      let finalThroughput = 0;
+      let finalFilter = 0;
+      let finalAvgLat = 0;
 
-        // Progressive animated stream (paces across ~35-45 chunks for realistic streaming feel)
-        const totalSteps = Math.min(45, Math.max(15, Math.ceil(total / 100)));
-        const chunkSize = Math.max(1, Math.ceil(total / totalSteps));
-        let currentIndex = 0;
-        let currentAlerts = 0;
-        let currentGnn = 0;
-
-        animationTimerRef.current = setInterval(() => {
-          const nextIndex = Math.min(total, currentIndex + chunkSize);
-          const chunk = allTx.slice(currentIndex, nextIndex);
+      for (let offset = 0; offset < streamVolume; offset += CHUNK_SIZE) {
+        const fetchSize = Math.min(CHUNK_SIZE, streamVolume - offset);
+        const res = await ApiService.simulateStreamBatch(dataset, fetchSize, offset);
+        
+        if (res && Array.isArray(res.transactions)) {
+          allTx = [...allTx, ...res.transactions];
+          finalAlerts += (res.high_risk_alerts_emitted || 0);
+          finalGnnRuns += (res.stage_2_gnn_runs || 0);
           
-          for (const tx of chunk) {
-            if (tx.stage_2_risk_probability >= riskCutoff) currentAlerts++;
-            if (tx.stage_1_flagged) currentGnn++;
-          }
-
-          currentIndex = nextIndex;
-          const pct = Math.round((currentIndex / total) * 100);
-
-          setStreamedTxCount(currentIndex);
+          // Use the last chunk's rates as representative, or calculate real throughput later
+          finalThroughput = res.throughput_tx_per_sec || 883.3;
+          finalFilter = res.stage_1_benign_filter_rate || 88.86;
+          finalAvgLat = res.avg_gnn_latency_ms || 0.70;
+          
+          // Progressive UI Update
+          const pct = Math.round((allTx.length / streamVolume) * 100);
+          setStreamedTxCount(allTx.length);
           setProgressPercent(pct);
-          setRawAlertsCount(currentAlerts);
-          setGnnRuns(currentGnn);
+          setRawAlertsCount(finalAlerts);
+          setGnnRuns(finalGnnRuns);
           setLiveRate(finalThroughput + (Math.random() * 30 - 15));
-          setFilterRate(finalFilter);
-          setAvgGnnLat(finalAvgLat);
-          setLiveStreamEvents(allTx.slice(0, currentIndex));
+          setLiveStreamEvents([...allTx]);
+        } else {
+          break; // Stop if error
+        }
+      }
 
-          if (currentIndex >= total) {
-            clearInterval(animationTimerRef.current);
-            setIsSimulating(false);
-            setStreamedTxCount(total);
-            setProgressPercent(100);
-            setRawAlertsCount(finalAlerts);
-            setGnnRuns(finalGnnRuns);
-            setLiveRate(finalThroughput);
-            setLiveStreamEvents(allTx);
-          }
-        }, 75);
+      if (allTx.length > 0) {
+        const total = allTx.length;
+
+        // Finish simulation state
+        setIsSimulating(false);
+        setStreamedTxCount(total);
+        setProgressPercent(100);
+        setRawAlertsCount(finalAlerts);
+        setGnnRuns(finalGnnRuns);
+        setLiveRate(finalThroughput);
+        setFilterRate(finalFilter);
+        setAvgGnnLat(finalAvgLat);
+        setLiveStreamEvents(allTx);
       } else {
+
         setStreamedTxCount(streamVolume);
         setProgressPercent(100);
         setIsSimulating(false);
