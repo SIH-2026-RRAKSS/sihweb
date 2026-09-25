@@ -12,6 +12,8 @@ export interface IncidentSummary {
   top_terminal_id?: string;
   top_terminal_city?: string;
   intercepted_in_flight?: boolean;
+  status?: string;
+  assignedOfficerName?: string;
 }
 
 export interface ComplaintDetail {
@@ -191,4 +193,194 @@ export interface ThreeWayBenchmarkRow {
   graphsage_f1: string;
   f1_delta: string;
   pr_auc: string;
+}
+
+// ==============================================================================
+// Multi-Role & Enterprise Domain Interfaces
+// ==============================================================================
+
+export type UserRole =
+  | 'COMPLAINANT'
+  | 'POLICE'
+  | 'CYBER_OFFICER'
+  | 'BANK_EMPLOYEE'
+  | 'BANK_MANAGER'
+  | 'ADMIN';
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  bankId?: string | null;
+  bankName?: string | null;
+  jurisdictionId?: string | null;
+  jurisdictionName?: string | null;
+  employeeId?: string | null;
+  phone?: string | null;
+}
+
+export interface AuthTokenResponse {
+  accessToken: string;
+  refreshToken?: string;
+  tokenType: string;
+  expiresIn: number;
+  user: UserProfile;
+}
+
+// --- Emergency Freeze Domain ---
+export type FreezeStatus = 'PENDING' | 'ACKNOWLEDGED' | 'FROZEN' | 'REJECTED' | 'EXPIRED';
+
+export interface FreezeRequest {
+  id: string;
+  incidentId: string;
+  complaintReference?: string;
+  targetAccountId: string;
+  targetAccountName?: string;
+  bankId: string;
+  bankName: string;
+  ifscPrefix?: string;
+  freezeAmount: number;
+  reason: string;
+  status: FreezeStatus;
+  requestedByOfficerId: string;
+  requestedByOfficerName?: string;
+  requestedAt: string;
+  slaDeadline: string;
+  slaRemainingSeconds?: number;
+  slaBreached?: boolean;
+  acknowledgedAt?: string;
+  frozenAt?: string;
+  bankReferenceNumber?: string;
+  rejectionReason?: string;
+}
+
+// --- Citizen Complaints Domain ---
+export type ComplaintLifecycleStatus =
+  | 'SUBMITTED'
+  | 'UNDER_TRIAGE'
+  | 'UNDER_INVESTIGATION'
+  | 'FREEZE_INITIATED'
+  | 'FUNDS_FROZEN'
+  | 'ESCALATED'
+  | 'RESOLVED'
+  | 'CLOSED';
+
+export interface CitizenComplaint {
+  id: string;
+  referenceNumber: string;
+  complainantName: string;
+  phone: string;
+  victimAccount: string;
+  victimIfsc: string;
+  suspectAccount: string;
+  suspectIfsc?: string;
+  amount: number;
+  transactionUtr: string;
+  transactionTimestamp: string;
+  category: string;
+  incidentNarrative?: string;
+  jurisdictionId?: string;
+  jurisdictionName?: string;
+  status: ComplaintLifecycleStatus;
+  createdAt: string;
+  updatedAt?: string;
+  assignedOfficerName?: string;
+  assignedOfficerRank?: string;
+  riskScore?: number;
+  confidenceTier?: ConfidenceTier;
+  freezeCount?: number;
+  evidenceFiles?: Array<{ id: string; fileName: string; fileType: string; uploadedAt: string; sizeBytes: number }>;
+}
+
+export interface ComplaintCreatePayload {
+  complainantName: string;
+  phone: string;
+  victimAccount: string;
+  victimIfsc: string;
+  suspectAccount: string;
+  suspectIfsc?: string;
+  amount: number;
+  transactionUtr: string;
+  transactionTimestamp: string;
+  category: string;
+  incidentNarrative?: string;
+  jurisdictionId?: string;
+}
+
+// --- Bank Upload Domain ---
+export type BankUploadStatus = 'PENDING_REVIEW' | 'ACCEPTED' | 'REJECTED';
+
+export interface BankUploadBatch {
+  id: string;
+  bankId: string;
+  bankName: string;
+  fileName: string;
+  fileSizeBytes: number;
+  totalTransactions: number;
+  flaggedCount: number;
+  uploadedAt: string;
+  uploadedByUserName: string;
+  status: BankUploadStatus;
+  reviewNotes?: string;
+  reviewedBy?: string;
+  reviewedAt?: string;
+}
+
+// --- Admin & Jurisdictions ---
+export interface BankMaster {
+  id: string;
+  code: string;
+  name: string;
+  active: boolean;
+  ifscPrefixes?: string[];
+  createdAt: string;
+}
+
+export interface JurisdictionMaster {
+  id: string;
+  name: string;
+  level: 'STATE' | 'DISTRICT' | 'STATION';
+  parentId?: string | null;
+  path: string;
+  createdAt: string;
+}
+
+export interface StaffUserMaster {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  employeeId?: string;
+  bankId?: string;
+  bankName?: string;
+  jurisdictionId?: string;
+  jurisdictionName?: string;
+  status: 'ACTIVE' | 'DEACTIVATED';
+  lastRosterSync?: string;
+}
+
+// --- MLOps Domain ---
+export interface GraphSnapshot {
+  id: string;
+  snapshotName: string;
+  capturedAt: string;
+  totalNodes: number;
+  totalEdges: number;
+  anomalyRatePercent: number;
+  f1Score: number;
+  datasetType: string;
+}
+
+export interface RegisteredModel {
+  id: string;
+  modelName: string;
+  version: string;
+  framework: string;
+  f1Score: number;
+  prAuc: number;
+  mrrScore: number;
+  status: 'CHAMPION' | 'CANDIDATE' | 'ARCHIVED';
+  trainedAt: string;
+  parametersCount: number;
 }

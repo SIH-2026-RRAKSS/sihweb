@@ -23,7 +23,7 @@ export const NetworkExplorer: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [incidents, setIncidents] = useState<IncidentSummary[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [selectedIncidentId, setSelectedIncidentId] = useState<string>('C000047');
+  const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const [graphData, setGraphData] = useState<GraphStructure | null>(null);
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [isHistoricalExpanded, setIsHistoricalExpanded] = useState<boolean>(false);
@@ -34,6 +34,9 @@ export const NetworkExplorer: React.FC = () => {
       try {
         const res = await ApiService.getIncidents({ page: 1, page_size: 50 });
         setIncidents(res.items || []);
+        if (res.items && res.items.length > 0) {
+          setSelectedIncidentId(res.items[0].complaint_id);
+        }
       } catch (err) {
         setError('Data unavailable - backend unreachable');
         console.warn(err);
@@ -282,7 +285,7 @@ export const NetworkExplorer: React.FC = () => {
           <div className="flex items-center gap-2">
             <span className="text-[10px] text-slate-500">SELECT INCIDENT:</span>
             <select
-              value={selectedIncidentId}
+              value={selectedIncidentId ?? ''}
               onChange={(e) => {
                 setSelectedIncidentId(e.target.value);
                 setIsHistoricalExpanded(false);
