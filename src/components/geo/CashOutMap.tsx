@@ -285,7 +285,7 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
   const isATM = selectedEntity?.entity_type === 'ATM_TERMINAL';
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 h-[calc(100vh-6.5rem)] font-sans text-xs">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 h-[calc(100dvh-6.5rem)] font-sans text-xs overflow-y-auto">
       
       {/* ── LEFT PANEL: ENTITY SELECTOR ROSTER (3 COLS) ── */}
       <div className="lg:col-span-3 bg-white border border-slate-200 rounded-2xl p-3 flex flex-col space-y-3 shadow-sm overflow-hidden">

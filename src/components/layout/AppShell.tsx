@@ -1,3 +1,4 @@
+import { Menu } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import {
   LayoutDashboard,
@@ -113,7 +114,7 @@ export const AppShell: React.FC<AppShellProps> = ({
   children,
 }) => {
   const { user, role, switchPersona, logout } = useAuth();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
   const [showPersonaMenu, setShowPersonaMenu] = useState(false);
   const [time, setTime] = useState<{ ist: string; utc: string }>({ ist: '', utc: '' });
   const [stats, setStats] = useState<any>(null);
@@ -173,7 +174,11 @@ export const AppShell: React.FC<AppShellProps> = ({
       {/* ── 1. TOP COMMAND BAR ── */}
       <header className="h-12 bg-white border-b border-slate-200 px-4 flex items-center justify-between font-sans text-xs z-50 flex-shrink-0 shadow-sm">
         {/* Left: Brand Identity (Click to Splash) */}
-        <div 
+        <div className="flex items-center gap-2">
+            <button onClick={() => setCollapsed(!collapsed)} className="md:hidden p-1 text-slate-500 hover:bg-slate-100 rounded">
+              <Menu className="w-5 h-5" />
+            </button>
+            <div 
           onClick={() => onNavigate('splash')} 
           className="flex items-center gap-2.5 cursor-pointer group"
           title="Return to Splash Overview (Team Trinetra)"
@@ -183,6 +188,7 @@ export const AppShell: React.FC<AppShellProps> = ({
             AML DEFCON-2
           </span>
         </div>
+          </div>
 
         {/* Center: Live Status & Role Badges */}
         <div className="hidden md:flex items-center gap-3 text-[11px]">
@@ -360,4 +366,5 @@ export const AppShell: React.FC<AppShellProps> = ({
     </div>
   );
 };
+
 

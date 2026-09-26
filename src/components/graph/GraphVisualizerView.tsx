@@ -412,16 +412,21 @@ export const GraphVisualizerView: React.FC<GraphVisualizerProps> = ({
           </div>
 
           {/* Canvas Element */}
-          <canvas
-            ref={canvasRef}
-            width={820}
-            height={520}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-            className="w-full h-[520px] cursor-grab active:cursor-grabbing bg-white rounded-xl"
-          />
+          <div className="w-full overflow-x-auto">
+            <canvas
+              ref={canvasRef}
+              width={820}
+              height={520}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+              className="h-[520px] cursor-grab active:cursor-grabbing bg-white rounded-xl"
+            />
+          </div>
+          <div className="md:hidden text-center text-[10px] text-slate-400 font-medium py-1">
+            ? scroll to explore ?
+          </div>
 
           <div className="absolute bottom-3 left-3 text-[10px] font-sans text-slate-500 bg-white px-2 py-1 rounded border border-slate-200">
             Drag nodes to rearrange • Click node to inspect details • Drag background to pan

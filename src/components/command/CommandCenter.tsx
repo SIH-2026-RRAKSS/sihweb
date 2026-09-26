@@ -185,7 +185,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
       </div>
 
       {/* ── MAIN 2-COLUMN WORKSPACE ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 min-h-[500px]">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 min-h-0 md:min-h-[500px]">
         
         {/* LEFT COLUMN: PRIORITY INCIDENT FEED (7 COLS) */}
         <div className="lg:col-span-7 flex flex-col bg-white border border-slate-200 rounded-2xl p-3.5 shadow-sm">
