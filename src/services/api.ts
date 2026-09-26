@@ -546,18 +546,21 @@ export class ApiService {
 
   public static async getFreezeRequests(status?: FreezeStatus): Promise<FreezeRequest[]> {
     try {
-      const url = status ? `${BASE_URL}/freeze-requests?status=${status}` : `${BASE_URL}/freeze-requests`;
-      const res = await fetch(url, {
-        headers: this.getHeaders()
-      });
+      const url = status ? ${BASE_URL}/freeze-requests?status= : ${BASE_URL}/freeze-requests;
+      const res = await fetch(url, { headers: this.getHeaders() });
       if (res.ok) {
         const json = await res.json();
         const list = unwrapResponse<FreezeRequest[]>(json);
-        if (Array.isArray(list)) return list;
+        if (Array.isArray(list) && list.length > 0) return list;
       }
     } catch {}
 
-    // Fallback seed records
+    let stored = localStorage.getItem('sih_mock_freeze_requests');
+    if (stored) {
+      const list = JSON.parse(stored);
+      return status ? list.filter((r: any) => r.status === status) : list;
+    }
+
     const seed: FreezeRequest[] = [
       {
         id: "FRZ-2026-9041",
@@ -586,45 +589,44 @@ export class ApiService {
         targetAccountName: "Karnal Transit Account",
         bankId: "BNK_SBI_01",
         bankName: "State Bank of India",
-        ifscPrefix: "SBIN0001245",
-        freezeAmount: 185000.0,
+        ifscPrefix: "SBIN000125",
+        freezeAmount: 185000.00,
         reason: "Immediate high-risk cashout attempt detected",
         status: "ACKNOWLEDGED",
-        requestedByOfficerId: "OFF_CYBER_02",
-        requestedByOfficerName: "Sub-Insp. V. Joshi",
-        requestedAt: new Date(Date.now() - 40 * 60 * 1000).toISOString(),
-        slaDeadline: new Date(Date.now() + 20 * 60 * 1000).toISOString(),
-        slaRemainingSeconds: 1200,
-        slaBreached: false,
-        acknowledgedAt: new Date(Date.now() - 10 * 60 * 1000).toISOString()
+        requestedByOfficerId: "OFF_CYBER_01",
+        requestedByOfficerName: "Insp. S. Rao (Cyber Crime Cell)",
+        requestedAt: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
+        respondedByUserId: "usr_004",
+        respondedAt: new Date(Date.now() - 47 * 60 * 60 * 1000).toISOString(),
+        slaDeadline: new Date(Date.now() - 48 * 60 * 60 * 1000 + 3 * 24 * 60 * 60 * 1000).toISOString(),
+        slaRemainingSeconds: 24 * 60 * 60,
+        slaBreached: false
       },
       {
         id: "FRZ-2026-7734",
-        incidentId: "C000047",
-        complaintReference: "REF-2026-0047",
-        targetAccountId: "983410294821",
-        targetAccountName: "Mule Layer 2 Node",
+        incidentId: "C000042",
+        complaintReference: "REF-2026-0042",
+        targetAccountId: "983421100234",
+        targetAccountName: "Rakesh Syndicated LLC",
         bankId: "BNK_ICICI_01",
         bankName: "ICICI Bank",
-        ifscPrefix: "ICIC0003312",
-        freezeAmount: 950000.0,
+        ifscPrefix: "ICIC0000342",
+        freezeAmount: 950000.00,
         reason: "Laundered extortion syndicate hub account",
         status: "FROZEN",
-        requestedByOfficerId: "OFF_CYBER_01",
-        requestedByOfficerName: "Insp. S. Rao",
-        requestedAt: new Date(Date.now() - 120 * 60 * 1000).toISOString(),
-        slaDeadline: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+        requestedByOfficerId: "OFF_POL_02",
+        requestedByOfficerName: "Sub-Insp. Vikram Joshi",
+        requestedAt: new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString(),
+        respondedByUserId: "BANK_MNGR_01",
+        respondedAt: new Date(Date.now() - 60 * 60 * 60 * 1000).toISOString(),
+        responseNote: "Frozen as per order. Block ref #IC-993-FZ",
+        slaDeadline: new Date(Date.now() - 72 * 60 * 60 * 1000 + 3 * 24 * 60 * 60 * 1000).toISOString(),
         slaRemainingSeconds: 0,
-        slaBreached: false,
-        frozenAt: new Date(Date.now() - 85 * 60 * 1000).toISOString(),
-        bankReferenceNumber: "ICICI-FRZ-ACK-90214"
+        slaBreached: false
       }
     ];
-
-    if (status) {
-      return seed.filter((f) => f.status === status);
-    }
-    return seed;
+    localStorage.setItem('sih_mock_freeze_requests', JSON.stringify(seed));
+    return status ? seed.filter((r: any) => r.status === status) : seed;
   }
 
   public static async createFreezeRequest(payload: {
@@ -636,7 +638,7 @@ export class ApiService {
     reason: string;
   }): Promise<FreezeRequest> {
     try {
-      const res = await fetch(`${BASE_URL}/freeze-requests`, {
+      const res = await fetch(${BASE_URL}/freeze-requests, {
         method: 'POST',
         headers: this.getHeaders(),
         body: JSON.stringify(payload)
@@ -647,8 +649,7 @@ export class ApiService {
       }
     } catch {}
 
-    // Simulated fallback
-    return {
+    const newReq: FreezeRequest = {
       id: "FRZ-" + Date.now().toString().substring(6),
       incidentId: payload.incidentId,
       complaintReference: "REF-" + payload.incidentId,
@@ -666,6 +667,13 @@ export class ApiService {
       slaRemainingSeconds: 1800,
       slaBreached: false
     };
+
+    let stored = localStorage.getItem('sih_mock_freeze_requests');
+    let list: FreezeRequest[] = stored ? JSON.parse(stored) : [];
+    list.unshift(newReq);
+    localStorage.setItem('sih_mock_freeze_requests', JSON.stringify(list));
+
+    return newReq;
   }
 
   public static async respondToFreezeRequest(
