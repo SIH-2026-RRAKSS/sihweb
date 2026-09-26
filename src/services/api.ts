@@ -546,7 +546,7 @@ export class ApiService {
 
   public static async getFreezeRequests(status?: FreezeStatus): Promise<FreezeRequest[]> {
     try {
-      const url = status ? ${BASE_URL}/freeze-requests?status= : ${BASE_URL}/freeze-requests;
+      const url = status ? `${BASE_URL}/freeze-requests?status=${status}` : `${BASE_URL}/freeze-requests`;
       const res = await fetch(url, { headers: this.getHeaders() });
       if (res.ok) {
         const json = await res.json();
@@ -596,8 +596,8 @@ export class ApiService {
         requestedByOfficerId: "OFF_CYBER_01",
         requestedByOfficerName: "Insp. S. Rao (Cyber Crime Cell)",
         requestedAt: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
-        respondedByUserId: "usr_004",
-        respondedAt: new Date(Date.now() - 47 * 60 * 60 * 1000).toISOString(),
+        // respondedByUserId: "usr_004",
+        acknowledgedAt: new Date(Date.now() - 47 * 60 * 60 * 1000).toISOString(),
         slaDeadline: new Date(Date.now() - 48 * 60 * 60 * 1000 + 3 * 24 * 60 * 60 * 1000).toISOString(),
         slaRemainingSeconds: 24 * 60 * 60,
         slaBreached: false
@@ -617,9 +617,9 @@ export class ApiService {
         requestedByOfficerId: "OFF_POL_02",
         requestedByOfficerName: "Sub-Insp. Vikram Joshi",
         requestedAt: new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString(),
-        respondedByUserId: "BANK_MNGR_01",
-        respondedAt: new Date(Date.now() - 60 * 60 * 60 * 1000).toISOString(),
-        responseNote: "Frozen as per order. Block ref #IC-993-FZ",
+        // respondedByUserId: "BANK_MNGR_01",
+        acknowledgedAt: new Date(Date.now() - 60 * 60 * 60 * 1000).toISOString(),
+        bankReferenceNumber: "Frozen as per order. Block ref #IC-993-FZ",
         slaDeadline: new Date(Date.now() - 72 * 60 * 60 * 1000 + 3 * 24 * 60 * 60 * 1000).toISOString(),
         slaRemainingSeconds: 0,
         slaBreached: false
@@ -638,7 +638,7 @@ export class ApiService {
     reason: string;
   }): Promise<FreezeRequest> {
     try {
-      const res = await fetch(${BASE_URL}/freeze-requests, {
+      const res = await fetch(`${BASE_URL}/freeze-requests`, {
         method: 'POST',
         headers: this.getHeaders(),
         body: JSON.stringify(payload)
