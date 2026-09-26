@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, useMotionValue, useSpring, useMotionTemplate } from 'framer-motion';
 import {
   ShieldAlert,
   ShieldCheck,
@@ -85,9 +85,54 @@ export const LoginPage: React.FC<{
       setErrorMsg("Authentication failed. Ensure backend is running and credentials are valid.");
     }
   };
+  // -- Dynamic Spring-Driven Mouse & Autonomous Idle Motion --
+  const mouseX = useMotionValue(typeof window !== 'undefined' ? window.innerWidth / 2 : 600);
+  const mouseY = useMotionValue(typeof window !== 'undefined' ? window.innerHeight / 3 : 300);
+  const springX = useSpring(mouseX, { stiffness: 60, damping: 20 });
+  const springY = useSpring(mouseY, { stiffness: 60, damping: 20 });
+
+  const lastMouseMoveTime = useRef<number>(Date.now());
+  const isUserMoving = useRef<boolean>(false);
+
+  // Autonomous Lissajous Drift when mouse is idle
+  useEffect(() => {
+    let animId: number;
+    let startTime = Date.now();
+    const width = typeof window !== 'undefined' ? window.innerWidth : 1200;
+    const height = typeof window !== 'undefined' ? window.innerHeight : 800;
+
+    const animateIdleMotion = () => {
+      const now = Date.now();
+      if (now - lastMouseMoveTime.current > 2000) {
+        isUserMoving.current = false;
+      }
+
+      if (!isUserMoving.current) {
+        const elapsed = (now - startTime) / 1000;
+        const autoX = width / 2 + Math.sin(elapsed * 0.4) * (width * 0.25) + Math.cos(elapsed * 0.2) * 80;
+        const autoY = height / 2.5 + Math.cos(elapsed * 0.3) * (height * 0.2) + Math.sin(elapsed * 0.5) * 50;
+
+        mouseX.set(autoX);
+        mouseY.set(autoY);
+      }
+
+      animId = requestAnimationFrame(animateIdleMotion);
+    };
+
+    animId = requestAnimationFrame(animateIdleMotion);
+    return () => cancelAnimationFrame(animId);
+  }, []);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { clientX, clientY } = e;
+    lastMouseMoveTime.current = Date.now();
+    isUserMoving.current = true;
+    mouseX.set(clientX);
+    mouseY.set(clientY);
+  };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col justify-between items-center p-4 sm:p-6 relative overflow-y-auto font-sans select-none">
+<div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col justify-between items-center p-4 sm:p-6 relative overflow-y-auto font-sans select-none">
       {/* Background Soft Pattern */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f080_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f080_1px,transparent_1px)] bg-[size:3.5rem_3.5rem] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_10%,#000_60%,transparent_100%)] pointer-events-none" />
 
