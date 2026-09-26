@@ -65,16 +65,7 @@ export const CommandHeroBanner: React.FC<CommandHeroBannerProps> = ({ onNavigate
 
         {/* Right: Quick Launchpad Action Buttons */}
         <div className="flex flex-col sm:flex-row md:flex-col gap-2 w-full md:w-auto flex-shrink-0 font-sans">
-          <motion.button
-            onClick={() => onNavigate?.('simulation')}
-            className="px-5 py-2.5 bg-white hover:bg-zinc-200 text-black font-bold text-xs tracking-wider flex items-center justify-center gap-2 rounded shadow-md transition-all"
-            whileHover={{ scale: 1.02, boxShadow: '0 0 20px rgba(255, 255, 255, 0.3)' }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <FlaskConical className="w-4 h-4 fill-current" />
-            <span>LAUNCH 3D SIMULATION LAB</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </motion.button>
+          
 
           <div className="flex items-center gap-2">
             <motion.button
@@ -102,3 +93,4 @@ export const CommandHeroBanner: React.FC<CommandHeroBannerProps> = ({ onNavigate
     </div>
   );
 };
+

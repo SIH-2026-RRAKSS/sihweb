@@ -24,7 +24,7 @@ import { ApiService } from './services/api';
 const AppContent: React.FC = () => {
   const { user, role, isAuthenticated } = useAuth();
   const [activePage, setActivePage] = useState<NavPage | 'splash' | 'login'>(() => {
-    if (!isAuthenticated) return 'login';
+    if (!isAuthenticated) return 'splash';
     if (role === 'COMPLAINANT') return 'citizen-portal';
     if (role === 'BANK_MANAGER' || role === 'BANK_EMPLOYEE') return 'bank-freeze';
     if (role === 'ADMIN') return 'admin-console';

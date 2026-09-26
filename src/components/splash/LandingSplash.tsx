@@ -426,7 +426,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
               whileTap={{ scale: 0.97 }}
             >
               <Terminal className="w-3 h-3 text-blue-600" />
-              <span>OPEN COMMAND CENTER</span>
+              <span>LOGIN</span>
             </motion.button>
           </motion.div>
 
@@ -725,7 +725,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
                 whileTap={{ scale: 0.97 }}
               >
                 <Terminal className="w-4 h-4 text-blue-600" />
-                <span>ENTER COMMAND CENTER</span>
+                <span>LOGIN</span>
               </motion.button>
             </div>
           </div>
