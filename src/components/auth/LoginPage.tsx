@@ -120,6 +120,41 @@ export const LoginPage: React.FC<{
     };
 
     animId = requestAnimationFrame(animateIdleMotion);
+  // -- Dynamic Spring-Driven Mouse & Autonomous Idle Motion --
+  const mouseX = useMotionValue(typeof window !== 'undefined' ? window.innerWidth / 2 : 600);
+  const mouseY = useMotionValue(typeof window !== 'undefined' ? window.innerHeight / 3 : 300);
+  const springX = useSpring(mouseX, { stiffness: 60, damping: 20 });
+  const springY = useSpring(mouseY, { stiffness: 60, damping: 20 });
+
+  const lastMouseMoveTime = useRef<number>(Date.now());
+  const isUserMoving = useRef<boolean>(false);
+
+  // Autonomous Lissajous Drift when mouse is idle
+  useEffect(() => {
+    let animId: number;
+    let startTime = Date.now();
+    const width = typeof window !== 'undefined' ? window.innerWidth : 1200;
+    const height = typeof window !== 'undefined' ? window.innerHeight : 800;
+
+    const animateIdleMotion = () => {
+      const now = Date.now();
+      if (now - lastMouseMoveTime.current > 2000) {
+        isUserMoving.current = false;
+      }
+
+      if (!isUserMoving.current) {
+        const elapsed = (now - startTime) / 1000;
+        const autoX = width / 2 + Math.sin(elapsed * 0.4) * (width * 0.25) + Math.cos(elapsed * 0.2) * 80;
+        const autoY = height / 2.5 + Math.cos(elapsed * 0.3) * (height * 0.2) + Math.sin(elapsed * 0.5) * 50;
+
+        mouseX.set(autoX);
+        mouseY.set(autoY);
+      }
+
+      animId = requestAnimationFrame(animateIdleMotion);
+    };
+
+    animId = requestAnimationFrame(animateIdleMotion);
     return () => cancelAnimationFrame(animId);
   }, []);
 
@@ -132,9 +167,66 @@ export const LoginPage: React.FC<{
   };
 
   return (
-<div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col justify-between items-center p-4 sm:p-6 relative overflow-y-auto font-sans select-none">
-      {/* Background Soft Pattern */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f080_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f080_1px,transparent_1px)] bg-[size:3.5rem_3.5rem] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_10%,#000_60%,transparent_100%)] pointer-events-none" />
+) => cancelAnimationFrame(animId);
+  }, []);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { clientX, clientY } = e;
+    lastMouseMoveTime.current = Date.now();
+    isUserMoving.current = true;
+    mouseX.set(clientX);
+    mouseY.set(clientY);
+  };
+
+  return (
+    <div 
+      onMouseMove={handleMouseMove}
+      className="min-h-screen w-full bg-[#F8FAFC] text-slate-900 font-sans selection:bg-orange-500/20 selection:text-orange-600 relative overflow-x-hidden flex flex-col justify-between items-center p-4 sm:p-6 select-none"
+    >
+      {/* -- HIGH-TECH CYBER GRID LINES & INTERACTIVE SPOTLIGHT -- */}
+      
+      {/* 1. Base Precision Cyber Grid Lines */}
+      <div 
+        className="pointer-events-none fixed inset-0 z-0 opacity-45"
+        style={{
+          backgroundImage: `
+            linear-gradient(to right, rgba(15, 23, 42, 0.08) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(15, 23, 42, 0.08) 1px, transparent 1px)
+          `,
+          backgroundSize: '40px 40px',
+        }}
+      />
+
+      {/* 2. Micro Dot Matrix Intersections */}
+      <div 
+        className="pointer-events-none fixed inset-0 z-0 opacity-35"
+        style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(15, 23, 42, 0.16) 1.2px, transparent 0)`,
+          backgroundSize: '40px 40px',
+        }}
+      />
+
+      {/* 3. DYNAMIC MOUSE-ILLUMINATED GRID BEAM (Grid lines glow directly around cursor) */}
+      <motion.div
+        className="pointer-events-none fixed inset-0 z-0"
+        style={{
+          backgroundImage: `
+            linear-gradient(to right, rgba(255, 85, 0, 0.45) 1.5px, transparent 1.5px),
+            linear-gradient(to bottom, rgba(255, 85, 0, 0.45) 1.5px, transparent 1.5px)
+          `,
+          backgroundSize: '40px 40px',
+          WebkitMaskImage: useMotionTemplate`radial-gradient(320px circle at ${springX}px ${springY}px, black 20%, transparent 80%)`,
+          maskImage: useMotionTemplate`radial-gradient(320px circle at ${springX}px ${springY}px, black 20%, transparent 80%)`,
+        }}
+      />
+
+      {/* 4. Soft Moving Caustic Spotlight Beam */}
+      <motion.div
+        className="pointer-events-none fixed inset-0 z-0 transition-opacity duration-300"
+        style={{
+          background: useMotionTemplate`radial-gradient(650px circle at ${springX}px ${springY}px, rgba(255, 85, 0, 0.12), rgba(56, 189, 248, 0.06) 45%, transparent 75%)`
+        }}
+      />
 
       {/* Top Navbar Bar */}
       <header className="w-full max-w-5xl flex items-center justify-between z-10 py-2">
