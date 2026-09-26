@@ -83,7 +83,6 @@ const ALL_NAV_ITEMS: NavItemDef[] = [
   { id: 'freeze-leo', label: 'Emergency Freezes', code: 'LEA-FRZ', icon: AlertOctagon, allowedRoles: ['CYBER_OFFICER', 'POLICE', 'ADMIN'] },
   { id: 'network', label: '3D Network Explorer', code: 'NET-EXP', icon: Network, is3D: true, allowedRoles: ['CYBER_OFFICER', 'POLICE', 'ADMIN'] },
   { id: 'cashout-map', label: 'Cash-Out Map', code: 'GEO-MAP', icon: MapPin, allowedRoles: ['CYBER_OFFICER', 'POLICE', 'ADMIN'] },
-  { id: 'dossier', label: 'Case Dossiers', code: 'CASE-DOS', icon: FileText, allowedRoles: ['CYBER_OFFICER', 'POLICE', 'ADMIN'] },
   { id: 'simulation', label: '3D Simulation Lab', code: 'SIM-3D', icon: FlaskConical, is3D: true, allowedRoles: ['CYBER_OFFICER', 'ADMIN'] },
   { id: 'policy', label: 'Threshold Policy', code: 'POL-TUNE', icon: SlidersHorizontal, allowedRoles: ['CYBER_OFFICER', 'ADMIN'] },
 
@@ -361,3 +360,4 @@ export const AppShell: React.FC<AppShellProps> = ({
     </div>
   );
 };
+
