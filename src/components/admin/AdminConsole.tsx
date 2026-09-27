@@ -16,13 +16,15 @@ import {
 } from 'lucide-react';
 import { ApiService } from '../../services/api';
 import { BankMaster, JurisdictionMaster, StaffUserMaster, UserRole } from '../../types';
+import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
+import { LottieLoader } from '../ui/LottieLoader';
 
 export const AdminConsole: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'BANKS' | 'JURISDICTIONS' | 'STAFF'>('BANKS');
   const [banks, setBanks] = useState<BankMaster[]>([]);
   const [jurisdictions, setJurisdictions] = useState<JurisdictionMaster[]>([]);
   const [staffUsers, setStaffUsers] = useState<StaffUserMaster[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { status: fetchStatus, error: fetchError, run: runFetch } = useAsyncState<void>();
   const [search, setSearch] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -32,9 +34,8 @@ export const AdminConsole: React.FC = () => {
   const [bankName, setBankName] = useState('');
   const [ifscPrefixes, setIfscPrefixes] = useState('');
 
-  const loadData = async () => {
-    try {
-      setLoading(true);
+  const loadData = () => {
+    runFetch(async () => {
       const [b, j, s] = await Promise.all([
         ApiService.getBanks().catch(() => []),
         ApiService.getJurisdictions().catch(() => []),
@@ -43,11 +44,7 @@ export const AdminConsole: React.FC = () => {
       setBanks(b);
       setJurisdictions(j);
       setStaffUsers(s);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   useEffect(() => {
@@ -77,17 +74,12 @@ export const AdminConsole: React.FC = () => {
   };
 
   const handleSyncRoster = async () => {
-    try {
-      setLoading(true);
+    runFetch(async () => {
       const synced = await ApiService.syncStaffRoster();
       setStaffUsers(synced);
       setSuccessMessage('Staff officer roster synchronized with State Police Directory.');
       setTimeout(() => setSuccessMessage(null), 4000);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   return (
@@ -144,7 +136,7 @@ export const AdminConsole: React.FC = () => {
             onClick={loadData}
             className="p-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-slate-600 transition-colors"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${fetchStatus === AsyncStatus.LOADING ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
@@ -201,7 +193,13 @@ export const AdminConsole: React.FC = () => {
         </div>
       </div>
 
-      {/* ── TAB 1: BANKS REGISTRY ── */}
+      {fetchStatus === AsyncStatus.LOADING && banks.length === 0 ? (
+        <div className="p-12 flex justify-center items-center bg-white rounded-2xl border border-slate-200 shadow-saas-card">
+          <LottieLoader status={fetchStatus} />
+        </div>
+      ) : (
+        <>
+          {/* ── TAB 1: BANKS REGISTRY ── */}
       {activeTab === 'BANKS' && (
         <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-saas-card">
           <table className="w-full text-left text-xs font-sans">
@@ -314,6 +312,8 @@ export const AdminConsole: React.FC = () => {
             </tbody>
           </table>
         </div>
+      )}
+      </>
       )}
 
       {/* ── MODAL: ONBOARD NEW BANK ── */}

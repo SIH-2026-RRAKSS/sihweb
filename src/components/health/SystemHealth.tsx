@@ -27,31 +27,23 @@ import {
   ResponsiveContainer,
   Cell
 } from 'recharts';
+import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
+import { LottieLoader } from '../ui/LottieLoader';
 
 export const SystemHealth: React.FC = () => {
   const [health, setHealth] = useState<HealthResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [streaming, setStreaming] = useState<StreamingBenchmark | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const { status, error, run } = useAsyncState<void>();
 
   useEffect(() => {
-    const fetchHealthData = async () => {
-      try {
-        setLoading(true);
-        const [healthData, streamingData] = await Promise.all([
-          ApiService.checkHealth(),
-          ApiService.getStreamingBenchmark()
-        ]);
-        setHealth(healthData);
-        setStreaming(streamingData);
-      } catch (err) {
-        setError('Data unavailable - backend unreachable');
-        console.warn(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchHealthData();
+    run(async () => {
+      const [healthData, streamingData] = await Promise.all([
+        ApiService.checkHealth(),
+        ApiService.getStreamingBenchmark()
+      ]);
+      setHealth(healthData);
+      setStreaming(streamingData);
+    });
   }, []);
 
   const latencyChartData = streaming ? [
@@ -63,7 +55,13 @@ export const SystemHealth: React.FC = () => {
   return (
     <div className="space-y-3 font-sans text-xs">
       {error && <div className="bg-red-50 p-4 rounded-xl border border-red-200 text-red-600 font-bold text-sm mb-4">{error}</div>}
-      {/* ── TOP KPI STATUS CARDS ── */}
+      {status === AsyncStatus.LOADING && !health ? (
+        <div className="p-16 flex justify-center items-center">
+          <LottieLoader status={status} />
+        </div>
+      ) : (
+        <>
+          {/* ── TOP KPI STATUS CARDS ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
         <KPICard
           icon={Radio}
@@ -205,6 +203,8 @@ export const SystemHealth: React.FC = () => {
           </GlassCard>
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 };

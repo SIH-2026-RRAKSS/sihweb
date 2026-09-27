@@ -14,6 +14,8 @@ import {
 import { ApiService } from '../../services/api';
 import { CitizenComplaint } from '../../types';
 import { useAuth } from '../../context/AuthContext';
+import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
+import { LottieLoader } from '../ui/LottieLoader';
 
 interface MyComplaintsListProps {
   onSelectComplaint: (id: string) => void;
@@ -26,20 +28,15 @@ export const MyComplaintsList: React.FC<MyComplaintsListProps> = ({
 }) => {
   const { user } = useAuth();
   const [complaints, setComplaints] = useState<CitizenComplaint[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { status: fetchStatus, error: fetchError, run: runFetch } = useAsyncState<void>();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
 
-  const fetchComplaints = async () => {
-    try {
-      setLoading(true);
+  const fetchComplaints = () => {
+    runFetch(async () => {
       const data = await ApiService.getCitizenComplaints(user?.id);
       setComplaints(data);
-    } catch (err) {
-      console.error('Failed to load complaints', err);
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   useEffect(() => {
@@ -98,7 +95,7 @@ export const MyComplaintsList: React.FC<MyComplaintsListProps> = ({
             onClick={() => fetchComplaints()}
             className="p-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-slate-600 transition-colors"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${fetchStatus === AsyncStatus.LOADING ? 'animate-spin' : ''}`} />
           </button>
 
           <button
@@ -147,10 +144,9 @@ export const MyComplaintsList: React.FC<MyComplaintsListProps> = ({
       </div>
 
       {/* ── COMPLAINT CARDS ── */}
-      {loading ? (
-        <div className="p-12 text-center text-slate-400">
-          <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-[#FF5500]" />
-          <span>Loading your complaints...</span>
+      {fetchStatus === AsyncStatus.LOADING ? (
+        <div className="p-12 flex justify-center items-center">
+          <LottieLoader status={fetchStatus} />
         </div>
       ) : filtered.length === 0 ? (
         <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center space-y-3 shadow-saas-card">

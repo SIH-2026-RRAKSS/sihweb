@@ -24,34 +24,23 @@ import { LoadingSkeleton } from '../ui/LoadingSkeleton';
 import { EmptyState } from '../ui/EmptyState';
 import { ApiService } from '../../services/api';
 import { IncidentDetail, GraphStructure } from '../../types';
+import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
+import { LottieLoader } from '../ui/LottieLoader';
 
 export const CaseDossier: React.FC = () => {
   const { caseId } = useParams<{ caseId: string }>();
   const navigate = useNavigate();
+  const { status: fetchStatus, error: fetchError, run: runFetch } = useAsyncState<void>();
   const [detail, setDetail] = useState<IncidentDetail | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const [copiedType, setCopiedType] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!caseId) { setLoading(false); return; }
+    if (!caseId) return;
 
-    const fetchCaseData = async () => {
-      try {
-        setLoading(true);
-        const [detailData] = await Promise.all([
-          ApiService.getIncidentDetail(caseId),
-        ]);
-        setDetail(detailData);
-      } catch (err) {
-        console.warn(err);
-        setError("Failed to load Case Dossier");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCaseData();
+    runFetch(async () => {
+      const detailData = await ApiService.getIncidentDetail(caseId);
+      setDetail(detailData);
+    });
   }, [caseId]);
 
   const handleExportMarkdown = () => {
@@ -112,7 +101,7 @@ ${detail?.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
 
   return (
     <div className="space-y-4 font-sans text-xs">
-      {error && (<div className="bg-red-50 text-red-600 p-4 rounded-lg font-bold border border-red-200 mb-4">⚠ {error}</div>)}
+      {fetchStatus === AsyncStatus.ERROR && (<div className="bg-red-50 text-red-600 p-4 rounded-lg font-bold border border-red-200 mb-4">⚠ {fetchError || "Failed to load Case Dossier"}</div>)}
 
       {/* ── TOP ACTION HEADER BAR ── */}
       <div className="bg-white border border-slate-200 p-3.5 rounded-2xl flex flex-wrap items-center justify-between gap-3 shadow-sm">
@@ -172,16 +161,16 @@ ${detail?.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
         </div>
       </div>
 
-      {error ? (
+      {fetchStatus === AsyncStatus.ERROR ? (
         <div className="p-8 text-center text-red-400 bg-slate-900 rounded-lg mx-3.5 mt-4 border border-red-900/50">
           <AlertTriangle size={32} className="mx-auto mb-3 opacity-50" />
-          <p className="font-mono text-sm">{error}</p>
+          <p className="font-mono text-sm">{fetchError}</p>
         </div>
       ) : !caseId ? (
         <div className="p-8 text-center text-slate-500 font-bold">Select a case from the Incident Queue to view its dossier.</div>
-      ) : loading || !detail ? (
-        <div className="p-8">
-          <LoadingSkeleton variant="card" count={3} />
+      ) : fetchStatus === AsyncStatus.LOADING || !detail ? (
+        <div className="p-8 flex justify-center items-center min-h-[400px]">
+          <LottieLoader status={fetchStatus} />
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5">

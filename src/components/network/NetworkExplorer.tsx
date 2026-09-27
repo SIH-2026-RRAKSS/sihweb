@@ -18,50 +18,41 @@ import { GlassCard } from '../ui/GlassCard';
 import { ConfidenceBadge } from '../ui/ConfidenceBadge';
 import { ApiService } from '../../services/api';
 import { IncidentSummary, GraphStructure, GraphNode, GraphEdge } from '../../types';
+import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
+import { LottieLoader } from '../ui/LottieLoader';
 
 export const NetworkExplorer: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [incidents, setIncidents] = useState<IncidentSummary[]>([]);
-  const [error, setError] = useState<string | null>(null);
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const [graphData, setGraphData] = useState<GraphStructure | null>(null);
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [isHistoricalExpanded, setIsHistoricalExpanded] = useState<boolean>(false);
 
+  const { status: incidentsStatus, error: incidentsError, run: runIncidents } = useAsyncState<void>();
+  const { status: graphStatus, error: graphError, run: runGraph } = useAsyncState<void>();
+
   // Fetch Incident options
   useEffect(() => {
-    const fetchIncidents = async () => {
-      try {
-        const res = await ApiService.getIncidents({ page: 1, page_size: 50 });
-        setIncidents(res.items || []);
-        if (res.items && res.items.length > 0) {
-          setSelectedIncidentId(res.items[0].complaint_id);
-        }
-      } catch (err) {
-        setError('Data unavailable - backend unreachable');
-        console.warn(err);
+    runIncidents(async () => {
+      const res = await ApiService.getIncidents({ page: 1, page_size: 50 });
+      setIncidents(res.items || []);
+      if (res.items && res.items.length > 0) {
+        setSelectedIncidentId(res.items[0].complaint_id);
       }
-    };
-    fetchIncidents();
+    });
   }, []);
 
   // Fetch Graph data for selected incident
   useEffect(() => {
     if (!selectedIncidentId) return;
-    const fetchGraph = async () => {
-      try {
-        const data = await ApiService.getIncidentGraph(selectedIncidentId, isHistoricalExpanded);
-        setGraphData(data);
-        if (data.nodes.length > 0) {
-          setSelectedNode(data.nodes[0]);
-        }
-      } catch (err) {
-        setError('Data unavailable - backend unreachable');
-        console.warn(err);
-      } finally {
+    runGraph(async () => {
+      const data = await ApiService.getIncidentGraph(selectedIncidentId, isHistoricalExpanded);
+      setGraphData(data);
+      if (data.nodes.length > 0) {
+        setSelectedNode(data.nodes[0]);
       }
-    };
-    fetchGraph();
+    });
   }, [selectedIncidentId, isHistoricalExpanded]);
 
   // 3D Three.js Graph Visualization
@@ -262,7 +253,11 @@ export const NetworkExplorer: React.FC = () => {
 
   return (
     <div className="flex flex-col lg:flex-row h-full gap-3 font-sans text-xs overflow-hidden">
-      {error && <div className="bg-red-50 p-4 m-4 rounded-xl border border-red-200 text-red-600 font-bold text-sm w-full absolute z-50">{error}</div>}
+      {(incidentsError || graphError) && (
+        <div className="bg-red-50 p-4 m-4 rounded-xl border border-red-200 text-red-600 font-bold text-sm w-full absolute z-50">
+          {incidentsError || graphError || 'Data unavailable - backend unreachable'}
+        </div>
+      )}
       {/* ── LEFT / MAIN: 3D THREE.JS GRAPH CANVAS ── */}
       <div className="flex-1 flex flex-col bg-white border border-cyan-500/30 p-3 hud-bracket relative overflow-hidden">
         {/* Filter Controls Header */}
@@ -303,6 +298,11 @@ export const NetworkExplorer: React.FC = () => {
 
         {/* 3D Canvas Container */}
         <div className="flex-1 relative min-h-[400px]">
+          {graphStatus === AsyncStatus.LOADING && (
+            <div className="absolute inset-0 z-30 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
+              <LottieLoader status={graphStatus} />
+            </div>
+          )}
           <div ref={containerRef} className="w-full h-full cursor-grab" />
 
           {/* Top HUD Overlay */}

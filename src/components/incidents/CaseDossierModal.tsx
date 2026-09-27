@@ -16,6 +16,8 @@ import {
 } from 'lucide-react';
 import { IncidentDetail } from '../../types';
 import { ApiService } from '../../services/api';
+import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
+import { LottieLoader } from '../ui/LottieLoader';
 
 interface CaseDossierModalProps {
   incidentId: string | null;
@@ -29,19 +31,14 @@ export const CaseDossierModal: React.FC<CaseDossierModalProps> = ({
   onViewGraph
 }) => {
   const [detail, setDetail] = useState<IncidentDetail | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const { status, error, run } = useAsyncState<void>();
   const [actionNotice, setActionNotice] = useState<string | null>(null);
 
   useEffect(() => {
     if (!incidentId) return;
-    setLoading(true);
-    ApiService.getIncidentDetail(incidentId).then((data) => {
+    run(async () => {
+      const data = await ApiService.getIncidentDetail(incidentId);
       setDetail(data);
-      setLoading(false);
-    }).catch(err => {
-      setError(err.message);
-      setLoading(false);
     });
   }, [incidentId]);
 
@@ -157,9 +154,9 @@ ${detail.investigative_evidence_bullets.map((b, i) => `${i + 1}. ${b}`).join('\n
 
         {/* Modal Body */}
         <div className="p-6 overflow-y-auto space-y-6 flex-1 text-slate-800 text-xs font-sans">
-          {loading ? (
+          {status === AsyncStatus.LOADING ? (
             <div className="py-20 flex flex-col items-center justify-center gap-3">
-              <Radio className="w-8 h-8 text-cyber-cyan animate-spin" />
+              <LottieLoader status={status} />
               <span className="text-xs font-sans text-slate-500">Loading Case Intelligence...</span>
             </div>
           ) : detail ? (

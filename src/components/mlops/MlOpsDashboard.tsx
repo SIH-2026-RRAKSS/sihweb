@@ -17,11 +17,13 @@ import {
 import { ApiService } from '../../services/api';
 import { GraphSnapshot } from '../../types';
 import { ModelRegistryView } from './ModelRegistryView';
+import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
+import { LottieLoader } from '../ui/LottieLoader';
 
 export const MlOpsDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'SNAPSHOTS' | 'REGISTRY'>('SNAPSHOTS');
   const [snapshots, setSnapshots] = useState<GraphSnapshot[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { status: fetchStatus, error: fetchError, run: runFetch } = useAsyncState<void>();
   const [isRetraining, setIsRetraining] = useState(false);
   const [retrainProgress, setRetrainProgress] = useState(0);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -32,16 +34,11 @@ export const MlOpsDashboard: React.FC = () => {
   const [learningRate, setLearningRate] = useState('0.001');
   const [datasetChoice, setDatasetChoice] = useState('SYNTHETIC_A');
 
-  const fetchSnapshots = async () => {
-    try {
-      setLoading(true);
+  const fetchSnapshots = () => {
+    runFetch(async () => {
       const data = await ApiService.getGraphSnapshots();
       setSnapshots(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   useEffect(() => {
@@ -141,7 +138,7 @@ export const MlOpsDashboard: React.FC = () => {
             onClick={fetchSnapshots}
             className="p-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-slate-600 transition-colors"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${fetchStatus === AsyncStatus.LOADING ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
@@ -239,7 +236,15 @@ export const MlOpsDashboard: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 bg-white">
-                {snapshots.map((s) => (
+                {fetchStatus === AsyncStatus.LOADING ? (
+                  <tr>
+                    <td colSpan={7} className="p-8 text-center">
+                      <div className="flex justify-center items-center">
+                        <LottieLoader status={fetchStatus} />
+                      </div>
+                    </td>
+                  </tr>
+                ) : snapshots.map((s) => (
                   <tr key={s.id} className="hover:bg-slate-50/80 transition-colors">
                     <td className="p-3 font-mono font-bold text-slate-900">{s.snapshotName}</td>
                     <td className="p-3">

@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { ApiService } from '../../services/api';
 import { CitizenComplaint, ComplaintLifecycleStatus } from '../../types';
+import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
+import { LottieLoader } from '../ui/LottieLoader';
 
 interface ComplaintTimelineProps {
   complaintId: string;
@@ -37,35 +39,29 @@ export const ComplaintTimeline: React.FC<ComplaintTimelineProps> = ({
   onBack,
 }) => {
   const [complaint, setComplaint] = useState<CitizenComplaint | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { status, error, run } = useAsyncState<void>();
 
-  const fetchDetail = async () => {
-    try {
-      setLoading(true);
+  const fetchDetail = () => {
+    run(async () => {
       const data = await ApiService.getComplaintTimeline(complaintId);
       setComplaint(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load complaint timeline.');
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   useEffect(() => {
     fetchDetail();
   }, [complaintId]);
 
-  if (loading) {
+  if (status === AsyncStatus.LOADING) {
     return (
-      <div className="max-w-3xl mx-auto p-12 text-center text-slate-400">
-        <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-3 text-[#FF5500]" />
-        <p className="font-bold text-xs">Loading Live Case Timeline...</p>
+      <div className="max-w-3xl mx-auto p-12 flex flex-col justify-center items-center">
+        <LottieLoader status={status} />
+        <p className="font-bold text-xs mt-3 text-slate-500">Loading Live Case Timeline...</p>
       </div>
     );
   }
 
-  if (error || !complaint) {
+  if (status === AsyncStatus.ERROR || !complaint) {
     return (
       <div className="max-w-3xl mx-auto p-8 bg-white border border-slate-200 rounded-3xl shadow-saas-card text-center space-y-3">
         <AlertTriangle className="w-8 h-8 text-red-500 mx-auto" />

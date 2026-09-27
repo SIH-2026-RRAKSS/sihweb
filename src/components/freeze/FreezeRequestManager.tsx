@@ -16,28 +16,25 @@ import {
 import { ApiService } from '../../services/api';
 import { FreezeRequest, FreezeStatus } from '../../types';
 import { QuickFreezeModal } from './QuickFreezeModal';
+import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
+import { LottieLoader } from '../ui/LottieLoader';
 
 export const FreezeRequestManager: React.FC = () => {
   const [freezes, setFreezes] = useState<FreezeRequest[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { status: fetchStatus, error: fetchError, run: runFetch } = useAsyncState<void>();
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [search, setSearch] = useState('');
   const [showNewModal, setShowNewModal] = useState(false);
   const [selectedFreeze, setSelectedFreeze] = useState<FreezeRequest | null>(null);
   const [currentTime, setCurrentTime] = useState<number>(Date.now());
 
-  const fetchFreezes = async () => {
-    try {
-      setLoading(true);
+  const fetchFreezes = () => {
+    runFetch(async () => {
       const data = await ApiService.getFreezeRequests(
         statusFilter === 'ALL' ? undefined : (statusFilter as FreezeStatus)
       );
       setFreezes(data);
-    } catch (err) {
-      console.error('Failed to fetch freeze notices', err);
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   useEffect(() => {
@@ -111,7 +108,7 @@ export const FreezeRequestManager: React.FC = () => {
             className="p-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-slate-600 transition-colors"
             title="Refresh list"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${fetchStatus === AsyncStatus.LOADING ? 'animate-spin' : ''}`} />
           </button>
 
           <button
@@ -221,11 +218,12 @@ export const FreezeRequestManager: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
-              {loading ? (
+              {fetchStatus === AsyncStatus.LOADING ? (
                 <tr>
                   <td colSpan={9} className="p-8 text-center text-slate-400">
-                    <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-slate-400" />
-                    <span>Loading freeze records...</span>
+                    <div className="flex justify-center items-center">
+                      <LottieLoader status={fetchStatus} />
+                    </div>
                   </td>
                 </tr>
               ) : filteredFreezes.length === 0 ? (

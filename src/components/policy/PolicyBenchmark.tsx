@@ -24,6 +24,8 @@ import {
   ResponsiveContainer,
   Legend
 } from 'recharts';
+import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
+import { LottieLoader } from '../ui/LottieLoader';
 
 export const PolicyBenchmark: React.FC<{ activeDataset?: string }> = ({ activeDataset }) => {
   const [threshold, setThreshold] = useState<number>(0.50);
@@ -31,39 +33,34 @@ export const PolicyBenchmark: React.FC<{ activeDataset?: string }> = ({ activeDa
   const [benchmarkData, setBenchmarkData] = useState<ThreeWayBenchmarkRow[]>([]);
   const [chartData, setChartData] = useState<any[]>([]);
 
+  const { status, error, run } = useAsyncState<void>();
+
   useEffect(() => {
     const timerId = setTimeout(() => {
-      const fetchData = async () => {
-        try {
-          const [currentPolicy, benchmarks] = await Promise.all([
-            ApiService.tunePolicy(threshold, activeDataset),
-            ApiService.getThreeWayBenchmark()
-          ]);
-          
-          setPolicyData(currentPolicy);
-          setBenchmarkData(benchmarks);
-          
-          // Fetch points for the chart
-          const points = [0.1, 0.3, 0.5, 0.7, 0.8, 0.9];
-          const chartPoints = await Promise.all(
-            points.map(async (t) => {
-              const res = await ApiService.tunePolicy(t, activeDataset);
-              return {
-                threshold: `τ=${t.toFixed(1)}`,
-                precision: Number(res.precision_percent.toFixed(1)),
-                recall: Number(res.recall_percent.toFixed(1)),
-                f1: Number(res.f1_score_percent.toFixed(1)),
-              };
-            })
-          );
-          setChartData(chartPoints);
-        } catch (err) {
-          console.warn(err);
-        } finally {
-        }
-      };
-
-      fetchData();
+      run(async () => {
+        const [currentPolicy, benchmarks] = await Promise.all([
+          ApiService.tunePolicy(threshold, activeDataset),
+          ApiService.getThreeWayBenchmark()
+        ]);
+        
+        setPolicyData(currentPolicy);
+        setBenchmarkData(benchmarks);
+        
+        // Fetch points for the chart
+        const points = [0.1, 0.3, 0.5, 0.7, 0.8, 0.9];
+        const chartPoints = await Promise.all(
+          points.map(async (t) => {
+            const res = await ApiService.tunePolicy(t, activeDataset);
+            return {
+              threshold: `τ=${t.toFixed(1)}`,
+              precision: Number(res.precision_percent.toFixed(1)),
+              recall: Number(res.recall_percent.toFixed(1)),
+              f1: Number(res.f1_score_percent.toFixed(1)),
+            };
+          })
+        );
+        setChartData(chartPoints);
+      });
     }, 300);
 
     return () => clearTimeout(timerId);
@@ -80,7 +77,18 @@ export const PolicyBenchmark: React.FC<{ activeDataset?: string }> = ({ activeDa
 
   return (
     <div className="space-y-3 font-sans">
-      {/* ── SECTION A: TACTICAL THRESHOLD CONSOLE ── */}
+      {error && (
+        <div className="bg-red-50 p-4 rounded-xl border border-red-200 text-red-600 font-bold text-sm">
+          {error}
+        </div>
+      )}
+      {status === AsyncStatus.LOADING && !policyData ? (
+        <div className="p-12 flex justify-center items-center">
+          <LottieLoader status={status} />
+        </div>
+      ) : (
+        <>
+          {/* ── SECTION A: TACTICAL THRESHOLD CONSOLE ── */}
       <GlassCard padding="md" glow="cyan">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-cyan-500/30 pb-2.5 mb-4">
           <div className="flex items-center gap-2">
@@ -232,6 +240,8 @@ export const PolicyBenchmark: React.FC<{ activeDataset?: string }> = ({ activeDa
           <span className="text-amber-cash font-bold">ALL BENCHMARKS EVALUATED ON SYNTHETIC HOLDOUT SUITES</span>
         </div>
       </GlassCard>
+      </>
+      )}
     </div>
   );
 };

@@ -13,23 +13,20 @@ import {
 } from 'lucide-react';
 import { ApiService } from '../../services/api';
 import { RegisteredModel } from '../../types';
+import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
+import { LottieLoader } from '../ui/LottieLoader';
 
 export const ModelRegistryView: React.FC = () => {
   const [models, setModels] = useState<RegisteredModel[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { status: fetchStatus, error: fetchError, run: runFetch } = useAsyncState<void>();
   const [promotingId, setPromotingId] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const fetchModels = async () => {
-    try {
-      setLoading(true);
+  const fetchModels = () => {
+    runFetch(async () => {
       const data = await ApiService.getModelRegistry();
       setModels(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   useEffect(() => {
@@ -113,7 +110,7 @@ export const ModelRegistryView: React.FC = () => {
             onClick={fetchModels}
             className="p-1 hover:bg-slate-100 rounded text-slate-500"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${fetchStatus === AsyncStatus.LOADING ? 'animate-spin' : ''}`} />
           </button>
         </div>
 
@@ -131,7 +128,15 @@ export const ModelRegistryView: React.FC = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 bg-white">
-            {models.map((m) => {
+            {fetchStatus === AsyncStatus.LOADING ? (
+              <tr>
+                <td colSpan={8} className="p-8 text-center">
+                  <div className="flex justify-center items-center">
+                    <LottieLoader status={fetchStatus} />
+                  </div>
+                </td>
+              </tr>
+            ) : models.map((m) => {
               const isChamp = m.status === 'CHAMPION';
               const isCand = m.status === 'CANDIDATE';
 

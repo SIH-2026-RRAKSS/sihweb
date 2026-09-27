@@ -20,6 +20,8 @@ import {
 } from 'lucide-react';
 import { ApiService } from '../../services/api';
 import { EntityLocation, ConfidenceTier } from '../../types';
+import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
+import { LottieLoader } from '../ui/LottieLoader';
 
 interface CashOutMapProps {
   targetEntityId?: string | null;
@@ -35,45 +37,35 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
   const corridorsLayerRef = useRef<L.LayerGroup | null>(null);
 
+  const { status: fetchStatus, error: fetchError, run: runFetch } = useAsyncState<void>();
   const [locations, setLocations] = useState<EntityLocation[]>([]);
   const [corridors, setCorridors] = useState<any[]>([]);
   const [selectedEntity, setSelectedEntity] = useState<EntityLocation | null>(null);
   const [tierFilter, setTierFilter] = useState<string>('ALL');
   const [typeFilter, setTypeFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
 
   // Fetch Entity Locations
   useEffect(() => {
-    const fetchLocations = async () => {
-      try {
-        setLoading(true);
-        const data = await ApiService.getEntityLocations();
-        setLocations(data);
-        
-        const corridorsData = await ApiService.getCorridors();
-        setCorridors(corridorsData);
+    runFetch(async () => {
+      const data = await ApiService.getEntityLocations();
+      setLocations(data);
+      
+      const corridorsData = await ApiService.getCorridors();
+      setCorridors(corridorsData);
 
-        // Check if targetEntityId was passed
-        if (targetEntityId && data.length > 0) {
-          const match = data.find(l => l.entity_id.toUpperCase() === targetEntityId.toUpperCase() || l.city?.toLowerCase() === targetEntityId.toLowerCase());
-          if (match) {
-            setSelectedEntity(match);
-          } else {
-            setSelectedEntity(data[0]);
-          }
-        } else if (data.length > 0) {
+      // Check if targetEntityId was passed
+      if (targetEntityId && data.length > 0) {
+        const match = data.find(l => l.entity_id.toUpperCase() === targetEntityId.toUpperCase() || l.city?.toLowerCase() === targetEntityId.toLowerCase());
+        if (match) {
+          setSelectedEntity(match);
+        } else {
           setSelectedEntity(data[0]);
         }
-      } catch (err) {
-        console.warn(err);
-        setError("Map Data Unavailable");
-      } finally {
-        setLoading(false);
+      } else if (data.length > 0) {
+        setSelectedEntity(data[0]);
       }
-    };
-    fetchLocations();
+    });
   }, [targetEntityId]);
 
   // Initialize Leaflet Map
@@ -330,53 +322,59 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
 
         {/* Entity List */}
         <div className="flex-1 overflow-y-auto space-y-1.5 pr-1">
-          {locations
-            .filter(l => typeFilter === 'ALL' || l.entity_type === typeFilter)
-            .filter(l => !searchQuery || l.entity_id.toLowerCase().includes(searchQuery.toLowerCase()) || l.city?.toLowerCase().includes(searchQuery.toLowerCase()))
-            .map((loc) => {
-              const isSelected = selectedEntity?.entity_id === loc.entity_id;
-              const isLocATM = loc.entity_type === 'ATM_TERMINAL';
-              const isLocHigh = loc.confidence_tier === 'HIGH_CONFIDENCE';
+          {fetchStatus === AsyncStatus.LOADING ? (
+            <div className="p-4 flex justify-center items-center h-48">
+              <LottieLoader status={fetchStatus} />
+            </div>
+          ) : (
+            locations
+              .filter(l => typeFilter === 'ALL' || l.entity_type === typeFilter)
+              .filter(l => !searchQuery || l.entity_id.toLowerCase().includes(searchQuery.toLowerCase()) || l.city?.toLowerCase().includes(searchQuery.toLowerCase()))
+              .map((loc) => {
+                const isSelected = selectedEntity?.entity_id === loc.entity_id;
+                const isLocATM = loc.entity_type === 'ATM_TERMINAL';
+                const isLocHigh = loc.confidence_tier === 'HIGH_CONFIDENCE';
 
-              return (
-                <div
-                  key={loc.entity_id}
-                  onClick={() => handleSelectFromList(loc)}
-                  className={`p-2 rounded border cursor-pointer transition-all ${
-                    isSelected
-                      ? 'bg-slate-100 border-white/30 text-slate-900'
-                      : 'bg-slate-50 border-slate-100 text-slate-500 hover:border-white/15'
-                  }`}
-                >
-                  <div className="flex items-center justify-between text-[11px] font-bold">
-                    <span className={isLocATM ? 'text-amber-400' : 'text-[#38BDF8]'}>
-                      {loc.entity_id}
-                    </span>
-                    <span className={`text-[9px] px-1 py-0.2 rounded border font-bold ${
-                      isLocHigh ? 'bg-[#FF5500]/15 text-[#FF5500] border-[#FF5500]/30' : 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
-                    }`}>
-                      {(loc.risk_probability * 100).toFixed(0)}%
-                    </span>
+                return (
+                  <div
+                    key={loc.entity_id}
+                    onClick={() => handleSelectFromList(loc)}
+                    className={`p-2 rounded border cursor-pointer transition-all ${
+                      isSelected
+                        ? 'bg-slate-100 border-white/30 text-slate-900'
+                        : 'bg-slate-50 border-slate-100 text-slate-500 hover:border-white/15'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between text-[11px] font-bold">
+                      <span className={isLocATM ? 'text-amber-400' : 'text-[#38BDF8]'}>
+                        {loc.entity_id}
+                      </span>
+                      <span className={`text-[9px] px-1 py-0.2 rounded border font-bold ${
+                        isLocHigh ? 'bg-[#FF5500]/15 text-[#FF5500] border-[#FF5500]/30' : 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                      }`}>
+                        {(loc.risk_probability * 100).toFixed(0)}%
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-slate-700 truncate mt-0.5">
+                      {loc.holder_name}
+                    </div>
+                    <div className="flex justify-between items-center text-[9px] text-slate-500 mt-1">
+                      <span>{loc.city}, {loc.state}</span>
+                      <span className="text-slate-900 font-sans font-bold">₹{(loc.flagged_amount || 0).toLocaleString('en-IN')}</span>
+                    </div>
                   </div>
-                  <div className="text-[10px] text-slate-700 truncate mt-0.5">
-                    {loc.holder_name}
-                  </div>
-                  <div className="flex justify-between items-center text-[9px] text-slate-500 mt-1">
-                    <span>{loc.city}, {loc.state}</span>
-                    <span className="text-slate-900 font-sans font-bold">₹{(loc.flagged_amount || 0).toLocaleString('en-IN')}</span>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })
+          )}
         </div>
       </div>
 
       {/* ── CENTER: LEAFLET INTERACTIVE MAP (6 COLS) ── */}
       <div className="lg:col-span-6 bg-white border border-slate-200 rounded-2xl overflow-hidden relative shadow-sm flex flex-col">
         
-      {error && (
+      {fetchStatus === AsyncStatus.ERROR && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-red-50 text-red-600 px-4 py-2 rounded-lg border border-red-200 font-bold shadow-lg flex items-center gap-2">
-          <span>⚠ {error}</span>
+          <span>⚠ {fetchError || "Map Data Unavailable"}</span>
         </div>
       )}
       <div ref={mapContainerRef} className="w-full h-full min-h-[400px]" />

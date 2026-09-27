@@ -22,6 +22,8 @@ import { PipelineStats, IncidentSummary, IncidentDetail } from '../../types';
 
 import { CommandHeroBanner } from './CommandHeroBanner';
 import { NavPage } from '../layout/AppShell';
+import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
+import { LottieLoader } from '../ui/LottieLoader';
 
 interface CommandCenterProps {
   activeDataset?: string;
@@ -39,61 +41,47 @@ const formatCurrency = (amount: number): string => {
 
 export const CommandCenter: React.FC<CommandCenterProps> = ({ activeDataset }) => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { status: fetchStatus, error: fetchError, run: runFetch } = useAsyncState<void>();
+  const { status: detailStatus, error: detailError, run: runDetailFetch } = useAsyncState<void>();
   const [stats, setStats] = useState<PipelineStats | null>(null);
   const [incidents, setIncidents] = useState<IncidentSummary[]>([]);
   const [tierFilter, setTierFilter] = useState<string>('ALL');
   const [sortMode, setSortMode] = useState<'SERIAL' | 'RISK'>('SERIAL');
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const [incidentDetail, setIncidentDetail] = useState<IncidentDetail | null>(null);
-  const [detailLoading, setDetailLoading] = useState(false);
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
-        const [statsData, incidentsResult] = await Promise.all([
-          ApiService.getPipelineStats(),
-          ApiService.getIncidents({ 
-            page: 1, 
-            page_size: 1000, 
-            tier: tierFilter !== 'ALL' ? tierFilter : undefined,
-            dataset: activeDataset 
-          })
-        ]);
-        
-        setStats(statsData);
-        let items = incidentsResult.items || [];
+    runFetch(async () => {
+      const [statsData, incidentsResult] = await Promise.all([
+        ApiService.getPipelineStats(),
+        ApiService.getIncidents({ 
+          page: 1, 
+          page_size: 1000, 
+          tier: tierFilter !== 'ALL' ? tierFilter : undefined,
+          dataset: activeDataset 
+        })
+      ]);
+      
+      setStats(statsData);
+      let items = incidentsResult.items || [];
 
-        if (items.length > 0) {
-          setIncidents(items);
-          const topId = items[0].complaint_id;
-          setSelectedIncidentId(topId);
-          fetchDetail(topId);
-        }
-      } catch (err) {
-        setError('Investigation data unavailable - backend unreachable');
-        console.warn(err);
-      } finally {
-        setLoading(false);
+      if (items.length > 0) {
+        setIncidents(items);
+        const topId = items[0].complaint_id;
+        setSelectedIncidentId(topId);
+        runDetailFetch(async () => {
+          const detail = await ApiService.getIncidentDetail(topId);
+          setIncidentDetail(detail);
+        });
       }
-    };
-
-    fetchDashboardData();
+    });
   }, [activeDataset]);
 
-  const fetchDetail = async (id: string) => {
-    try {
-      setDetailLoading(true);
+  const fetchDetail = (id: string) => {
+    runDetailFetch(async () => {
       const detail = await ApiService.getIncidentDetail(id);
       setIncidentDetail(detail);
-    } catch (err) {
-        setError('Investigation data unavailable - backend unreachable');
-        console.warn(err);
-      } finally {
-      setDetailLoading(false);
-    }
+    });
   };
 
   const handleSelectIncident = (id: string) => {
@@ -122,7 +110,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ activeDataset }) =
 
   return (
     <div className="space-y-4 font-sans">
-      {error && <div className="bg-red-50 p-4 m-4 rounded-xl border border-red-200 text-red-600 font-bold text-sm z-50">{error}</div>}
+      {fetchStatus === AsyncStatus.ERROR && <div className="bg-red-50 p-4 m-4 rounded-xl border border-red-200 text-red-600 font-bold text-sm z-50">{fetchError || 'Investigation data unavailable'}</div>}
       {/* ── IMMERSIVE COMMAND HERO BANNER ── */}
       <CommandHeroBanner />
 
@@ -251,9 +239,9 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ activeDataset }) =
 
           {/* List Feed */}
           <div className="flex-1 overflow-y-auto max-h-[460px] divide-y divide-white/5 font-sans">
-            {loading ? (
-              <div className="p-4 space-y-2">
-                <LoadingSkeleton variant="table-row" count={6} />
+            {fetchStatus === AsyncStatus.LOADING ? (
+              <div className="p-4 flex justify-center items-center h-48">
+                <LottieLoader status={fetchStatus} />
               </div>
             ) : filteredIncidents.length === 0 ? (
               <div className="p-8">
@@ -362,10 +350,10 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ activeDataset }) =
           <div className="flex-1 overflow-y-auto space-y-3">
             {(() => {
               const selectedIncident = incidents.find(i => i.complaint_id === selectedIncidentId);
-              if (detailLoading) {
+              if (detailStatus === AsyncStatus.LOADING) {
                 return (
-                  <div className="space-y-2">
-                    <LoadingSkeleton variant="text" count={6} />
+                  <div className="p-4 flex justify-center items-center h-48">
+                    <LottieLoader status={detailStatus} />
                   </div>
                 );
               }

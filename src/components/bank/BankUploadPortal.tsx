@@ -17,13 +17,15 @@ import {
 import { ApiService } from '../../services/api';
 import { BankUploadBatch } from '../../types';
 import { useAuth } from '../../context/AuthContext';
+import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
+import { LottieLoader } from '../ui/LottieLoader';
 
 export const BankUploadPortal: React.FC = () => {
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [batches, setBatches] = useState<BankUploadBatch[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { status: fetchStatus, error: fetchError, run: runFetch } = useAsyncState<void>();
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -35,16 +37,11 @@ export const BankUploadPortal: React.FC = () => {
   const [reviewNotes, setReviewNotes] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
 
-  const fetchBatches = async () => {
-    try {
-      setLoading(true);
+  const fetchBatches = () => {
+    runFetch(async () => {
       const data = await ApiService.getBankUploads();
       setBatches(data);
-    } catch (err) {
-      console.error('Failed to load bank uploads', err);
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   useEffect(() => {
@@ -172,7 +169,7 @@ export const BankUploadPortal: React.FC = () => {
             onClick={fetchBatches}
             className="p-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-slate-600 transition-colors"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${fetchStatus === AsyncStatus.LOADING ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
@@ -262,11 +259,12 @@ export const BankUploadPortal: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
-              {loading ? (
+              {fetchStatus === AsyncStatus.LOADING ? (
                 <tr>
                   <td colSpan={8} className="p-8 text-center text-slate-400">
-                    <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-slate-400" />
-                    <span>Loading ingestion audit logs...</span>
+                    <div className="flex justify-center items-center">
+                      <LottieLoader status={fetchStatus} />
+                    </div>
                   </td>
                 </tr>
               ) : batches.length === 0 ? (

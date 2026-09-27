@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { AlertOctagon, CheckCircle2, X, AlertCircle, Building2, Clock, ShieldAlert } from 'lucide-react';
 import { ApiService } from '../../services/api';
 import { FreezeRequest } from '../../types';
+import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
 
 interface QuickFreezeModalProps {
   incidentId: string;
@@ -34,34 +35,31 @@ export const QuickFreezeModal: React.FC<QuickFreezeModalProps> = ({
   const [bankId, setBankId] = useState(BANKS_LIST[0].id);
   const [freezeAmount, setFreezeAmount] = useState(defaultAmount || 149500);
   const [reason, setReason] = useState('Immediate emergency freeze order: multi-hop mule siphon detected by GraphSAGE AML pipeline');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { status, error, run } = useAsyncState<void>();
   const [successNotice, setSuccessNotice] = useState<string | null>(null);
 
   const handleIssueFreeze = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
     try {
-      const selectedBank = BANKS_LIST.find(b => b.id === bankId);
-      const res = await ApiService.createFreezeRequest({
-        incidentId,
-        targetAccountId: targetAccount,
-        bankId,
-        bankName: selectedBank?.name,
-        freezeAmount: Number(freezeAmount),
-        reason
+      await run(async () => {
+        const selectedBank = BANKS_LIST.find(b => b.id === bankId);
+        const res = await ApiService.createFreezeRequest({
+          incidentId,
+          targetAccountId: targetAccount,
+          bankId,
+          bankName: selectedBank?.name,
+          freezeAmount: Number(freezeAmount),
+          reason
+        });
+        setSuccessNotice(`Notice ${res.id} issued successfully. SLA countdown active.`);
+        setTimeout(() => {
+          onFreezeDispatched?.(res);
+          onFreezeIssued?.();
+          onClose();
+        }, 1500);
       });
-      setSuccessNotice(`Notice ${res.id} issued successfully. SLA countdown active.`);
-      setTimeout(() => {
-        onFreezeDispatched?.(res);
-        onFreezeIssued?.();
-        onClose();
-      }, 1500);
     } catch (err: any) {
-      setError(err.message || 'Failed to issue freeze request');
-    } finally {
-      setLoading(false);
+      // Handled by useAsyncState
     }
   };
 
@@ -165,10 +163,10 @@ export const QuickFreezeModal: React.FC<QuickFreezeModalProps> = ({
               </button>
               <button
                 type="submit"
-                disabled={loading}
+                disabled={status === AsyncStatus.LOADING}
                 className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-md shadow-red-600/20 disabled:opacity-50 flex items-center gap-1.5"
               >
-                {loading ? 'Dispatched...' : <><AlertOctagon className="w-3.5 h-3.5" /> Dispatch Freeze Order</>}
+                {status === AsyncStatus.LOADING ? 'Dispatching...' : <><AlertOctagon className="w-3.5 h-3.5" /> Dispatch Freeze Order</>}
               </button>
             </div>
           </form>

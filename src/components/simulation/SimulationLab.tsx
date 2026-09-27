@@ -3,27 +3,25 @@ import { Play, ShieldAlert, Network } from 'lucide-react';
 import { ApiService } from '../../services/api';
 import { ThreeNetworkCanvas } from './ThreeNetworkCanvas';
 import { InputValidator } from '../../utils/validation';
+import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
+import { LottieLoader } from '../ui/LottieLoader';
 
 export const SimulationLab: React.FC = () => {
   const [seedEntityId, setSeedEntityId] = useState<string>('ENT_000185');
   const [predictionResult, setPredictionResult] = useState<any | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const { status, error, run } = useAsyncState<void>();
   const [inputVal, setInputVal] = useState<string>('ENT_000185');
 
   const handleRunInference = async (entityId: string = seedEntityId) => {
     if (!entityId) return;
-    setLoading(true);
-    setError(null);
     setPredictionResult(null);
     try {
-      // Actually fetch live prediction from the backend
-      const res = await ApiService.predictLiveEntity(entityId, 3);
-      setPredictionResult(res);
+      await run(async () => {
+        const res = await ApiService.predictLiveEntity(entityId, 3);
+        setPredictionResult(res);
+      });
     } catch (err: any) {
-      setError(err.message || 'Failed to reach backend');
-    } finally {
-      setLoading(false);
+      // Handled by useAsyncState
     }
   };
 
@@ -50,10 +48,10 @@ export const SimulationLab: React.FC = () => {
               setSeedEntityId(inputVal);
               handleRunInference(inputVal);
             }}
-            disabled={loading}
+            disabled={status === AsyncStatus.LOADING}
             className="bg-[#FF5500] hover:bg-[#FF5500]/90 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 disabled:opacity-50"
           >
-            {loading ? 'Running...' : <><Play className="w-4 h-4" /> Run Inference</>}
+            {status === AsyncStatus.LOADING ? 'Running...' : <><Play className="w-4 h-4" /> Run Inference</>}
           </button>
         </div>
       </div>
@@ -61,6 +59,12 @@ export const SimulationLab: React.FC = () => {
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-600 font-bold p-4 rounded-xl text-sm">
           Error: {error}
+        </div>
+      )}
+
+      {status === AsyncStatus.LOADING && (
+        <div className="p-12 flex justify-center items-center bg-white rounded-2xl border border-slate-200 shadow-sm">
+          <LottieLoader status={status} />
         </div>
       )}
 

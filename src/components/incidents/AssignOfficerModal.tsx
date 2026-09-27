@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ShieldCheck, User, CheckCircle2, X, AlertCircle } from 'lucide-react';
 import { ApiService } from '../../services/api';
+import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
 
 interface OfficerDef {
   id: string;
@@ -31,21 +32,18 @@ export const AssignOfficerModal: React.FC<AssignOfficerModalProps> = ({
   onAssigned
 }) => {
   const [selectedOfficerId, setSelectedOfficerId] = useState(OFFICERS_LIST[0].id);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { status, error, run } = useAsyncState<void>();
 
   const handleAssign = async () => {
-    setLoading(true);
-    setError(null);
     try {
-      await ApiService.assignOfficerToIncident(incidentId, selectedOfficerId);
-      const chosen = OFFICERS_LIST.find(o => o.id === selectedOfficerId);
-      onAssigned(chosen || { id: selectedOfficerId, name: 'Assigned Officer' });
-      onClose();
+      await run(async () => {
+        await ApiService.assignOfficerToIncident(incidentId, selectedOfficerId);
+        const chosen = OFFICERS_LIST.find(o => o.id === selectedOfficerId);
+        onAssigned(chosen || { id: selectedOfficerId, name: 'Assigned Officer' });
+        onClose();
+      });
     } catch (err: any) {
-      setError(err.message || 'Failed to assign officer');
-    } finally {
-      setLoading(false);
+      // Handled by useAsyncState
     }
   };
 
@@ -117,10 +115,10 @@ export const AssignOfficerModal: React.FC<AssignOfficerModalProps> = ({
           </button>
           <button
             onClick={handleAssign}
-            disabled={loading}
+            disabled={status === AsyncStatus.LOADING}
             className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-600/20 disabled:opacity-50 flex items-center gap-1.5"
           >
-            {loading ? 'Assigning...' : <><CheckCircle2 className="w-3.5 h-3.5" /> Confirm Assignment</>}
+            {status === AsyncStatus.LOADING ? 'Assigning...' : <><CheckCircle2 className="w-3.5 h-3.5" /> Confirm Assignment</>}
           </button>
         </div>
       </div>
