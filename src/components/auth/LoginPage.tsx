@@ -183,21 +183,28 @@ export const LoginPage: React.FC<{
 
       {/* Top Navbar Bar */}
       <header className="w-full max-w-5xl flex items-center justify-between z-10 py-2">
-        <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span>I4C NATIONAL NETWORK ONLINE</span>
-        </div>
+          <div className="flex items-center gap-4 text-[10px] font-mono tracking-wider font-bold bg-slate-900/40 px-3 py-1.5 rounded-md border border-slate-700/50 shadow-sm backdrop-blur-sm">
+            <div className="flex items-center gap-2">
+              <span className={`w-2 h-2 rounded-full ${restStatus === '200 OK' ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+              <span className="text-slate-400">REST API: <span className={restStatus === '200 OK' ? 'text-emerald-400' : 'text-red-400'}>{restStatus}</span></span>
+            </div>
+            <div className="w-px h-3 bg-slate-700"></div>
+            <div className="flex items-center gap-2">
+              <span className={`w-2 h-2 rounded-full ${fastApiStatus === '200 OK' ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+              <span className="text-slate-400">FASTAPI: <span className={fastApiStatus === '200 OK' ? 'text-emerald-400' : 'text-red-400'}>{fastApiStatus}</span></span>
+            </div>
+          </div>
 
-        {onCancel && (
-          <button
-            onClick={onCancel}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold shadow-sm transition-all"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Return to Splash</span>
-          </button>
-        )}
-      </header>
+          {onCancel && (
+            <button
+              onClick={onCancel}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold shadow-sm transition-all"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Return to Splash</span>
+            </button>
+          )}
+        </header>
 
       {/* Central Content Area */}
       <main className="w-full max-w-4xl z-10 my-auto py-6 space-y-6">
