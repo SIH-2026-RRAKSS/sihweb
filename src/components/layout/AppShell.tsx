@@ -120,6 +120,30 @@ export const AppShell: React.FC<AppShellProps> = ({
   const [stats, setStats] = useState<any>(null);
   const [bench, setBench] = useState<any>(null);
 
+  const [restStatus, setRestStatus] = useState<string>('PINGING...');
+  const [fastApiStatus, setFastApiStatus] = useState<string>('PINGING...');
+
+  useEffect(() => {
+    const checkHealth = async () => {
+      const baseUrl = ((import.meta as any).env?.VITE_API_BASE_URL as string) || '/api';
+      try {
+        const restRes = await fetch(baseUrl + '/health');
+        if (restRes.ok) setRestStatus('200 OK');
+        else setRestStatus(`ERROR ${restRes.status}`);
+      } catch (e) { setRestStatus('OFFLINE'); }
+
+      try {
+        const fastRes = await fetch(baseUrl + '/model-health');
+        if (fastRes.ok) setFastApiStatus('200 OK');
+        else setFastApiStatus(`ERROR ${fastRes.status}`);
+      } catch (e) { setFastApiStatus('OFFLINE'); }
+    };
+    checkHealth();
+    const interval = setInterval(checkHealth, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+
   useEffect(() => {
     Promise.all([
       ApiService.getPipelineStats().catch(() => null),
@@ -204,12 +228,17 @@ export const AppShell: React.FC<AppShellProps> = ({
             </div>
           )}
 
-          <div className="flex items-center gap-1.5 text-slate-500">
-            <span>FASTAPI:</span>
-            <span className={`font-bold ${backendOnline ? 'text-emerald-600' : 'text-slate-500'}`}>
-              {backendOnline ? '200 OK' : 'LOCAL MOCK'}
-            </span>
-          </div>
+          <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 px-3 py-1 rounded-full shadow-sm ml-2">
+              <div className="flex items-center gap-1.5">
+                <span className={`w-1.5 h-1.5 rounded-full ${restStatus === '200 OK' ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+                <span className="text-[10px] font-bold text-slate-500">REST API: <span className={restStatus === '200 OK' ? 'text-emerald-600' : 'text-red-600'}>{restStatus}</span></span>
+              </div>
+              <div className="w-px h-3 bg-slate-300"></div>
+              <div className="flex items-center gap-1.5">
+                <span className={`w-1.5 h-1.5 rounded-full ${fastApiStatus === '200 OK' ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+                <span className="text-[10px] font-bold text-slate-500">FASTAPI: <span className={fastApiStatus === '200 OK' ? 'text-emerald-600' : 'text-red-600'}>{fastApiStatus}</span></span>
+              </div>
+            </div>
         </div>
 
         {/* Right: Military Time & User Profile Chip */}

@@ -28,28 +28,6 @@ export const LoginPage: React.FC<{
   onSuccess?: () => void;
   onCancel?: () => void;
 }> = ({ onLoginSuccess, onSuccess, onCancel }) => {
-  const [restStatus, setRestStatus] = useState<string>('PINGING...');
-  const [fastApiStatus, setFastApiStatus] = useState<string>('PINGING...');
-
-  useEffect(() => {
-    const checkHealth = async () => {
-      const baseUrl = ((import.meta as any).env?.VITE_API_BASE_URL as string) || '/api';
-      try {
-        const restRes = await fetch(baseUrl + '/health');
-        if (restRes.ok) setRestStatus('200 OK');
-        else setRestStatus(`ERROR ${restRes.status}`);
-      } catch (e) { setRestStatus('OFFLINE'); }
-
-      try {
-        const fastRes = await fetch(baseUrl + '/model-health');
-        if (fastRes.ok) setFastApiStatus('200 OK');
-        else setFastApiStatus(`ERROR ${fastRes.status}`);
-      } catch (e) { setFastApiStatus('OFFLINE'); }
-    };
-    checkHealth();
-    const interval = setInterval(checkHealth, 5000);
-    return () => clearInterval(interval);
-  }, []);
 
   const { loginStaff, loginCitizen, isLoading } = useAuth();
   const [mode, setMode] = useState<'STAFF' | 'CITIZEN'>('STAFF');
@@ -206,16 +184,9 @@ export const LoginPage: React.FC<{
 
       {/* Top Navbar Bar */}
       <header className="w-full max-w-5xl flex items-center justify-between z-10 py-2">
-          <div className="flex items-center gap-4 text-[10px] font-mono tracking-wider font-bold bg-slate-900/40 px-3 py-1.5 rounded-md border border-slate-700/50 shadow-sm backdrop-blur-sm">
-            <div className="flex items-center gap-2">
-              <span className={`w-2 h-2 rounded-full ${restStatus === '200 OK' ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
-              <span className="text-slate-400">REST API: <span className={restStatus === '200 OK' ? 'text-emerald-400' : 'text-red-400'}>{restStatus}</span></span>
-            </div>
-            <div className="w-px h-3 bg-slate-700"></div>
-            <div className="flex items-center gap-2">
-              <span className={`w-2 h-2 rounded-full ${fastApiStatus === '200 OK' ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
-              <span className="text-slate-400">FASTAPI: <span className={fastApiStatus === '200 OK' ? 'text-emerald-400' : 'text-red-400'}>{fastApiStatus}</span></span>
-            </div>
+          <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>I4C NATIONAL NETWORK ONLINE</span>
           </div>
 
           {onCancel && (
