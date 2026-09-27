@@ -25,21 +25,45 @@ import { NotFound } from './components/layout/NotFound';
 
 const SplashGate = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, role } = useAuth();
   
   useEffect(() => {
     const splashSeen = sessionStorage.getItem('splashSeen');
-    if (splashSeen) {
-      navigate('/command', { replace: true });
+    if (splashSeen || isAuthenticated) {
+      if (role === 'COMPLAINANT') navigate('/citizen-portal', { replace: true });
+      else if (role === 'BANK_MANAGER' || role === 'BANK_EMPLOYEE') navigate('/bank-freeze', { replace: true });
+      else if (role === 'ADMIN') navigate('/admin-console', { replace: true });
+      else navigate('/command', { replace: true });
     }
-  }, [navigate]);
+  }, [navigate, isAuthenticated, role]);
 
-  if (sessionStorage.getItem('splashSeen')) return null;
+  if (sessionStorage.getItem('splashSeen') || isAuthenticated) return null;
 
   return (
     <LandingSplash
-      onEnterApp={() => {
+      onEnterApp={(targetTab) => {
         sessionStorage.setItem('splashSeen', 'true');
-        navigate('/command');
+        if (targetTab === 'simulation') navigate('/simulation');
+        else if (targetTab === 'cashout-map') navigate('/cashout-map');
+        else if (targetTab === 'incidents') navigate('/incidents');
+        else if (targetTab === 'policy') navigate('/policy');
+        else navigate('/command');
+      }}
+    />
+  );
+};
+
+const SplashPage = () => {
+  const navigate = useNavigate();
+  return (
+    <LandingSplash
+      onEnterApp={(targetTab) => {
+        sessionStorage.setItem('splashSeen', 'true');
+        if (targetTab === 'simulation') navigate('/simulation');
+        else if (targetTab === 'cashout-map') navigate('/cashout-map');
+        else if (targetTab === 'incidents') navigate('/incidents');
+        else if (targetTab === 'policy') navigate('/policy');
+        else navigate('/command');
       }}
     />
   );
@@ -60,7 +84,7 @@ const LoginGate = () => {
 
   if (isAuthenticated) return null;
 
-  return <LoginPage onCancel={() => navigate('/')} />;
+  return <LoginPage onCancel={() => navigate('/splash')} />;
 };
 
 const AppShellLayout = ({ activeDataset, setActiveDataset }: { activeDataset: 'SYNTHETIC_A' | 'IBM_B' | 'ELLIPTIC_C', setActiveDataset: (d: any) => void }) => {
@@ -82,6 +106,7 @@ const AppContent: React.FC = () => {
   return (
     <Routes>
       <Route path="/" element={<SplashGate />} />
+      <Route path="/splash" element={<SplashPage />} />
       <Route path="/login" element={<LoginGate />} />
 
       <Route element={<AppShellLayout activeDataset={activeDataset} setActiveDataset={setActiveDataset} />}>

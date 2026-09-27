@@ -236,7 +236,7 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ activeDataset }) =
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
-              {fetchStatus === AsyncStatus.LOADING && incidents.length === 0 ? (
+              {fetchStatus === AsyncStatus.LOADING ? (
                 <tr>
                   <td colSpan={9} className="p-6 text-center">
                     <LottieLoader status={fetchStatus} error={fetchError} />

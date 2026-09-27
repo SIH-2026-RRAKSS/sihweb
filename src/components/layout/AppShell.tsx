@@ -203,7 +203,7 @@ export const AppShell: React.FC<AppShellProps> = ({
               <Menu className="w-5 h-5" />
             </button>
             <div 
-          onClick={() => navigate('/')} 
+          onClick={() => navigate('/splash')} 
           className="flex items-center gap-2.5 cursor-pointer group"
           title="Return to Splash Overview (Team Trinetra)"
         >

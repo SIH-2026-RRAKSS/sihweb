@@ -8,7 +8,7 @@ export enum AsyncStatus {
   TIMEOUT = 'TIMEOUT',
 }
 
-export function useAsyncState<T>(timeoutMs: number = 8000) {
+export function useAsyncState<T>(timeoutMs: number = 8000, minDisplayMs: number = 2000) {
   const [status, setStatus] = useState<AsyncStatus>(AsyncStatus.IDLE);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<T | null>(null);
@@ -28,8 +28,8 @@ export function useAsyncState<T>(timeoutMs: number = 8000) {
         const result = await Promise.race([asyncFn(), timeoutPromise]);
 
         const elapsedTime = Date.now() - startTime;
-        if (elapsedTime < 500) {
-          await new Promise((resolve) => setTimeout(resolve, 500 - elapsedTime));
+        if (elapsedTime < minDisplayMs) {
+          await new Promise((resolve) => setTimeout(resolve, minDisplayMs - elapsedTime));
         }
 
         setData(result);

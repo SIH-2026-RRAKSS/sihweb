@@ -193,7 +193,7 @@ export const AdminConsole: React.FC = () => {
         </div>
       </div>
 
-      {fetchStatus === AsyncStatus.LOADING && banks.length === 0 ? (
+      {fetchStatus === AsyncStatus.LOADING ? (
         <div className="p-12 flex justify-center items-center bg-white rounded-2xl border border-slate-200 shadow-saas-card">
           <LottieLoader status={fetchStatus} />
         </div>

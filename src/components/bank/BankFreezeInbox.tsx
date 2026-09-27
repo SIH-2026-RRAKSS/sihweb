@@ -189,7 +189,7 @@ export const BankFreezeInbox: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
-              {fetchStatus === AsyncStatus.LOADING && freezes.length === 0 ? (
+              {fetchStatus === AsyncStatus.LOADING ? (
                 <tr>
                   <td colSpan={7} className="p-8 text-center">
                     <LottieLoader status={fetchStatus} error={fetchError} />

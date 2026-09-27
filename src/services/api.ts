@@ -452,19 +452,6 @@ export class ApiService {
   }
 
   public static async simulateStreamBatch(dataset: 'synthetic' | 'ibm' = 'synthetic', numTx: number = 50, offset: number = 0): Promise<any> {
-    try {
-      const res = await fetch(`${BASE_URL}/streaming/start`, {
-        method: 'POST',
-        headers: this.getHeaders(),
-        body: JSON.stringify({ datasetName: dataset, speedMultiplier: 5.0, count: numTx }),
-        signal: AbortSignal.timeout(10000)
-      });
-      if (res.ok) {
-        const json = await res.json();
-        return unwrapResponse(json);
-      }
-    } catch {}
-
     const res = await fetch(`${BASE_URL}/simulate/stream?dataset=${dataset}&num_tx=${numTx}&offset=${offset}`, {
       method: 'POST',
       headers: this.getHeaders(),
