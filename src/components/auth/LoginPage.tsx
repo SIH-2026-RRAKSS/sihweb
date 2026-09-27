@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams, useLocation } from 'react-router-dom';
 import { motion, useMotionValue, useSpring, useMotionTemplate } from 'framer-motion';
 import {
   ShieldAlert,
@@ -29,6 +30,14 @@ export const LoginPage: React.FC<{
   onCancel?: () => void;
 }> = ({ onLoginSuccess, onSuccess, onCancel }) => {
 
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const [isSessionExpired, setIsSessionExpired] = useState<boolean>(() => {
+    return searchParams.get('expired') === 'true' || 
+           sessionStorage.getItem('sih_session_expired') === 'true' ||
+           (location.state as any)?.sessionExpired === true;
+  });
+
   const { loginStaff, loginCitizen, isLoading } = useAuth();
   const [mode, setMode] = useState<'STAFF' | 'CITIZEN'>('STAFF');
   const [employeeId, setEmployeeId] = useState('CYBER001');
@@ -40,6 +49,9 @@ export const LoginPage: React.FC<{
 
   const notifySuccess = () => {
     setErrorMsg(null);
+    setIsSessionExpired(false);
+    sessionStorage.removeItem('sih_session_expired');
+    sessionStorage.removeItem('sih_session_expired_msg');
     onSuccess?.();
     onLoginSuccess?.();
   };
@@ -217,6 +229,31 @@ export const LoginPage: React.FC<{
             Multi-Hop Mule Detection, Inductive GraphSAGE Intelligence & Section 91 CrPC Emergency Inter-Bank Freezes
           </p>
         </div>
+
+        {/* Session Expired Alert Banner */}
+        {isSessionExpired && (
+          <div className="bg-amber-50 border border-amber-300 rounded-2xl p-4 text-xs text-amber-900 flex items-start gap-3 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="p-2 bg-amber-100 rounded-xl text-amber-700 flex-shrink-0 mt-0.5">
+              <ShieldAlert className="w-5 h-5 text-amber-700" />
+            </div>
+            <div className="flex-1">
+              <div className="font-bold text-sm text-amber-950">Security Session Expired</div>
+              <p className="text-xs text-amber-800 mt-1 leading-relaxed">
+                Your authentication session has expired due to inactivity. Please sign in again or select an operational clearance below to resume your AML investigation.
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                setIsSessionExpired(false);
+                sessionStorage.removeItem('sih_session_expired');
+                sessionStorage.removeItem('sih_session_expired_msg');
+              }}
+              className="text-amber-700 hover:text-amber-950 font-bold text-xs px-2.5 py-1 bg-amber-200/60 hover:bg-amber-200 rounded-lg transition-colors cursor-pointer"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
 
         {/* 1-Click Fast Persona Switcher Bar */}
         <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-saas-card space-y-3.5">

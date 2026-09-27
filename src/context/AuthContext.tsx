@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { UserProfile, UserRole } from '../types';
-import { ApiService } from '../services/api';
+import { ApiService, isJwtExpired } from '../services/api';
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -8,6 +8,9 @@ interface AuthContextType {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isSessionExpired: boolean;
+  sessionExpiredMessage: string | null;
+  dismissSessionExpired: () => void;
   loginStaff: (employeeId: string, password?: string) => Promise<void>;
   loginCitizen: (provider: string, credentialToken: string) => Promise<void>;
   switchPersona: (role: UserRole) => void;
@@ -70,7 +73,30 @@ export const PERSONA_PRESETS: Record<UserRole, UserProfile> = {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isSessionExpired, setIsSessionExpired] = useState<boolean>(() => {
+    return sessionStorage.getItem('sih_session_expired') === 'true';
+  });
+  const [sessionExpiredMessage, setSessionExpiredMessage] = useState<string | null>(() => {
+    return sessionStorage.getItem('sih_session_expired_msg') || null;
+  });
+
+  const [token, setToken] = useState<string | null>(() => {
+    const savedToken = localStorage.getItem('sih_auth_token');
+    if (savedToken && isJwtExpired(savedToken)) {
+      localStorage.removeItem('sih_auth_token');
+      localStorage.removeItem('sih_user_profile');
+      sessionStorage.setItem('sih_session_expired', 'true');
+      sessionStorage.setItem('sih_session_expired_msg', 'Your session has expired. Please sign in again.');
+      return null;
+    }
+    return savedToken || null;
+  });
+
   const [user, setUser] = useState<UserProfile | null>(() => {
+    const savedToken = localStorage.getItem('sih_auth_token');
+    if (!savedToken || isJwtExpired(savedToken)) {
+      return null;
+    }
     const saved = localStorage.getItem('sih_user_profile');
     if (saved) {
       try {
@@ -80,11 +106,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return null;
   });
 
-  const [token, setToken] = useState<string | null>(() => {
-    return localStorage.getItem('sih_auth_token') || null;
-  });
-
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const handleSessionExpired = useCallback((msg: string = "Your session has expired. Please sign in again.") => {
+    setUser(null);
+    setToken(null);
+    ApiService.setAuthToken(null);
+    localStorage.removeItem('sih_auth_token');
+    localStorage.removeItem('sih_user_profile');
+    sessionStorage.setItem('sih_session_expired', 'true');
+    sessionStorage.setItem('sih_session_expired_msg', msg);
+    setIsSessionExpired(true);
+    setSessionExpiredMessage(msg);
+  }, []);
+
+  const dismissSessionExpired = useCallback(() => {
+    setIsSessionExpired(false);
+    setSessionExpiredMessage(null);
+    sessionStorage.removeItem('sih_session_expired');
+    sessionStorage.removeItem('sih_session_expired_msg');
+  }, []);
+
+  // Register ApiService callback and proactive token freshness checking
+  useEffect(() => {
+    ApiService.setOnAuthExpired(handleSessionExpired);
+
+    const handleWindowSessionExpired = (e: any) => {
+      handleSessionExpired(e?.detail?.message);
+    };
+    window.addEventListener('sih:session-expired', handleWindowSessionExpired);
+
+    const checkTokenFreshness = () => {
+      const currentToken = localStorage.getItem('sih_auth_token');
+      if (currentToken && isJwtExpired(currentToken)) {
+        handleSessionExpired("Your session has expired due to inactivity. Please sign in again.");
+      }
+    };
+
+    const intervalId = setInterval(checkTokenFreshness, 15000);
+    window.addEventListener('focus', checkTokenFreshness);
+
+    return () => {
+      window.removeEventListener('sih:session-expired', handleWindowSessionExpired);
+      window.removeEventListener('focus', checkTokenFreshness);
+      clearInterval(intervalId);
+    };
+  }, [handleSessionExpired]);
 
   useEffect(() => {
     if (user) {
@@ -110,6 +177,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const auth = await ApiService.loginStaff(employeeId, password);
       setUser(auth.user);
       setToken(auth.accessToken);
+      dismissSessionExpired();
     } catch (err) {
       console.error("Staff login error:", err);
       throw err;
@@ -124,6 +192,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const auth = await ApiService.loginCitizen(provider, credentialToken);
       setUser(auth.user);
       setToken(auth.accessToken);
+      dismissSessionExpired();
     } catch (err) {
       console.error("Citizen login error:", err);
       throw err;
@@ -139,6 +208,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const mockTok = `mock_token_${role.toLowerCase()}`;
       setToken(mockTok);
       ApiService.setAuthToken(mockTok);
+      dismissSessionExpired();
     }
   };
 
@@ -147,7 +217,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setToken(null);
     ApiService.logout();
     localStorage.removeItem('sih_user_profile');
+    localStorage.removeItem('sih_auth_token');
+    dismissSessionExpired();
   };
+
+  const isAuthenticated = !!user && !!token && !isJwtExpired(token);
 
   return (
     <AuthContext.Provider
@@ -155,8 +229,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         role: user?.role || null,
         token,
-        isAuthenticated: !!user,
+        isAuthenticated,
         isLoading,
+        isSessionExpired,
+        sessionExpiredMessage,
+        dismissSessionExpired,
         loginStaff,
         loginCitizen,
         switchPersona,

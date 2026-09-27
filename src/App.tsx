@@ -19,6 +19,7 @@ import { AdminConsole } from './components/admin/AdminConsole';
 import { MlOpsDashboard } from './components/mlops/MlOpsDashboard';
 import { LoginPage } from './components/auth/LoginPage';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { SessionExpiredModal } from './components/auth/SessionExpiredModal';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ConnectivityProvider, useConnectivity } from './context/ConnectivityContext';
 import { NotFound } from './components/layout/NotFound';
@@ -141,6 +142,7 @@ export const App: React.FC = () => {
   return (
     <AuthProvider>
       <ConnectivityProvider>
+        <SessionExpiredModal />
         <AppContent />
       </ConnectivityProvider>
     </AuthProvider>

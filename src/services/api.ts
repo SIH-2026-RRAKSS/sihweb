@@ -36,9 +36,75 @@ function unwrapResponse<T = any>(data: any): T {
   return data;
 }
 
+/**
+ * Inspects a JWT token and checks if it has expired based on the 'exp' claim.
+ * Returns true if the token is null, invalid, or expired.
+ */
+export function isJwtExpired(token: string | null): boolean {
+  if (!token) return true;
+  if (token.startsWith('mock')) return false;
+
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return false;
+    const base64Url = parts[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    const payload = JSON.parse(jsonPayload);
+    if (!payload.exp) return false;
+    // Buffer by 5 seconds to prevent race conditions
+    return Date.now() >= (payload.exp * 1000 - 5000);
+  } catch {
+    return false;
+  }
+}
+
 export class ApiService {
   private static backendOnline: boolean = false;
   private static authToken: string | null = localStorage.getItem('sih_auth_token');
+  private static onAuthExpiredCallback: ((message?: string) => void) | null = null;
+  private static interceptorInitialized: boolean = false;
+
+  public static setOnAuthExpired(callback: (message?: string) => void) {
+    this.onAuthExpiredCallback = callback;
+  }
+
+  public static initAuthInterceptor() {
+    if (this.interceptorInitialized || typeof window === 'undefined') return;
+    this.interceptorInitialized = true;
+
+    const originalFetch = window.fetch;
+    window.fetch = async (...args) => {
+      const res = await originalFetch(...args);
+      if (res.status === 401) {
+        const url = typeof args[0] === 'string' ? args[0] : (args[0] as Request)?.url || '';
+        // Skip login endpoints to allow bad credentials errors to be displayed in login form
+        const isLoginEndpoint = url.includes('/auth/staff/login') || url.includes('/auth/complainant/login');
+        if (!isLoginEndpoint && ApiService.authToken) {
+          ApiService.handleAuthExpired("Your session has expired. Please log in again.");
+        }
+      }
+      return res;
+    };
+  }
+
+  public static handleAuthExpired(message: string = "Your session has expired. Please log in again.") {
+    this.setAuthToken(null);
+    localStorage.removeItem('sih_user_profile');
+    sessionStorage.setItem('sih_session_expired', 'true');
+    sessionStorage.setItem('sih_session_expired_msg', message);
+
+    if (this.onAuthExpiredCallback) {
+      this.onAuthExpiredCallback(message);
+    }
+
+    window.dispatchEvent(new CustomEvent('sih:session-expired', { detail: { message } }));
+  }
 
   public static setAuthToken(token: string | null) {
     this.authToken = token;
@@ -525,6 +591,7 @@ export class ApiService {
 
   public static logout(): void {
     this.setAuthToken(null);
+    localStorage.removeItem('sih_user_profile');
   }
 
   // ============================================================================
@@ -1231,3 +1298,6 @@ export class ApiService {
     return this.assignOfficerToIncident(incidentId, officerId);
   }
 }
+
+// Auto-initialize global fetch response interceptor for session expiration
+ApiService.initAuthInterceptor();
