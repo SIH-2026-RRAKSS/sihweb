@@ -377,6 +377,27 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
           <span>⚠ {fetchError || "Map Data Unavailable"}</span>
         </div>
       )}
+
+      {activeDataset === 'IBM_B' && (
+        <div className="absolute top-3 left-3 right-3 z-[1000] bg-slate-900/90 text-white px-3.5 py-2 rounded border border-cyan-500/40 text-xs shadow-lg backdrop-blur flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+            <span><strong>DATASET B (IBM MULTI-BANK):</strong> Multi-Bank inter-bank clearing flows transacted in USD ($). Physical Indian ATM cash-out nodes below are displayed for cross-dataset structural reference.</span>
+          </div>
+          <span className="text-[10px] font-mono bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30 font-bold">INTERNATIONAL CLEARING</span>
+        </div>
+      )}
+
+      {activeDataset === 'ELLIPTIC_C' && (
+        <div className="absolute top-3 left-3 right-3 z-[1000] bg-slate-900/90 text-white px-3.5 py-2 rounded border border-amber-500/40 text-xs shadow-lg backdrop-blur flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+            <span><strong>DATASET C (ELLIPTIC BITCOIN):</strong> Cryptocurrency blockchain DAG (BTC). Physical GPS coordinates are not applicable to decentralized blockchain wallet UTXOs.</span>
+          </div>
+          <span className="text-[10px] font-mono bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded border border-amber-500/30 font-bold">BLOCKCHAIN UTXO</span>
+        </div>
+      )}
+
       <div ref={mapContainerRef} className="w-full h-full min-h-[400px]" />
 
         {/* Map Legend Floating Bar */}

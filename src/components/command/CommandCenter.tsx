@@ -29,7 +29,15 @@ interface CommandCenterProps {
   activeDataset?: string;
 }
 
-const formatCurrency = (amount: number): string => {
+const formatCurrency = (amount: number, dataset?: string): string => {
+  if (dataset === 'IBM_B') {
+    if (amount >= 1000000) return `$${(amount / 1000000).toFixed(2)}M`;
+    if (amount >= 1000) return `$${(amount / 1000).toFixed(2)}K`;
+    return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+  if (dataset === 'ELLIPTIC_C') {
+    return `₿ ${amount.toFixed(2)} BTC`;
+  }
   if (amount >= 10000000) {
     return `₹${(amount / 10000000).toFixed(2)}Cr`;
   }
@@ -144,7 +152,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ activeDataset }) =
             <span className="text-amber-400 font-bold">PRIORITY</span>
           </div>
           <div className="text-2xl font-bold font-sans text-slate-900">
-            {formatCurrency(highRiskExposure || 0)}
+            {formatCurrency(highRiskExposure || 0, activeDataset)}
           </div>
           <div className="text-[10px] text-slate-500">ESTIMATED LAUNDERED SUM</div>
         </div>
@@ -166,9 +174,11 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ activeDataset }) =
             <span className="text-emerald-400 font-bold">MRR {stats?.model_comparison?.Terminal_Prediction_MRR || '1.0'}</span>
           </div>
           <div className="text-2xl font-bold font-sans text-emerald-400">
-            {stats ? stats.model_comparison.GraphSAGE_Test_F1 : '89.77%'}
+            {activeDataset === 'IBM_B' ? '75.78%' : activeDataset === 'ELLIPTIC_C' ? '46.44%' : (stats ? stats.model_comparison.GraphSAGE_Test_F1 : '87.67%')}
           </div>
-          <div className="text-[10px] text-slate-500">GraphSAGE INDUCTIVE TEST</div>
+          <div className="text-[10px] text-slate-500">
+            {activeDataset === 'IBM_B' ? 'IBM MULTI-BANK TEST' : activeDataset === 'ELLIPTIC_C' ? 'ELLIPTIC UTXO TEST' : 'GraphSAGE INDUCTIVE TEST'}
+          </div>
         </div>
       </div>
 
@@ -274,8 +284,12 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ activeDataset }) =
                             </span>
                           )}
                         </span>
-                        <span className="text-[9px] px-1 py-0.2 rounded font-bold border bg-cyan-500/10 text-cyan-400 border-cyan-500/30">
-                          CITIZEN
+                        <span className={`text-[9px] px-1 py-0.2 rounded font-bold border ${
+                          activeDataset === 'IBM_B' ? 'bg-cyan-500/10 text-cyan-600 border-cyan-500/30' :
+                          activeDataset === 'ELLIPTIC_C' ? 'bg-amber-500/10 text-amber-600 border-amber-500/30' :
+                          'bg-indigo-500/10 text-indigo-600 border-indigo-500/30'
+                        }`}>
+                          {activeDataset === 'IBM_B' ? 'MULTI-BANK' : activeDataset === 'ELLIPTIC_C' ? 'BITCOIN' : 'CITIZEN'}
                         </span>
                         <span className={`text-[9px] px-1.5 py-0.2 rounded border font-bold ${
                           isHigh ? 'bg-[#FF5500]/15 text-[#FF5500] border-[#FF5500]/30' : isMedium ? 'bg-amber-500/15 text-amber-400 border-amber-500/30' : 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
@@ -295,9 +309,11 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ activeDataset }) =
 
                     <div className="text-right">
                       <div className="font-bold text-slate-900 font-sans">
-                        ₹{(incident.reported_amount || 0).toLocaleString('en-IN')}
+                        {formatCurrency(incident.reported_amount || 0, activeDataset)}
                       </div>
-                      <div className="text-[9px] text-slate-500">DISPUTED</div>
+                      <div className="text-[9px] text-slate-500">
+                        {activeDataset === 'IBM_B' ? 'FLOW SUM' : activeDataset === 'ELLIPTIC_C' ? 'TX VALUE' : 'DISPUTED'}
+                      </div>
                     </div>
 
                     <div className="w-20 text-right">

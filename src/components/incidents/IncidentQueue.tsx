@@ -101,6 +101,22 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ activeDataset }) =
   const start = (page - 1) * pageSize;
   const incidents = allIncidents.slice(start, start + pageSize);
 
+  const formatAmount = (amount: number) => {
+    if (activeDataset === 'IBM_B') {
+      return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+    if (activeDataset === 'ELLIPTIC_C') {
+      return `₿ ${amount.toFixed(4)} BTC`;
+    }
+    return `₹${amount.toLocaleString('en-IN')}`;
+  };
+
+  const getOriginBadge = () => {
+    if (activeDataset === 'IBM_B') return 'MULTI-BANK LEDGER';
+    if (activeDataset === 'ELLIPTIC_C') return 'BITCOIN UTXO';
+    return 'CITIZEN COMPLAINT';
+  };
+
   return (
     <div className="space-y-4 font-sans text-xs">
       {/* ── ACTION LOADER ── */}
@@ -227,7 +243,9 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ activeDataset }) =
                 <th className="p-3">COMPLAINT ID</th>
                 <th className="p-3">INTAKE ORIGIN</th>
                 <th className="p-3">SCAM CATEGORY</th>
-                <th className="p-3 text-right">DISPUTED AMOUNT</th>
+                <th className="p-3 text-right">
+                  {activeDataset === 'IBM_B' ? 'FLOW AMOUNT ($)' : activeDataset === 'ELLIPTIC_C' ? 'TX AMOUNT (BTC)' : 'DISPUTED AMOUNT (₹)'}
+                </th>
                 <th className="p-3">JURISDICTION</th>
                 <th className="p-3">GRAPHSAGE RISK</th>
                 <th className="p-3">OPERATIONAL TIER</th>
@@ -275,8 +293,12 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ activeDataset }) =
 
                       {/* Origin */}
                       <td className="p-3">
-                        <span className="text-[9px] px-2 py-0.5 rounded font-bold border bg-cyan-50 text-cyan-700 border-cyan-200">
-                          CITIZEN COMPLAINT
+                        <span className={`text-[9px] px-2 py-0.5 rounded font-bold border ${
+                          activeDataset === 'IBM_B' ? 'bg-cyan-50 text-cyan-700 border-cyan-200' :
+                          activeDataset === 'ELLIPTIC_C' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                          'bg-indigo-50 text-indigo-700 border-indigo-200'
+                        }`}>
+                          {getOriginBadge()}
                         </span>
                       </td>
 
@@ -287,7 +309,7 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ activeDataset }) =
 
                       {/* Disputed Amount */}
                       <td className="p-3 text-right font-bold text-slate-900 font-mono">
-                        ₹{(incident.reported_amount || 0).toLocaleString('en-IN')}
+                        {formatAmount(incident.reported_amount || 0)}
                       </td>
 
                       {/* Jurisdiction */}
