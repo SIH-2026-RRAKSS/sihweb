@@ -28,6 +28,29 @@ export const LoginPage: React.FC<{
   onSuccess?: () => void;
   onCancel?: () => void;
 }> = ({ onLoginSuccess, onSuccess, onCancel }) => {
+  const [restStatus, setRestStatus] = useState<string>('PINGING...');
+  const [fastApiStatus, setFastApiStatus] = useState<string>('PINGING...');
+
+  useEffect(() => {
+    const checkHealth = async () => {
+      const baseUrl = ((import.meta as any).env?.VITE_API_BASE_URL as string) || '/api';
+      try {
+        const restRes = await fetch(baseUrl + '/health');
+        if (restRes.ok) setRestStatus('200 OK');
+        else setRestStatus(`ERROR ${restRes.status}`);
+      } catch (e) { setRestStatus('OFFLINE'); }
+
+      try {
+        const fastRes = await fetch(baseUrl + '/model-health');
+        if (fastRes.ok) setFastApiStatus('200 OK');
+        else setFastApiStatus(`ERROR ${fastRes.status}`);
+      } catch (e) { setFastApiStatus('OFFLINE'); }
+    };
+    checkHealth();
+    const interval = setInterval(checkHealth, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   const { loginStaff, loginCitizen, isLoading } = useAuth();
   const [mode, setMode] = useState<'STAFF' | 'CITIZEN'>('STAFF');
   const [employeeId, setEmployeeId] = useState('CYBER001');
