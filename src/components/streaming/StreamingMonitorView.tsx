@@ -53,6 +53,7 @@ export const StreamingMonitorView: React.FC = () => {
   const [avgGnnLat, setAvgGnnLat] = useState<number>(0.70);
   const [liveStreamEvents, setLiveStreamEvents] = useState<any[]>([]);
   const [progressPercent, setProgressPercent] = useState<number>(0);
+  const [streamError, setStreamError] = useState<string | null>(null);
 
   // Risk Factor Visibility & Threshold Controls
   const [riskCutoff, setRiskCutoff] = useState<number>(0.70);
@@ -89,6 +90,7 @@ export const StreamingMonitorView: React.FC = () => {
     setGnnRuns(0);
     setProgressPercent(0);
     setLiveStreamEvents([]);
+    setStreamError(null);
     setPage(1);
   };
 
@@ -101,16 +103,15 @@ export const StreamingMonitorView: React.FC = () => {
     setGnnRuns(0);
     setProgressPercent(0);
     setLiveStreamEvents([]);
+    setStreamError(null);
     setPage(1);
 
-    
     try {
-      // FIX: Chunk the requests so Vercel Serverless (10s timeout) doesn't crash on large datasets
-      const CHUNK_SIZE = 1000;
+      // Chunk requests into 100-tx batches to guarantee execution well under Vercel's 10s edge timeout
+      const CHUNK_SIZE = 100;
       let allTx: any[] = [];
       let finalAlerts = 0;
       let finalGnnRuns = 0;
-      let totalTimeSec = 0;
       
       let finalThroughput = 0;
       let finalFilter = 0;
@@ -125,21 +126,21 @@ export const StreamingMonitorView: React.FC = () => {
           finalAlerts += (res.high_risk_alerts_emitted || 0);
           finalGnnRuns += (res.stage_2_gnn_runs || 0);
           
-          // Use the last chunk's rates as representative, or calculate real throughput later
           finalThroughput = res.throughput_tx_per_sec || 1250.0;
           finalFilter = res.stage_1_benign_filter_rate || 88.86;
           finalAvgLat = res.avg_gnn_latency_ms || 0.70;
           
           // Progressive UI Update
-          const pct = Math.round((allTx.length / streamVolume) * 100);
+          const pct = Math.min(100, Math.round((allTx.length / streamVolume) * 100));
           setStreamedTxCount(allTx.length);
           setProgressPercent(pct);
           setRawAlertsCount(finalAlerts);
           setGnnRuns(finalGnnRuns);
-          setLiveRate(finalThroughput + (Math.random() * 30 - 15));
+          setLiveRate(finalThroughput);
           setLiveStreamEvents([...allTx]);
         } else {
-          break; // Stop if error
+          setStreamError(`Live stream interrupted at offset ${offset}. Backend service returned an invalid or empty response.`);
+          break;
         }
       }
 
@@ -157,13 +158,14 @@ export const StreamingMonitorView: React.FC = () => {
         setAvgGnnLat(finalAvgLat);
         setLiveStreamEvents(allTx);
       } else {
-
-        setStreamedTxCount(streamVolume);
-        setProgressPercent(100);
         setIsSimulating(false);
+        if (!streamError) {
+          setStreamError("No transactions returned from backend simulation.");
+        }
       }
-    } catch (e) {
-      console.warn(e);
+    } catch (e: any) {
+      console.error("Live streaming error:", e);
+      setStreamError(e?.message || "Failed to stream simulation transactions. Check network or backend connection.");
       setIsSimulating(false);
     }
   };
@@ -301,6 +303,25 @@ export const StreamingMonitorView: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Stream Error Alert Banner */}
+      {streamError && (
+        <div className="p-3.5 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 flex items-center justify-between shadow-sm">
+          <div className="flex items-center gap-2.5">
+            <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
+            <div>
+              <span className="font-bold text-red-800">Stream Ingestion Pipeline Error: </span>
+              <span>{streamError}</span>
+            </div>
+          </div>
+          <button 
+            onClick={() => setStreamError(null)} 
+            className="text-red-600 hover:text-red-900 font-bold px-2 py-1 text-xs bg-red-100 hover:bg-red-200 rounded-md transition-colors flex-shrink-0 ml-3"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
       {/* ── INTERACTIVE RISK FACTOR & VISIBILITY CONTROL DECK ── */}
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-4 space-y-4">
