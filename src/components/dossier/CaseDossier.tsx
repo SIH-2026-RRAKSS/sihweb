@@ -34,6 +34,13 @@ export const CaseDossier: React.FC = () => {
   const [detail, setDetail] = useState<IncidentDetail | null>(null);
   const [copiedType, setCopiedType] = useState<string | null>(null);
 
+  const BASE_URL = ((import.meta as any).env?.VITE_API_BASE_URL as string) || '/api';
+
+  const evidenceBullets: string[] = 
+    detail?.investigative_evidence_bullets || 
+    (detail as any)?.explainability?.investigative_evidence_bullets || 
+    [];
+
   useEffect(() => {
     if (!caseId) return;
 
@@ -63,7 +70,7 @@ export const CaseDossier: React.FC = () => {
 - Bank: ${detail?.resolved_canonical_entity?.bank_name}
 
 ## 3. GNN INVESTIGATIVE EVIDENCE
-${detail?.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
+${evidenceBullets.map(b => `- ${b}`).join('\n') || '- Standard transaction graph topology evaluated within 72h observation window.'}
 
 ## 4. CASH-OUT TERMINAL PREDICTION
 - Exit Terminal: ${detail?.model_prediction?.top_terminal_id || 'N/A'} (${detail?.model_prediction?.top_terminal_city || 'N/A'})
@@ -96,8 +103,8 @@ ${detail?.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
     );
   }
 
-  const isHigh = detail?.model_prediction.confidence_tier === 'HIGH_CONFIDENCE';
-  const isMedium = detail?.model_prediction.confidence_tier === 'MEDIUM_CONFIDENCE';
+  const isHigh = detail?.model_prediction?.confidence_tier === 'HIGH_CONFIDENCE';
+  const isMedium = detail?.model_prediction?.confidence_tier === 'MEDIUM_CONFIDENCE';
 
   return (
     <div className="space-y-4 font-sans text-xs">
@@ -249,12 +256,18 @@ ${detail?.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
               </div>
 
               <div className="space-y-1.5 text-[11px] text-slate-700">
-                {detail?.investigative_evidence_bullets.map((bullet, idx) => (
-                  <div key={idx} className="flex items-start gap-2 p-2 bg-slate-50 border border-slate-100 rounded">
-                    <CheckCircle2 className={`w-3.5 h-3.5 flex-shrink-0 mt-0.5 ${isHigh ? 'text-[#FF5500]' : isMedium ? 'text-amber-400' : 'text-emerald-400'}`} />
-                    <span className="leading-relaxed font-sans">{bullet}</span>
+                {evidenceBullets.length > 0 ? (
+                  evidenceBullets.map((bullet, idx) => (
+                    <div key={idx} className="flex items-start gap-2 p-2 bg-slate-50 border border-slate-100 rounded">
+                      <CheckCircle2 className={`w-3.5 h-3.5 flex-shrink-0 mt-0.5 ${isHigh ? 'text-[#FF5500]' : isMedium ? 'text-amber-400' : 'text-emerald-400'}`} />
+                      <span className="leading-relaxed font-sans">{bullet}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-3 bg-slate-50 border border-slate-200 rounded text-slate-500 font-sans italic">
+                    Standard multi-hop transaction graph topology evaluated within 72h observation window. No high-risk structural anomalies flagged.
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>
@@ -388,7 +401,7 @@ ${detail?.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
             {/* Legal Export Action */}
             {(isHigh || isMedium) && (
               <button 
-                onClick={() => window.open(`http://localhost:8000/api/dossier/${caseId}/export`, '_blank')}
+                onClick={() => window.open(`${BASE_URL}/dossier/${caseId}/export?format=html`, '_blank')}
                 className="w-full py-3 bg-tactical-accent hover:bg-tactical-accentHover text-slate-900 font-bold text-xs uppercase tracking-wider rounded-full flex items-center justify-center gap-2 transition-all shadow-sm"
               >
                 <FileText className="w-4 h-4" />

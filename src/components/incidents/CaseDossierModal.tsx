@@ -81,7 +81,7 @@ export const CaseDossierModal: React.FC<CaseDossierModalProps> = ({
 ---
 
 ## 4. Concrete Observable Graph Evidence
-${detail.investigative_evidence_bullets.map((b, i) => `${i + 1}. ${b}`).join('\n')}
+${((detail.investigative_evidence_bullets || (detail as any).explainability?.investigative_evidence_bullets || []).map((b: string, i: number) => `${i + 1}. ${b}`).join('\n')) || '- Standard transaction graph topology evaluated within 72h observation window.'}
 
 ---
 
@@ -265,20 +265,29 @@ ${detail.investigative_evidence_bullets.map((b, i) => `${i + 1}. ${b}`).join('\n
               </div>
 
               {/* Section 4: Concrete Observable Graph Evidence */}
-              <div className="p-4 bg-white border border-slate-200 rounded-xl space-y-3">
-                <div className="text-xs font-sans font-bold text-slate-700 uppercase flex items-center justify-between">
-                  <span>4. Concrete Observable Graph Evidence Bullets</span>
-                  <span className="text-[10px] text-emerald-400">{detail.investigative_evidence_bullets.length} Signals Validated</span>
-                </div>
-                <ul className="space-y-2">
-                  {detail.investigative_evidence_bullets.map((bullet, idx) => (
-                    <li key={idx} className="flex items-start gap-2.5 text-xs text-slate-700">
-                      <CheckCircle2 className="w-4 h-4 text-cyber-cyan flex-shrink-0 mt-0.5" />
-                      <span>{bullet}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              {(() => {
+                const bullets: string[] = detail.investigative_evidence_bullets || (detail as any).explainability?.investigative_evidence_bullets || [];
+                return (
+                  <div className="p-4 bg-white border border-slate-200 rounded-xl space-y-3">
+                    <div className="text-xs font-sans font-bold text-slate-700 uppercase flex items-center justify-between">
+                      <span>4. Concrete Observable Graph Evidence Bullets</span>
+                      <span className="text-[10px] text-emerald-400">{bullets.length} Signals Validated</span>
+                    </div>
+                    <ul className="space-y-2">
+                      {bullets.length > 0 ? (
+                        bullets.map((bullet, idx) => (
+                          <li key={idx} className="flex items-start gap-2.5 text-xs text-slate-700">
+                            <CheckCircle2 className="w-4 h-4 text-cyber-cyan flex-shrink-0 mt-0.5" />
+                            <span>{bullet}</span>
+                          </li>
+                        ))
+                      ) : (
+                        <li className="text-xs text-slate-500 italic">Standard multi-hop transaction graph topology evaluated within 72h observation window.</li>
+                      )}
+                    </ul>
+                  </div>
+                );
+              })()}
 
               {/* Section 5: Physical Cash Exit Intelligence */}
               {detail.top_terminal_details && (

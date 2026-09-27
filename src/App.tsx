@@ -116,6 +116,7 @@ const AppContent: React.FC = () => {
         <Route path="/network" element={<ProtectedRoute allowedRoles={['CYBER_OFFICER', 'POLICE', 'ADMIN']}><NetworkExplorer /></ProtectedRoute>} />
         <Route path="/cashout-map" element={<ProtectedRoute allowedRoles={['CYBER_OFFICER', 'POLICE', 'ADMIN']}><CashOutMap activeDataset={activeDataset} /></ProtectedRoute>} />
         <Route path="/dossier/:caseId" element={<ProtectedRoute allowedRoles={['CYBER_OFFICER', 'POLICE', 'ADMIN']}><CaseDossier /></ProtectedRoute>} />
+        <Route path="/dossier" element={<Navigate to="/incidents" replace />} />
         <Route path="/simulation" element={<ProtectedRoute allowedRoles={['CYBER_OFFICER', 'ADMIN']}><SimulationLab /></ProtectedRoute>} />
         <Route path="/policy" element={<ProtectedRoute allowedRoles={['CYBER_OFFICER', 'ADMIN']}><PolicyBenchmark activeDataset={activeDataset} /></ProtectedRoute>} />
         <Route path="/bank-freeze" element={<ProtectedRoute allowedRoles={['BANK_MANAGER', 'BANK_EMPLOYEE', 'ADMIN']}><BankFreezeInbox /></ProtectedRoute>} />
