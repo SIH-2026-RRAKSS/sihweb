@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   Activity,
@@ -24,12 +25,9 @@ import { EmptyState } from '../ui/EmptyState';
 import { ApiService } from '../../services/api';
 import { IncidentDetail, GraphStructure } from '../../types';
 
-interface CaseDossierProps {
-  caseId: string | null;
-  onBack: () => void;
-}
-
-export const CaseDossier: React.FC<CaseDossierProps> = ({ caseId, onBack }) => {
+export const CaseDossier: React.FC = () => {
+  const { caseId } = useParams<{ caseId: string }>();
+  const navigate = useNavigate();
   const [detail, setDetail] = useState<IncidentDetail | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -120,7 +118,7 @@ ${detail?.investigative_evidence_bullets.map(b => `- ${b}`).join('\n')}
       <div className="bg-white border border-slate-200 p-3.5 rounded-2xl flex flex-wrap items-center justify-between gap-3 shadow-sm">
         <div className="flex items-center gap-3">
           <button
-            onClick={onBack}
+            onClick={() => navigate('/incidents')}
             className="px-3 py-1.5 bg-white border border-slate-200 hover:border-white/25 text-slate-800 rounded flex items-center gap-1.5 font-bold transition-all text-xs"
           >
             <ArrowLeft className="w-3.5 h-3.5" />

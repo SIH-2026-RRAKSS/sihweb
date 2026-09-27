@@ -1,5 +1,6 @@
 import { Menu } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
   FlaskConical,
@@ -60,16 +61,14 @@ export type NavPage =
   | 'login';
 
 interface AppShellProps {
-  activePage: NavPage;
-  onNavigate: (page: NavPage) => void;
   backendOnline: boolean;
   activeDataset: 'SYNTHETIC_A' | 'IBM_B' | 'ELLIPTIC_C';
   onToggleDataset: (dataset: 'SYNTHETIC_A' | 'IBM_B' | 'ELLIPTIC_C') => void;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 interface NavItemDef {
-  id: NavPage;
+  id: string; // the path without leading slash
   label: string;
   code: string;
   icon: any;
@@ -106,13 +105,14 @@ const ALL_NAV_ITEMS: NavItemDef[] = [
 ];
 
 export const AppShell: React.FC<AppShellProps> = ({
-  activePage,
-  onNavigate,
   backendOnline,
   activeDataset,
   onToggleDataset,
   children,
 }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const { user, role, switchPersona, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
   const [showPersonaMenu, setShowPersonaMenu] = useState(false);
@@ -203,7 +203,7 @@ export const AppShell: React.FC<AppShellProps> = ({
               <Menu className="w-5 h-5" />
             </button>
             <div 
-          onClick={() => onNavigate('splash')} 
+          onClick={() => navigate('/')} 
           className="flex items-center gap-2.5 cursor-pointer group"
           title="Return to Splash Overview (Team Trinetra)"
         >
@@ -275,7 +275,7 @@ export const AppShell: React.FC<AppShellProps> = ({
                     onClick={() => {
                       logout();
                       setShowPersonaMenu(false);
-                      onNavigate('login');
+                      navigate('/login');
                     }}
                     className="w-full text-left px-2 py-2 rounded-lg text-xs text-red-600 hover:bg-red-50 flex items-center gap-1.5 font-bold mt-1"
                   >
@@ -296,12 +296,12 @@ export const AppShell: React.FC<AppShellProps> = ({
           <div className="space-y-1">
             {visibleNavItems.map((item) => {
               const Icon = item.icon;
-              const isActive = activePage === item.id;
+              const isActive = location.pathname.startsWith(`/${item.id}`);
 
               return (
                 <button
                   key={item.id}
-                  onClick={() => onNavigate(item.id)}
+                  onClick={() => navigate(`/${item.id}`)}
                   className={`w-full flex items-center gap-3 px-3 py-2 rounded text-xs transition-all ${
                     isActive
                       ? 'bg-gradient-to-r from-[#FF7A1A] to-[#EA580C] text-slate-900 font-bold shadow-md shadow-orange-500/20'

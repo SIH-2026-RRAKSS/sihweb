@@ -16,13 +16,16 @@ import {
 import { ApiService } from '../../services/api';
 import { FreezeRequest, FreezeStatus } from '../../types';
 import { useAuth } from '../../context/AuthContext';
+import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
+import { LottieLoader } from '../ui/LottieLoader';
 
 export const BankFreezeInbox: React.FC = () => {
   const { user } = useAuth();
   const [freezes, setFreezes] = useState<FreezeRequest[]>([]);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+  
+  const { status: fetchStatus, error: fetchError, run: runFetch } = useAsyncState<FreezeRequest[]>();
+  const { status: actionStatus, error: actionError, run: runAction } = useAsyncState<void>();
 
   // Freeze action modal states
   const [freezeActionModal, setFreezeActionModal] = useState<{
@@ -31,25 +34,22 @@ export const BankFreezeInbox: React.FC = () => {
   } | null>(null);
   const [bankRefNo, setBankRefNo] = useState('');
   const [rejectReason, setRejectReason] = useState('');
-  const [submittingAction, setSubmittingAction] = useState(false);
   const [currentTime, setCurrentTime] = useState(Date.now());
 
   const fetchBankFreezes = async () => {
-    try {
-      setLoading(true);
+    runFetch(async () => {
       const data = await ApiService.getFreezeRequests();
       // Filter for bank if user has bankId or show all if admin/demo
       const userBankId = user?.bankId;
       if (userBankId && userBankId !== 'BNK-HDFC-01') {
-        setFreezes(data.filter((f) => f.bankId === userBankId));
+        const filtered = data.filter((f) => f.bankId === userBankId);
+        setFreezes(filtered);
+        return filtered;
       } else {
         setFreezes(data);
+        return data;
       }
-    } catch (err) {
-      console.error('Failed to load bank freeze notices', err);
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   useEffect(() => {
@@ -64,48 +64,34 @@ export const BankFreezeInbox: React.FC = () => {
   }, []);
 
   const handleAcknowledge = async (freezeId: string) => {
-    try {
+    runAction(async () => {
       const updated = await ApiService.acknowledgeFreezeRequest(freezeId);
-      setActionSuccess(`Notice #${freezeId} acknowledged. SLA clock paused.`);
-      setTimeout(() => setActionSuccess(null), 4000);
       setFreezes((prev) => prev.map((f) => (f.id === freezeId ? updated : f)));
-    } catch (err) {
-      console.error(err);
-    }
+    });
   };
 
   const handleExecuteFreeze = async () => {
     if (!freezeActionModal || !bankRefNo.trim()) return;
-    try {
-      setSubmittingAction(true);
+    runAction(async () => {
       const updated = await ApiService.markFrozen(freezeActionModal.freeze.id, bankRefNo.trim());
-      setActionSuccess(`Account ${freezeActionModal.freeze.targetAccountId} successfully FROZEN in CBS (Ref: ${bankRefNo})`);
-      setTimeout(() => setActionSuccess(null), 5000);
       setFreezes((prev) => prev.map((f) => (f.id === freezeActionModal.freeze.id ? updated : f)));
-      setFreezeActionModal(null);
-      setBankRefNo('');
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSubmittingAction(false);
-    }
+      setTimeout(() => {
+        setFreezeActionModal(null);
+        setBankRefNo('');
+      }, 1500);
+    });
   };
 
   const handleExecuteReject = async () => {
     if (!freezeActionModal || !rejectReason.trim()) return;
-    try {
-      setSubmittingAction(true);
+    runAction(async () => {
       const updated = await ApiService.rejectFreezeRequest(freezeActionModal.freeze.id, rejectReason.trim());
-      setActionSuccess(`Notice #${freezeActionModal.freeze.id} rejected.`);
-      setTimeout(() => setActionSuccess(null), 4000);
       setFreezes((prev) => prev.map((f) => (f.id === freezeActionModal.freeze.id ? updated : f)));
-      setFreezeActionModal(null);
-      setRejectReason('');
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSubmittingAction(false);
-    }
+      setTimeout(() => {
+        setFreezeActionModal(null);
+        setRejectReason('');
+      }, 1500);
+    });
   };
 
   const getRemainingSeconds = (slaDeadline: string) => {
@@ -133,11 +119,10 @@ export const BankFreezeInbox: React.FC = () => {
 
   return (
     <div className="space-y-4 font-sans text-xs">
-      {/* ── ACTION SUCCESS BANNER ── */}
-      {actionSuccess && (
-        <div className="bg-emerald-50 border border-emerald-300 text-emerald-800 px-4 py-3 rounded-2xl flex items-center gap-2 font-medium shadow-sm animate-fadeIn">
-          <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-          <span>{actionSuccess}</span>
+      {/* ── ACTION SUCCESS BANNER / ERROR / LOADER ── */}
+      {(actionStatus === AsyncStatus.LOADING || actionStatus === AsyncStatus.SUCCESS || actionStatus === AsyncStatus.ERROR) && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+          <LottieLoader status={actionStatus} error={actionError} autoHideMs={1200} />
         </div>
       )}
 
@@ -165,7 +150,7 @@ export const BankFreezeInbox: React.FC = () => {
             onClick={() => fetchBankFreezes()}
             className="p-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-slate-600 transition-colors"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${fetchStatus === AsyncStatus.LOADING ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
@@ -204,11 +189,16 @@ export const BankFreezeInbox: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
-              {loading ? (
+              {fetchStatus === AsyncStatus.LOADING && freezes.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-400">
-                    <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-slate-400" />
-                    <span>Loading inbound freeze requests...</span>
+                  <td colSpan={7} className="p-8 text-center">
+                    <LottieLoader status={fetchStatus} error={fetchError} />
+                  </td>
+                </tr>
+              ) : fetchStatus === AsyncStatus.ERROR ? (
+                <tr>
+                  <td colSpan={7} className="p-8 text-center">
+                    <LottieLoader status={fetchStatus} error={fetchError} onRetry={fetchBankFreezes} />
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
@@ -421,18 +411,18 @@ export const BankFreezeInbox: React.FC = () => {
               {freezeActionModal.type === 'FREEZE' ? (
                 <button
                   onClick={handleExecuteFreeze}
-                  disabled={submittingAction || !bankRefNo.trim()}
+                  disabled={actionStatus === AsyncStatus.LOADING || !bankRefNo.trim()}
                   className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm disabled:opacity-50 transition-all"
                 >
-                  {submittingAction ? 'Executing...' : 'Submit CBS Lien & Mark Frozen'}
+                  {actionStatus === AsyncStatus.LOADING ? 'Executing...' : 'Submit CBS Lien & Mark Frozen'}
                 </button>
               ) : (
                 <button
                   onClick={handleExecuteReject}
-                  disabled={submittingAction || !rejectReason.trim()}
+                  disabled={actionStatus === AsyncStatus.LOADING || !rejectReason.trim()}
                   className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold shadow-sm disabled:opacity-50 transition-all"
                 >
-                  {submittingAction ? 'Rejecting...' : 'Reject Freeze Directive'}
+                  {actionStatus === AsyncStatus.LOADING ? 'Rejecting...' : 'Reject Freeze Directive'}
                 </button>
               )}
             </div>

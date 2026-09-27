@@ -15,23 +15,20 @@ import {
 } from 'lucide-react';
 import { IncidentSummary, IncidentDetail } from '../../types';
 import { LoadingSkeleton } from '../ui/LoadingSkeleton';
-import { NavPage } from '../layout/AppShell';
+import { useNavigate } from 'react-router-dom';
 
 interface DossierPeekHUDProps {
   selectedIncident: IncidentSummary | undefined;
   incidentDetail: IncidentDetail | null;
   loading: boolean;
-  onSelectCase: (id: string) => void;
-  onNavigate?: (page: NavPage) => void;
 }
 
 export const DossierPeekHUD: React.FC<DossierPeekHUDProps> = ({
   selectedIncident,
   incidentDetail,
   loading,
-  onSelectCase,
-  onNavigate,
 }) => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'RATIONALE' | 'ATM' | 'TOPOLOGY'>('RATIONALE');
 
   if (loading) {
@@ -232,7 +229,7 @@ export const DossierPeekHUD: React.FC<DossierPeekHUDProps> = ({
               </div>
 
               <button
-                onClick={() => onNavigate?.('cashout-map')}
+                onClick={() => navigate('/cashout-map')}
                 className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold rounded-xl flex items-center justify-center gap-2 transition-all"
               >
                 <MapPin className="w-3.5 h-3.5 text-amber-500" />
@@ -266,7 +263,7 @@ export const DossierPeekHUD: React.FC<DossierPeekHUDProps> = ({
               </div>
 
               <button
-                onClick={() => onNavigate?.('network')}
+                onClick={() => navigate('/network')}
                 className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold rounded-xl flex items-center justify-center gap-2 transition-all"
               >
                 <Share2 className="w-3.5 h-3.5 text-slate-700" />
@@ -280,7 +277,7 @@ export const DossierPeekHUD: React.FC<DossierPeekHUDProps> = ({
       {/* Primary Action Button */}
       <div className="pt-4 border-t border-slate-100 mt-4">
         <motion.button
-          onClick={() => onSelectCase(selectedIncident.complaint_id)}
+          onClick={() => navigate(`/dossier/${selectedIncident.complaint_id}`)}
           className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all group"
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.98 }}

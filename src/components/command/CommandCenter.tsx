@@ -14,6 +14,7 @@ import {
   FileText,
   ListOrdered
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { LoadingSkeleton } from '../ui/LoadingSkeleton';
 import { EmptyState } from '../ui/EmptyState';
 import { ApiService } from '../../services/api';
@@ -23,8 +24,6 @@ import { CommandHeroBanner } from './CommandHeroBanner';
 import { NavPage } from '../layout/AppShell';
 
 interface CommandCenterProps {
-  onSelectCase: (id: string) => void;
-  onNavigate?: (page: NavPage) => void;
   activeDataset?: string;
 }
 
@@ -38,7 +37,8 @@ const formatCurrency = (amount: number): string => {
   return `₹${amount.toLocaleString('en-IN')}`;
 };
 
-export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNavigate, activeDataset }) => {
+export const CommandCenter: React.FC<CommandCenterProps> = ({ activeDataset }) => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState<PipelineStats | null>(null);
@@ -124,7 +124,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
     <div className="space-y-4 font-sans">
       {error && <div className="bg-red-50 p-4 m-4 rounded-xl border border-red-200 text-red-600 font-bold text-sm z-50">{error}</div>}
       {/* ── IMMERSIVE COMMAND HERO BANNER ── */}
-      <CommandHeroBanner onNavigate={onNavigate} />
+      <CommandHeroBanner />
 
       {/* ── TOP KPI STRIP (5 METRIC TILES) ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 font-sans">
@@ -327,7 +327,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        onSelectCase(incident.complaint_id);
+                        navigate(`/dossier/${incident.complaint_id}`);
                       }}
                       className="px-2.5 py-1 bg-slate-100 hover:bg-slate-100 text-slate-900 border border-slate-200 rounded text-[10px] font-bold flex items-center gap-1 transition-colors"
                     >
@@ -446,7 +446,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onSelectCase, onNa
 
                 {/* Case Link */}
                 <button
-                  onClick={() => onSelectCase(incidentDetail.complaint.complaint_id)}
+                  onClick={() => navigate(`/dossier/${incidentDetail.complaint.complaint_id}`)}
                   className="w-full py-2.5 bg-white hover:bg-zinc-200 text-black font-bold text-xs rounded flex items-center justify-center gap-2 transition-all shadow-sm"
                 >
                   <span>OPEN FULL CLASSIFIED CASE DOSSIER</span>

@@ -14,6 +14,7 @@ import {
   Clock,
   Filter
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { LoadingSkeleton } from '../ui/LoadingSkeleton';
 import { EmptyState } from '../ui/EmptyState';
 import { ApiService } from '../../services/api';
@@ -21,18 +22,18 @@ import { InputValidator } from '../../utils/validation';
 import { IncidentSummary } from '../../types';
 import { AssignOfficerModal } from './AssignOfficerModal';
 import { QuickFreezeModal } from '../freeze/QuickFreezeModal';
+import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
+import { LottieLoader } from '../ui/LottieLoader';
 
 interface IncidentQueueProps {
-  onSelectCase: (id: string) => void;
   activeDataset?: string;
 }
 
 export type SortMode = 'SERIAL' | 'RISK' | 'AMOUNT';
 
-export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase, activeDataset }) => {
+export const IncidentQueue: React.FC<IncidentQueueProps> = ({ activeDataset }) => {
+  const navigate = useNavigate();
   const [allIncidents, setAllIncidents] = useState<IncidentSummary[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(15);
@@ -40,76 +41,60 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase, acti
   const [search, setSearch] = useState<string>('');
   const [sortMode, setSortMode] = useState<SortMode>('SERIAL');
 
+  const { status: fetchStatus, error: fetchError, run: runFetch } = useAsyncState<void>();
+  const { status: actionStatus, error: actionError, run: runAction } = useAsyncState<void>();
+
   // Modals state
   const [assignModalIncident, setAssignModalIncident] = useState<IncidentSummary | null>(null);
   const [freezeModalIncident, setFreezeModalIncident] = useState<IncidentSummary | null>(null);
-  const [actionSuccessMessage, setActionSuccessMessage] = useState<string | null>(null);
 
-  const fetchIncidents = async (isInitial = false) => {
-    try {
-      if (isInitial) {
-        setLoading(true);
-      }
-      
-      if (search) {
-        const val = InputValidator.validateSearchQuery(search);
-        if (!val.isValid) {
-          setError(val.error || 'Invalid search query');
-          setLoading(false);
-          return;
-        }
-        setError(null);
-      }
-
-      const { items } = await ApiService.getIncidents({
-        page: 1,
-        page_size: 1000,
-        tier: tierFilter,
-        search: search || undefined,
-        dataset: activeDataset
-      });
-
-      let itemList = [...(items || [])];
-
-      // Local sort
-      if (sortMode === 'SERIAL') {
-        itemList.sort((a, b) => a.complaint_id.localeCompare(b.complaint_id));
-      } else if (sortMode === 'RISK') {
-        itemList.sort((a, b) => (b.graphsage_risk_probability || 0) - (a.graphsage_risk_probability || 0));
-      } else if (sortMode === 'AMOUNT') {
-        itemList.sort((a, b) => (b.reported_amount || 0) - (a.reported_amount || 0));
-      }
-
-      setTotalCount(itemList.length);
-      setAllIncidents(itemList);
-    } catch (err) {
-      setError('Investigation data unavailable - backend unreachable');
-      console.warn(err);
-    } finally {
-      if (isInitial) {
-        setLoading(false);
+  const fetchIncidents = async () => {
+    if (search) {
+      const val = InputValidator.validateSearchQuery(search);
+      if (!val.isValid) {
+        throw new Error(val.error || 'Invalid search query');
       }
     }
+
+    const { items } = await ApiService.getIncidents({
+      page: 1,
+      page_size: 1000,
+      tier: tierFilter,
+      search: search || undefined,
+      dataset: activeDataset
+    });
+
+    let itemList = [...(items || [])];
+
+    // Local sort
+    if (sortMode === 'SERIAL') {
+      itemList.sort((a, b) => a.complaint_id.localeCompare(b.complaint_id));
+    } else if (sortMode === 'RISK') {
+      itemList.sort((a, b) => (b.graphsage_risk_probability || 0) - (a.graphsage_risk_probability || 0));
+    } else if (sortMode === 'AMOUNT') {
+      itemList.sort((a, b) => (b.reported_amount || 0) - (a.reported_amount || 0));
+    }
+
+    setTotalCount(itemList.length);
+    setAllIncidents(itemList);
   };
 
   useEffect(() => {
-    fetchIncidents(true);
-    const intervalId = setInterval(() => fetchIncidents(false), 12000);
+    runFetch(fetchIncidents);
+    const intervalId = setInterval(() => {
+      fetchIncidents().catch(() => {});
+    }, 12000);
     return () => clearInterval(intervalId);
   }, [tierFilter, search, sortMode, activeDataset]);
 
   const handleStatusChange = async (incidentId: string, newStatus: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    try {
+    runAction(async () => {
       await ApiService.updateIncidentStatus(incidentId, newStatus);
-      setActionSuccessMessage(`Case ${incidentId} updated to ${newStatus}`);
-      setTimeout(() => setActionSuccessMessage(null), 3500);
       setAllIncidents(prev =>
         prev.map(inc => inc.complaint_id === incidentId ? { ...inc, status: newStatus } : inc)
       );
-    } catch (err) {
-      console.error(err);
-    }
+    });
   };
 
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
@@ -118,11 +103,10 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase, acti
 
   return (
     <div className="space-y-4 font-sans text-xs">
-      {/* ── SUCCESS TOAST ── */}
-      {actionSuccessMessage && (
-        <div className="bg-emerald-50 border border-emerald-300 text-emerald-800 px-4 py-2.5 rounded-xl flex items-center gap-2 font-medium shadow-sm transition-all animate-fadeIn">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-          <span>{actionSuccessMessage}</span>
+      {/* ── ACTION LOADER ── */}
+      {(actionStatus === AsyncStatus.LOADING || actionStatus === AsyncStatus.SUCCESS || actionStatus === AsyncStatus.ERROR) && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+          <LottieLoader status={actionStatus} error={actionError} autoHideMs={1200} />
         </div>
       )}
 
@@ -227,10 +211,10 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase, acti
         </div>
       </div>
 
-      {error && (
+      {fetchStatus === AsyncStatus.ERROR && (
         <div className="bg-red-50 border border-red-200 p-4 rounded-xl flex items-center gap-3 text-red-600">
           <ShieldAlert className="w-5 h-5 text-red-500" />
-          <span className="font-bold text-sm">{error}</span>
+          <span className="font-bold text-sm">{fetchError || 'Error fetching data'}</span>
         </div>
       )}
 
@@ -252,10 +236,10 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase, acti
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
-              {loading ? (
+              {fetchStatus === AsyncStatus.LOADING && incidents.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="p-6">
-                    <LoadingSkeleton variant="table-row" count={8} />
+                  <td colSpan={9} className="p-6 text-center">
+                    <LottieLoader status={fetchStatus} error={fetchError} />
                   </td>
                 </tr>
               ) : incidents.length === 0 ? (
@@ -276,7 +260,7 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase, acti
                   return (
                     <tr
                       key={incident.complaint_id}
-                      onClick={() => onSelectCase(incident.complaint_id)}
+                      onClick={() => navigate(`/dossier/${incident.complaint_id}`)}
                       className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
                     >
                       {/* ID */}
@@ -387,7 +371,7 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase, acti
 
                           {/* Open Dossier */}
                           <button
-                            onClick={() => onSelectCase(incident.complaint_id)}
+                            onClick={() => navigate(`/dossier/${incident.complaint_id}`)}
                             className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 rounded-lg text-[10px] font-bold inline-flex items-center gap-1 transition-all"
                             title="Open Full Case Dossier"
                           >
@@ -444,8 +428,6 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase, acti
                   : inc
               )
             );
-            setActionSuccessMessage(`Assigned ${officer.name} to ${assignModalIncident.complaint_id}`);
-            setTimeout(() => setActionSuccessMessage(null), 3500);
             setAssignModalIncident(null);
           }}
         />
@@ -459,8 +441,6 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ onSelectCase, acti
           defaultAmount={freezeModalIncident.reported_amount || 50000}
           onClose={() => setFreezeModalIncident(null)}
           onFreezeDispatched={(freeze) => {
-            setActionSuccessMessage(`Emergency freeze #${freeze.id} dispatched to ${freeze.bankName} (SLA 30m)`);
-            setTimeout(() => setActionSuccessMessage(null), 4000);
             setFreezeModalIncident(null);
           }}
         />

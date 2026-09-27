@@ -9,13 +9,12 @@ import {
   ArrowRight,
   Sparkles
 } from 'lucide-react';
-import { NavPage } from '../layout/AppShell';
+import { useNavigate } from 'react-router-dom';
 
-interface CommandHeroBannerProps {
-  onNavigate?: (page: NavPage) => void;
-}
+interface CommandHeroBannerProps {}
 
-export const CommandHeroBanner: React.FC<CommandHeroBannerProps> = ({ onNavigate }) => {
+export const CommandHeroBanner: React.FC<CommandHeroBannerProps> = () => {
+  const navigate = useNavigate();
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const springX = useSpring(mouseX, { stiffness: 150, damping: 25 });
@@ -69,7 +68,7 @@ export const CommandHeroBanner: React.FC<CommandHeroBannerProps> = ({ onNavigate
 
           <div className="flex items-center gap-2">
             <motion.button
-              onClick={() => onNavigate?.('cashout-map')}
+              onClick={() => navigate('/cashout-map')}
               className="flex-1 px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-amber-400 text-[11px] font-bold flex items-center justify-center gap-1.5 rounded transition-colors"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -79,7 +78,7 @@ export const CommandHeroBanner: React.FC<CommandHeroBannerProps> = ({ onNavigate
             </motion.button>
 
             <motion.button
-              onClick={() => onNavigate?.('policy')}
+              onClick={() => navigate('/policy')}
               className="flex-1 px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900 text-[11px] font-bold flex items-center justify-center gap-1.5 rounded transition-colors"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
