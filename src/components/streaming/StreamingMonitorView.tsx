@@ -106,7 +106,7 @@ export const StreamingMonitorView: React.FC = () => {
     
     try {
       // FIX: Chunk the requests so Vercel Serverless (10s timeout) doesn't crash on large datasets
-      const CHUNK_SIZE = 150;
+      const CHUNK_SIZE = 20;
       let allTx: any[] = [];
       let finalAlerts = 0;
       let finalGnnRuns = 0;
