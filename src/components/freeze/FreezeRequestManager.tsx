@@ -113,7 +113,7 @@ export const FreezeRequestManager: React.FC = () => {
 
           <button
             onClick={() => setShowNewModal(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold rounded-xl shadow-sm transition-all"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#FF7A1A] to-[#EA580C] hover:from-[#FF5500] hover:to-[#C2410C] text-white font-bold rounded-xl shadow-sm transition-all"
           >
             <PlusCircle className="w-4 h-4" />
             <span>DISPATCH NEW FREEZE</span>
@@ -248,7 +248,7 @@ export const FreezeRequestManager: React.FC = () => {
                       className="hover:bg-slate-50/80 cursor-pointer transition-colors"
                     >
                       {/* Notice ID */}
-                      <td className="p-3 font-mono font-bold text-red-600">
+                      <td className="p-3 font-mono font-bold text-[#FF5500]">
                         {f.id}
                       </td>
 

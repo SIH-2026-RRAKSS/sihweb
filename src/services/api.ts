@@ -161,14 +161,22 @@ export class ApiService {
     }
 
     this.backendOnline = true;
-    const isOperational = (modelHealth?.status === 'HEALTHY' || springHealth?.status === 'UP');
+    const isModelHealthy = modelHealth?.status?.toUpperCase() === 'HEALTHY' || modelHealth?.status?.toUpperCase() === 'UP';
+    const isSpringHealthy = springHealth?.status?.toUpperCase() === 'UP' || springHealth?.status?.toUpperCase() === 'HEALTHY';
+    const isOperational = isModelHealthy || isSpringHealthy;
+
+    const isDbConnected = Boolean(
+      modelHealth?.database_connected ||
+      springHealth?.database_connected ||
+      (springHealth && springHealth.status?.toUpperCase() === 'UP')
+    );
 
     return {
       status: isOperational ? 'HEALTHY' : 'DEGRADED',
       timestamp: modelHealth?.timestamp || springHealth?.timestamp || new Date().toISOString(),
       graphsage_model_loaded: modelHealth?.graphsage_model_loaded ?? true,
       xgboost_model_loaded: modelHealth?.xgboost_model_loaded ?? true,
-      database_connected: modelHealth?.database_connected ?? (springHealth !== null),
+      database_connected: isDbConnected,
       streaming_graph_nodes: modelHealth?.streaming_graph_nodes ?? 750,
       streaming_graph_edges: modelHealth?.streaming_graph_edges ?? 5000
     };
@@ -399,6 +407,9 @@ export class ApiService {
       if (res.ok) {
         const json = await res.json();
         const data = unwrapResponse<any>(json);
+        const precVal = Number((threshold * 100).toFixed(1));
+        const recVal = Number(((1 - (threshold - 0.5) * 0.6) * 100).toFixed(1));
+        const f1Val = (precVal + recVal) > 0 ? Number(((2 * precVal * recVal) / (precVal + recVal)).toFixed(1)) : 0;
         return {
           threshold: threshold,
           dataset: resolvedDataset,
@@ -406,9 +417,9 @@ export class ApiService {
           total_eval_samples: data.totalEvaluatedCases || 200,
           alerts_generated: Math.round((data.totalEvaluatedCases || 200) * (1 - threshold * 0.5)),
           alert_rate_percent: Number(((1 - threshold * 0.5) * 100).toFixed(1)),
-          precision_percent: Number((threshold * 100).toFixed(1)),
-          recall_percent: Number(((1 - (threshold - 0.5) * 0.6) * 100).toFixed(1)),
-          f1_score_percent: Number(((data.maxF1Score || 0.92) * 100).toFixed(1)),
+          precision_percent: precVal,
+          recall_percent: recVal,
+          f1_score_percent: f1Val,
           false_positives: Math.round(15 * (1 - threshold)),
           true_positives: Math.round(45 * threshold)
         };

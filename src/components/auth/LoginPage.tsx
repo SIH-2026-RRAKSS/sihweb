@@ -212,8 +212,8 @@ export const LoginPage: React.FC<{
           )}
         </header>
 
-      {/* Central Content Area */}
-      <main className="w-full max-w-4xl z-10 my-auto py-6 space-y-6">
+      {/* Central Content Area - Unified Single Column */}
+      <main className="w-full max-w-lg z-10 my-auto py-6 space-y-4">
         {/* Header Branding */}
         <div className="text-center space-y-2.5">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 border border-orange-200 text-[#FF5500] text-[11px] font-bold">
@@ -225,7 +225,7 @@ export const LoginPage: React.FC<{
             <TrinetraLogo size="md" showLangBadge={true} intervalMs={2600} theme="light" />
           </div>
 
-          <p className="text-xs text-slate-500 max-w-lg mx-auto leading-relaxed">
+          <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
             Multi-Hop Mule Detection, Inductive GraphSAGE Intelligence & Section 91 CrPC Emergency Inter-Bank Freezes
           </p>
         </div>
@@ -255,7 +255,7 @@ export const LoginPage: React.FC<{
           </div>
         )}
 
-        {/* 1-Click Fast Persona Switcher Bar */}
+        {/* 1-Click Fast Persona Switcher Bar - Matching Width */}
         <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-saas-card space-y-3.5">
           <div className="flex items-center justify-between text-xs text-slate-500">
             <div className="flex items-center gap-1.5 text-slate-900 font-bold">
@@ -265,11 +265,11 @@ export const LoginPage: React.FC<{
             <span className="text-[10px] uppercase font-bold text-slate-400">SELECT OPERATIONAL CLEARANCE</span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
             {/* Cyber Officer */}
             <button
               onClick={() => handlePersonaSelect('CYBER_OFFICER')}
-              className="group p-3.5 rounded-2xl bg-slate-50/80 hover:bg-orange-50/60 border border-slate-200/80 hover:border-orange-300 transition-all text-left flex flex-col justify-between space-y-3 shadow-sm hover:shadow"
+              className="group p-3 rounded-2xl bg-slate-50/80 hover:bg-orange-50/60 border border-slate-200/80 hover:border-orange-300 transition-all text-left flex flex-col justify-between space-y-2 shadow-sm hover:shadow"
             >
               <div className="p-2 rounded-xl bg-orange-100/80 text-[#FF5500] w-fit group-hover:scale-105 transition-transform">
                 <ShieldAlert className="w-4 h-4" />
@@ -285,7 +285,7 @@ export const LoginPage: React.FC<{
             {/* Police Station */}
             <button
               onClick={() => handlePersonaSelect('POLICE')}
-              className="group p-3.5 rounded-2xl bg-slate-50/80 hover:bg-blue-50/60 border border-slate-200/80 hover:border-blue-300 transition-all text-left flex flex-col justify-between space-y-3 shadow-sm hover:shadow"
+              className="group p-3 rounded-2xl bg-slate-50/80 hover:bg-blue-50/60 border border-slate-200/80 hover:border-blue-300 transition-all text-left flex flex-col justify-between space-y-2 shadow-sm hover:shadow"
             >
               <div className="p-2 rounded-xl bg-blue-100/80 text-blue-700 w-fit group-hover:scale-105 transition-transform">
                 <ShieldCheck className="w-4 h-4" />
@@ -301,7 +301,7 @@ export const LoginPage: React.FC<{
             {/* Bank Nodal Desk */}
             <button
               onClick={() => handlePersonaSelect('BANK_MANAGER')}
-              className="group p-3.5 rounded-2xl bg-slate-50/80 hover:bg-emerald-50/60 border border-slate-200/80 hover:border-emerald-300 transition-all text-left flex flex-col justify-between space-y-3 shadow-sm hover:shadow"
+              className="group p-3 rounded-2xl bg-slate-50/80 hover:bg-emerald-50/60 border border-slate-200/80 hover:border-emerald-300 transition-all text-left flex flex-col justify-between space-y-2 shadow-sm hover:shadow"
             >
               <div className="p-2 rounded-xl bg-emerald-100/80 text-emerald-700 w-fit group-hover:scale-105 transition-transform">
                 <Building2 className="w-4 h-4" />
@@ -317,7 +317,7 @@ export const LoginPage: React.FC<{
             {/* Citizen Complainant */}
             <button
               onClick={() => handlePersonaSelect('COMPLAINANT')}
-              className="group p-3.5 rounded-2xl bg-slate-50/80 hover:bg-purple-50/60 border border-slate-200/80 hover:border-purple-300 transition-all text-left flex flex-col justify-between space-y-3 shadow-sm hover:shadow"
+              className="group p-3 rounded-2xl bg-slate-50/80 hover:bg-purple-50/60 border border-slate-200/80 hover:border-purple-300 transition-all text-left flex flex-col justify-between space-y-2 shadow-sm hover:shadow"
             >
               <div className="p-2 rounded-xl bg-purple-100/80 text-purple-700 w-fit group-hover:scale-105 transition-transform">
                 <UserCheck className="w-4 h-4" />
@@ -333,7 +333,7 @@ export const LoginPage: React.FC<{
             {/* Admin */}
             <button
               onClick={() => handlePersonaSelect('ADMIN')}
-              className="group p-3.5 rounded-2xl bg-slate-50/80 hover:bg-amber-50/60 border border-slate-200/80 hover:border-amber-300 transition-all text-left flex flex-col justify-between space-y-3 shadow-sm hover:shadow"
+              className="group p-3 rounded-2xl bg-slate-50/80 hover:bg-amber-50/60 border border-slate-200/80 hover:border-amber-300 transition-all text-left flex flex-col justify-between space-y-2 shadow-sm hover:shadow col-span-2 sm:col-span-1"
             >
               <div className="p-2 rounded-xl bg-amber-100/80 text-amber-700 w-fit group-hover:scale-105 transition-transform">
                 <Settings className="w-4 h-4" />
@@ -348,8 +348,8 @@ export const LoginPage: React.FC<{
           </div>
         </div>
 
-        {/* Credentials Form Box */}
-        <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-saas-card max-w-md mx-auto space-y-5">
+        {/* Credentials Form Box - Matching Width */}
+        <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-saas-card space-y-5">
           {/* Tab Switcher */}
           <div className="grid grid-cols-2 p-1 bg-slate-100/90 rounded-2xl border border-slate-200 text-xs font-medium">
             <button

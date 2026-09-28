@@ -244,31 +244,47 @@ export const MlOpsDashboard: React.FC = () => {
                       </div>
                     </td>
                   </tr>
-                ) : snapshots.map((s) => (
-                  <tr key={s.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="p-3 font-mono font-bold text-slate-900">{s.snapshotName}</td>
-                    <td className="p-3">
-                      <span className="font-mono text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-700 font-bold">
-                        {s.datasetType}
-                      </span>
-                    </td>
-                    <td className="p-3 text-right font-mono font-bold text-slate-900">
-                      {s.totalNodes.toLocaleString()}
-                    </td>
-                    <td className="p-3 text-right font-mono text-slate-800">
-                      {s.totalEdges.toLocaleString()}
-                    </td>
-                    <td className="p-3 text-right font-mono font-bold text-red-600">
-                      {s.anomalyRatePercent}%
-                    </td>
-                    <td className="p-3 text-right font-mono font-bold text-emerald-600">
-                      {(s.f1Score * 100).toFixed(2)}%
-                    </td>
-                    <td className="p-3 text-slate-500 text-[11px]">
-                      {new Date(s.capturedAt).toLocaleString()}
+                ) : snapshots.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="p-12 text-center">
+                      <div className="flex flex-col items-center justify-center space-y-2.5 py-2">
+                        <div className="p-3.5 bg-slate-100 rounded-2xl text-slate-400">
+                          <Layers className="w-6 h-6" />
+                        </div>
+                        <div className="font-bold text-slate-800 text-xs">No snapshots recorded yet</div>
+                        <p className="text-[11px] text-slate-500 max-w-sm leading-relaxed">
+                          Graph snapshots are captured automatically during scheduled retrain cycles or on demand.
+                        </p>
+                      </div>
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  snapshots.map((s) => (
+                    <tr key={s.id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="p-3 font-mono font-bold text-slate-900">{s.snapshotName}</td>
+                      <td className="p-3">
+                        <span className="font-mono text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-700 font-bold">
+                          {s.datasetType}
+                        </span>
+                      </td>
+                      <td className="p-3 text-right font-mono font-bold text-slate-900">
+                        {s.totalNodes.toLocaleString()}
+                      </td>
+                      <td className="p-3 text-right font-mono text-slate-800">
+                        {s.totalEdges.toLocaleString()}
+                      </td>
+                      <td className="p-3 text-right font-mono font-bold text-red-600">
+                        {s.anomalyRatePercent}%
+                      </td>
+                      <td className="p-3 text-right font-mono font-bold text-emerald-600">
+                        {(s.f1Score * 100).toFixed(2)}%
+                      </td>
+                      <td className="p-3 text-slate-500 text-[11px]">
+                        {new Date(s.capturedAt).toLocaleString()}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
