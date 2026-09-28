@@ -24,6 +24,16 @@ import { CommandHeroBanner } from './CommandHeroBanner';
 import { NavPage } from '../layout/AppShell';
 import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
 import { LottieLoader } from '../ui/LottieLoader';
+import {
+  IncidentIdCell,
+  TierBadge,
+  RiskBar,
+  AmountCell,
+  LocationCell,
+  IntakeOriginChip,
+  FILTER_TABS,
+  getIntakeOriginLabel,
+} from '../incidents';
 
 interface CommandCenterProps {
   activeDataset?: string;
@@ -229,18 +239,18 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ activeDataset }) =
               </div>
 
               {/* Filter Tabs */}
-              <div className="flex border border-slate-200 bg-slate-50 rounded p-0.5 text-[10px]">
-                {['ALL', 'HIGH_CONFIDENCE', 'MEDIUM_CONFIDENCE', 'NORMAL'].map((t) => (
+              <div className="flex border border-slate-200 bg-slate-50 rounded-lg p-0.5 text-[10px]">
+                {FILTER_TABS.map((t) => (
                   <button
-                    key={t}
-                    onClick={() => setTierFilter(t)}
-                    className={`px-2 py-0.5 rounded font-bold transition-colors ${
-                      tierFilter === t
-                        ? 'bg-white text-black shadow-sm'
+                    key={t.id}
+                    onClick={() => setTierFilter(t.id)}
+                    className={`px-2 py-0.5 rounded-md font-bold transition-colors text-[10px] ${
+                      tierFilter === t.id
+                        ? 'bg-white text-slate-900 shadow-sm border border-slate-200/60'
                         : 'text-slate-500 hover:text-slate-700'
                     }`}
                   >
-                    {t === 'ALL' ? 'ALL' : t === 'HIGH_CONFIDENCE' ? 'CRITICAL' : t === 'MEDIUM_CONFIDENCE' ? 'SUSPICIOUS' : 'CLEARED'}
+                    {t.label}
                   </button>
                 ))}
               </div>
@@ -248,7 +258,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ activeDataset }) =
           </div>
 
           {/* List Feed */}
-          <div className="flex-1 overflow-y-auto max-h-[460px] divide-y divide-white/5 font-sans">
+          <div className="flex-1 overflow-y-auto max-h-[460px] space-y-1.5 font-sans pr-1">
             {fetchStatus === AsyncStatus.LOADING ? (
               <div className="p-4 flex justify-center items-center h-48">
                 <LottieLoader status={fetchStatus} />
@@ -258,89 +268,73 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ activeDataset }) =
                 <EmptyState title="No incidents" description="No cases match the selected filter." />
               </div>
             ) : (
-              filteredIncidents.map((incident) => {
-                const isSelected = selectedIncidentId === incident.complaint_id;
-                const isHigh = incident.confidence_tier === 'HIGH_CONFIDENCE';
-                const isMedium = incident.confidence_tier === 'MEDIUM_CONFIDENCE';
+              (() => {
+                const uniqueOrigins = new Set(filteredIncidents.map(() => getIntakeOriginLabel(activeDataset)));
+                const showOriginChip = uniqueOrigins.size > 1;
 
-                return (
-                  <div
-                    key={incident.complaint_id}
-                    onClick={() => handleSelectIncident(incident.complaint_id)}
-                    className={`p-2.5 transition-all cursor-pointer flex items-center justify-between gap-3 text-xs rounded ${
-                      isSelected
-                        ? 'bg-slate-100 border-l-2 border-l-[#FF5500] text-slate-900'
-                        : 'hover:bg-white/[0.03] text-slate-700'
-                    }`}
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <span className="font-bold text-slate-900 text-[11px] relative">
-                          {incident.complaint_id}
-                          {incident.intercepted_in_flight && (
-                            <span className="absolute -top-1 -right-1 flex h-1.5 w-1.5">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-indigo-500"></span>
-                            </span>
-                          )}
-                        </span>
-                        <span className={`text-[9px] px-1 py-0.2 rounded font-bold border ${
-                          activeDataset === 'IBM_B' ? 'bg-cyan-500/10 text-cyan-600 border-cyan-500/30' :
-                          activeDataset === 'ELLIPTIC_C' ? 'bg-amber-500/10 text-amber-600 border-amber-500/30' :
-                          'bg-indigo-500/10 text-indigo-600 border-indigo-500/30'
-                        }`}>
-                          {activeDataset === 'IBM_B' ? 'MULTI-BANK' : activeDataset === 'ELLIPTIC_C' ? 'BITCOIN' : 'CITIZEN'}
-                        </span>
-                        <span className={`text-[9px] px-1.5 py-0.2 rounded border font-bold ${
-                          isHigh ? 'bg-[#FF5500]/15 text-[#FF5500] border-[#FF5500]/30' : isMedium ? 'bg-amber-500/15 text-amber-400 border-amber-500/30' : 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
-                        }`}>
-                          {incident.confidence_tier}
-                        </span>
-                        {incident.top_terminal_city && incident.top_terminal_city !== 'NONE' && (
-                          <span className="text-[9px] text-amber-400">
-                            ➔ {incident.top_terminal_city}
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-[10px] text-slate-500 truncate">
-                        {incident.scam_category || 'Commercial Transfer Flow'}
-                      </div>
-                    </div>
+                return filteredIncidents.map((incident) => {
+                  const isSelected = selectedIncidentId === incident.complaint_id;
 
-                    <div className="text-right">
-                      <div className="font-bold text-slate-900 font-sans">
-                        {formatCurrency(incident.reported_amount || 0, activeDataset)}
-                      </div>
-                      <div className="text-[9px] text-slate-500">
-                        {activeDataset === 'IBM_B' ? 'FLOW SUM' : activeDataset === 'ELLIPTIC_C' ? 'TX VALUE' : 'DISPUTED'}
-                      </div>
-                    </div>
-
-                    <div className="w-20 text-right">
-                      <div className={`font-bold text-xs ${isHigh ? 'text-[#FF5500]' : isMedium ? 'text-amber-400' : 'text-emerald-400'}`}>
-                        {(incident.graphsage_risk_probability * 100).toFixed(1)}%
-                      </div>
-                      <div className="w-full h-1 bg-slate-100 rounded mt-0.5 overflow-hidden">
-                        <div
-                          className={`h-full ${isHigh ? 'bg-[#FF5500]' : isMedium ? 'bg-amber-400' : 'bg-emerald-400'}`}
-                          style={{ width: `${incident.graphsage_risk_probability * 100}%` }}
+                  return (
+                    <div
+                      key={incident.complaint_id}
+                      onClick={() => handleSelectIncident(incident.complaint_id)}
+                      className={`p-2.5 transition-all cursor-pointer flex items-center justify-between gap-3 text-xs rounded-lg border ${
+                        isSelected
+                          ? 'bg-slate-50 border-[#FF5500] shadow-xs text-slate-900'
+                          : 'bg-white hover:bg-slate-50/80 border-slate-200 text-slate-700'
+                      }`}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 mb-1">
+                          <IncidentIdCell
+                            complaintId={incident.complaint_id}
+                            interceptedInFlight={incident.intercepted_in_flight}
+                          />
+                          {showOriginChip && <IntakeOriginChip dataset={activeDataset} />}
+                          <TierBadge tier={incident.confidence_tier} />
+                        </div>
+                        <div className="text-[11px] text-slate-700 font-medium truncate mb-1">
+                          {incident.scam_category || 'Commercial Transfer Flow'}
+                        </div>
+                        <LocationCell
+                          district={incident.district}
+                          state={incident.state}
+                          predictedExitCity={incident.top_terminal_city}
+                          showPredictedExit={true}
                         />
                       </div>
-                    </div>
 
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/dossier/${incident.complaint_id}`);
-                      }}
-                      className="px-2.5 py-1 bg-slate-100 hover:bg-slate-100 text-slate-900 border border-slate-200 rounded text-[10px] font-bold flex items-center gap-1 transition-colors"
-                    >
-                      <span>DOSSIER</span>
-                      <ChevronRight className="w-3 h-3" />
-                    </button>
-                  </div>
-                );
-              })
+                      <div className="text-right shrink-0">
+                        <AmountCell
+                          amount={incident.reported_amount || 0}
+                          dataset={activeDataset}
+                          compact
+                        />
+                        <div className="text-[10px] text-slate-400 font-medium mt-0.5">
+                          {activeDataset === 'IBM_B' ? 'FLOW SUM' : activeDataset === 'ELLIPTIC_C' ? 'TX VALUE' : 'DISPUTED'}
+                        </div>
+                      </div>
+
+                      <div className="w-20 text-right shrink-0">
+                        <RiskBar probability={incident.graphsage_risk_probability} />
+                      </div>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/dossier/${incident.complaint_id}`);
+                        }}
+                        className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 rounded-lg text-[10px] font-bold flex items-center gap-1 transition-all shrink-0"
+                        title="Open Case Dossier"
+                      >
+                        <span>OPEN</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </button>
+                    </div>
+                  );
+                });
+              })()
             )}
           </div>
         </div>
@@ -354,11 +348,11 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ activeDataset }) =
                 <h2 className="text-xs font-bold tracking-tight text-slate-900 uppercase">
                   "WHY FLAGGED?" // GNN EXPLAINABILITY
                 </h2>
-                <div className="text-[9px] text-slate-500">DECISION RATIONALE & EVIDENCE</div>
+                <div className="text-[10px] text-slate-500">DECISION RATIONALE & EVIDENCE</div>
               </div>
             </div>
 
-            <span className="text-[9px] bg-[#FF5500]/10 border border-[#FF5500]/30 text-[#FF5500] px-2 py-0.5 rounded font-bold">
+            <span className="text-[10px] bg-[#FF5500]/10 border border-[#FF5500]/30 text-[#FF5500] px-2 py-0.5 rounded font-bold">
               HUMAN REVIEW
             </span>
           </div>
@@ -373,11 +367,27 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ activeDataset }) =
                   </div>
                 );
               }
-              if (!incidentDetail) return null;
+
+              if (!incidentDetail) {
+                return (
+                  <div className="flex-1 flex flex-col items-center justify-center p-8 text-center border border-dashed border-slate-200 rounded-xl bg-slate-50/50 min-h-[300px]">
+                    <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400 mb-3 shadow-2xs">
+                      <ShieldAlert className="w-5 h-5 text-slate-400" />
+                    </div>
+                    <div className="text-xs font-bold text-slate-800 tracking-tight">
+                      Select an incident to see why it was flagged
+                    </div>
+                    <p className="text-[10px] text-slate-500 max-w-xs mt-1 leading-relaxed">
+                      Choose a complaint from the active feed to inspect GraphSAGE explainability, multi-hop funnels, and mule flags.
+                    </p>
+                  </div>
+                );
+              }
+
               return (
                 <>
                 {/* Executive Summary Card */}
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded space-y-1">
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
                   <div className="text-[10px] text-slate-500 font-bold flex items-center gap-1.5 uppercase">
                     <FileText className="w-3 h-3 text-[#FF5500]" />
                     <span>EXECUTIVE SUMMARY</span>
@@ -389,31 +399,25 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ activeDataset }) =
                 </div>
 
                 {/* Risk & Terminal Details */}
-                <div className="grid grid-cols-2 gap-2 bg-slate-50 p-3 border border-slate-200 rounded text-[10px]">
+                <div className="grid grid-cols-2 gap-2 bg-slate-50 p-3 border border-slate-200 rounded-lg text-[10px]">
                   <div className="space-y-1">
-                    <div className="text-slate-500">GRAPHSAGE RISK SCORE:</div>
-                    <div className="text-xl font-bold font-sans text-slate-900">
+                    <div className="text-slate-500 font-medium">GRAPHSAGE RISK SCORE:</div>
+                    <div className="text-xl font-bold font-mono text-slate-900">
                       {(((selectedIncident?.graphsage_risk_probability !== undefined ? selectedIncident.graphsage_risk_probability : incidentDetail.model_prediction.graphsage_risk_probability) || 0) * 100).toFixed(1)}%
                     </div>
-                    <div className={`text-[9px] font-bold ${
-                      (selectedIncident?.confidence_tier || incidentDetail.model_prediction.confidence_tier) === 'HIGH_CONFIDENCE'
-                        ? 'text-[#FF5500]'
-                        : (selectedIncident?.confidence_tier || incidentDetail.model_prediction.confidence_tier) === 'MEDIUM_CONFIDENCE'
-                        ? 'text-amber-400'
-                        : 'text-emerald-400'
-                    }`}>
-                      {selectedIncident?.confidence_tier || incidentDetail.model_prediction.confidence_tier}
+                    <div>
+                      <TierBadge tier={selectedIncident?.confidence_tier || incidentDetail.model_prediction.confidence_tier} />
                     </div>
                   </div>
 
                   <div className="space-y-1">
-                    <div className="text-slate-500">PREDICTED EXIT TERMINAL:</div>
-                    <div className="text-sm font-bold text-amber-400">
+                    <div className="text-slate-500 font-medium">PREDICTED EXIT TERMINAL:</div>
+                    <div className="text-sm font-bold font-mono text-slate-900">
                       {incidentDetail.model_prediction.top_terminal_id && incidentDetail.model_prediction.top_terminal_id !== 'NONE'
                         ? incidentDetail.model_prediction.top_terminal_id
                         : 'N/A'}
                     </div>
-                    <div className="text-slate-500 truncate">
+                    <div className="text-slate-500 truncate text-[10px]">
                       {incidentDetail.model_prediction.top_terminal_city && incidentDetail.model_prediction.top_terminal_city !== 'NONE'
                         ? incidentDetail.model_prediction.top_terminal_city
                         : 'No Exit Convergence'}
@@ -434,13 +438,13 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ activeDataset }) =
                           `Disputed amount of ₹${(incidentDetail.complaint.reported_amount || 0).toLocaleString('en-IN')}.`,
                         ]
                     ).map((bullet, idx) => (
-                      <div key={idx} className="flex items-start gap-2 bg-slate-50 p-2 border border-slate-100 rounded">
+                      <div key={idx} className="flex items-start gap-2 bg-slate-50 p-2 border border-slate-100 rounded-lg">
                         <CheckCircle2 className={`w-3.5 h-3.5 flex-shrink-0 mt-0.5 ${
                           incidentDetail.model_prediction.confidence_tier === 'HIGH_CONFIDENCE'
-                            ? 'text-[#FF5500]'
+                            ? 'text-red-500'
                             : incidentDetail.model_prediction.confidence_tier === 'MEDIUM_CONFIDENCE'
-                            ? 'text-amber-400'
-                            : 'text-emerald-400'
+                            ? 'text-amber-500'
+                            : 'text-emerald-500'
                         }`} />
                         <span className="leading-snug text-slate-700 font-sans">{bullet}</span>
                       </div>
@@ -451,7 +455,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ activeDataset }) =
                 {/* Case Link */}
                 <button
                   onClick={() => navigate(`/dossier/${incidentDetail.complaint.complaint_id}`)}
-                  className="w-full py-2.5 bg-white hover:bg-zinc-200 text-black font-bold text-xs rounded flex items-center justify-center gap-2 transition-all shadow-sm"
+                  className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm"
                 >
                   <span>OPEN FULL CLASSIFIED CASE DOSSIER</span>
                   <ArrowRight className="w-3.5 h-3.5" />

@@ -1,64 +1,50 @@
 import React from 'react';
 import { ShieldAlert, AlertTriangle, CheckCircle, HelpCircle } from 'lucide-react';
 import type { ConfidenceTier } from '../../types';
+import { TIER_CONFIG, getTierLabel } from '../incidents/incidentConstants';
 
 interface ConfidenceBadgeProps {
-  tier: ConfidenceTier;
+  tier: ConfidenceTier | string;
   size?: 'sm' | 'md' | 'lg';
   showIcon?: boolean;
 }
-
-const tierConfig = {
-  HIGH_CONFIDENCE: {
-    label: 'CRITICAL THREAT // HIGH CONFIDENCE',
-    shortLabel: 'HIGH CONFIDENCE',
-    icon: ShieldAlert,
-    className: 'rounded-full border bg-tactical-critical/10 text-tactical-critical border-tactical-critical/20 font-bold',
-    dot: 'bg-tactical-critical animate-ping rounded-full',
-  },
-  MEDIUM_CONFIDENCE: {
-    label: 'SUSPICIOUS RING // MEDIUM CONFIDENCE',
-    shortLabel: 'MEDIUM CONFIDENCE',
-    icon: AlertTriangle,
-    className: 'rounded-full border bg-tactical-warning/10 text-tactical-warning border-tactical-warning/20 font-bold',
-    dot: 'bg-tactical-warning rounded-full',
-  },
-  NORMAL: {
-    label: 'CLEARED // NORMAL ACTIVITY',
-    shortLabel: 'NORMAL',
-    icon: CheckCircle,
-    className: 'rounded-full border bg-tactical-safe/10 text-tactical-safe border-tactical-safe/20 font-bold',
-    dot: 'bg-tactical-safe rounded-full',
-  },
-  UNCLASSIFIED: {
-    label: 'UNCLASSIFIED ENTITY',
-    shortLabel: 'UNCLASSIFIED',
-    icon: HelpCircle,
-    className: 'rounded-full border bg-slate-50 text-slate-500 border-slate-200 font-bold',
-    dot: 'bg-slate-500 rounded-full',
-  },
-};
-
-const sizeMap = {
-  sm: { text: 'text-[9px]', icon: 'w-2.5 h-2.5', px: 'px-1.5 py-0.5' },
-  md: { text: 'text-[10px]', icon: 'w-3 h-3', px: 'px-2.5 py-1' },
-  lg: { text: 'text-xs', icon: 'w-3.5 h-3.5', px: 'px-3 py-1.5' },
-};
 
 export const ConfidenceBadge: React.FC<ConfidenceBadgeProps> = ({
   tier,
   size = 'md',
   showIcon = true,
 }) => {
-  const config = tierConfig[tier] || tierConfig.UNCLASSIFIED;
-  const s = sizeMap[size];
-  const Icon = config.icon;
+  const normalizedTier = (
+    tier === 'HIGH_CONFIDENCE' || tier === 'CRITICAL'
+      ? 'HIGH_CONFIDENCE'
+      : tier === 'MEDIUM_CONFIDENCE' || tier === 'SUSPICIOUS'
+      ? 'MEDIUM_CONFIDENCE'
+      : tier === 'NORMAL' || tier === 'CLEARED'
+      ? 'NORMAL'
+      : 'UNCLASSIFIED'
+  ) as ConfidenceTier;
+
+  const config = TIER_CONFIG[normalizedTier] || TIER_CONFIG.UNCLASSIFIED;
+  const label = getTierLabel(tier);
+
+  const Icon =
+    normalizedTier === 'HIGH_CONFIDENCE'
+      ? ShieldAlert
+      : normalizedTier === 'MEDIUM_CONFIDENCE'
+      ? AlertTriangle
+      : normalizedTier === 'NORMAL'
+      ? CheckCircle
+      : HelpCircle;
 
   return (
-    <span className={`inline-flex items-center gap-1.5 font-sans ${config.className} ${s.text} ${s.px}`}>
-      <span className={`w-1.5 h-1.5 rounded-none ${config.dot}`} />
-      {showIcon && <Icon className={s.icon} />}
-      <span>{size === 'sm' ? config.shortLabel : config.label}</span>
+    <span
+      className={`inline-flex items-center gap-1.5 font-sans font-bold border rounded-md select-none ${config.badgeClass} ${
+        size === 'lg' ? 'text-xs px-2.5 py-1' : 'text-[10px] px-2 py-0.5'
+      }`}
+    >
+      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${config.dotClass}`} />
+      {showIcon && <Icon className="w-3 h-3 shrink-0" />}
+      <span>{label}</span>
     </span>
   );
 };

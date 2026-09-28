@@ -24,6 +24,16 @@ import { AssignOfficerModal } from './AssignOfficerModal';
 import { QuickFreezeModal } from '../freeze/QuickFreezeModal';
 import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
 import { LottieLoader } from '../ui/LottieLoader';
+import {
+  IncidentIdCell,
+  TierBadge,
+  RiskBar,
+  AmountCell,
+  LocationCell,
+  IntakeOriginChip,
+  FILTER_TABS,
+  getIntakeOriginLabel,
+} from './index';
 
 interface IncidentQueueProps {
   activeDataset?: string;
@@ -202,19 +212,14 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ activeDataset }) =
 
           {/* Tier Filter Tabs */}
           <div className="flex border border-slate-200 bg-slate-50 rounded-lg p-0.5 text-[10px]">
-            {[
-              { id: 'ALL', label: 'ALL' },
-              { id: 'HIGH_CONFIDENCE', label: 'CRITICAL' },
-              { id: 'MEDIUM_CONFIDENCE', label: 'SUSPICIOUS' },
-              { id: 'NORMAL', label: 'CLEARED' },
-            ].map((t) => (
+            {FILTER_TABS.map((t) => (
               <button
                 key={t.id}
                 onClick={() => {
                   setTierFilter(t.id);
                   setPage(1);
                 }}
-                className={`px-2.5 py-1 rounded-md font-bold transition-colors ${
+                className={`px-2.5 py-1 rounded-md font-bold transition-colors text-[10px] ${
                   tierFilter === t.id
                     ? 'bg-white text-slate-900 shadow-sm border border-slate-200/60'
                     : 'text-slate-500 hover:text-slate-700'
@@ -270,141 +275,130 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ activeDataset }) =
                   </td>
                 </tr>
               ) : (
-                incidents.map((incident) => {
-                  const isHigh = incident.confidence_tier === 'HIGH_CONFIDENCE';
-                  const isMedium = incident.confidence_tier === 'MEDIUM_CONFIDENCE';
-                  const status = incident.status || 'UNDER_INVESTIGATION';
+                (() => {
+                  const uniqueOrigins = new Set(incidents.map(() => getIntakeOriginLabel(activeDataset)));
+                  const showOriginChip = uniqueOrigins.size > 1;
 
-                  return (
-                    <tr
-                      key={incident.complaint_id}
-                      onClick={() => navigate(`/dossier/${incident.complaint_id}`)}
-                      className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
-                    >
-                      {/* ID */}
-                      <td className="p-3 font-bold text-slate-900 relative">
-                        <span className="text-[#FF5500] font-mono">{incident.complaint_id}</span>
-                        {incident.intercepted_in_flight && (
-                          <div className="mt-0.5 text-[9px] bg-indigo-50 text-indigo-700 border border-indigo-200 px-1 py-0.2 rounded w-fit font-bold">
-                            In-Flight Intercept
+                  return incidents.map((incident) => {
+                    const status = incident.status || 'UNDER_INVESTIGATION';
+
+                    return (
+                      <tr
+                        key={incident.complaint_id}
+                        onClick={() => navigate(`/dossier/${incident.complaint_id}`)}
+                        className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
+                      >
+                        {/* ID */}
+                        <td className="p-3 font-bold text-slate-900 relative">
+                          <IncidentIdCell
+                            complaintId={incident.complaint_id}
+                            interceptedInFlight={incident.intercepted_in_flight}
+                          />
+                        </td>
+
+                        {/* Origin */}
+                        <td className="p-3">
+                          {showOriginChip ? (
+                            <IntakeOriginChip dataset={activeDataset} />
+                          ) : (
+                            <span className="text-[10px] text-slate-400 font-mono">—</span>
+                          )}
+                        </td>
+
+                        {/* Scam Category */}
+                        <td className="p-3 text-slate-700 max-w-[180px] truncate font-medium text-[11px]">
+                          {incident.scam_category || 'Commercial Transfer Flow'}
+                        </td>
+
+                        {/* Disputed Amount */}
+                        <td className="p-3 text-right">
+                          <AmountCell
+                            amount={incident.reported_amount || 0}
+                            dataset={activeDataset}
+                          />
+                        </td>
+
+                        {/* Jurisdiction */}
+                        <td className="p-3">
+                          <LocationCell
+                            district={incident.district}
+                            state={incident.state}
+                            predictedExitCity={incident.top_terminal_city}
+                            showPredictedExit={false}
+                          />
+                        </td>
+
+                        {/* Risk Score */}
+                        <td className="p-3">
+                          <RiskBar probability={incident.graphsage_risk_probability} />
+                        </td>
+
+                        {/* Operational Tier */}
+                        <td className="p-3">
+                          <TierBadge tier={incident.confidence_tier} />
+                        </td>
+
+                        {/* Officer & Status */}
+                        <td className="p-3" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex flex-col gap-1">
+                            <div className="text-[10px] text-slate-700 font-medium truncate max-w-[120px]">
+                              {incident.assignedOfficerName ? (
+                                <span className="text-slate-900 font-bold">👮 {incident.assignedOfficerName}</span>
+                              ) : (
+                                <span className="text-slate-400 italic">Unassigned</span>
+                              )}
+                            </div>
+                            
+                            <select
+                              value={status}
+                              onChange={(e) => handleStatusChange(incident.complaint_id, e.target.value, e as any)}
+                              className="text-[10px] bg-slate-50 border border-slate-200 rounded px-1.5 py-0.5 text-slate-700 font-bold focus:outline-none focus:border-[#FF5500]"
+                            >
+                              <option value="UNDER_TRIAGE">TRIAGE</option>
+                              <option value="UNDER_INVESTIGATION">INVESTIGATING</option>
+                              <option value="FREEZE_INITIATED">FREEZE SENT</option>
+                              <option value="FUNDS_FROZEN">FROZEN</option>
+                              <option value="RESOLVED">RESOLVED</option>
+                            </select>
                           </div>
-                        )}
-                      </td>
+                        </td>
 
-                      {/* Origin */}
-                      <td className="p-3">
-                        <span className={`text-[9px] px-2 py-0.5 rounded font-bold border ${
-                          activeDataset === 'IBM_B' ? 'bg-cyan-50 text-cyan-700 border-cyan-200' :
-                          activeDataset === 'ELLIPTIC_C' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                          'bg-indigo-50 text-indigo-700 border-indigo-200'
-                        }`}>
-                          {getOriginBadge()}
-                        </span>
-                      </td>
+                        {/* Actions */}
+                        <td className="p-3 text-center" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center justify-center gap-1.5">
+                            {/* Quick Freeze Action */}
+                            <button
+                              onClick={() => setFreezeModalIncident(incident)}
+                              className="p-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg text-[10px] font-bold transition-all"
+                              title="Issue Immediate Bank Freeze Notice"
+                            >
+                              <AlertOctagon className="w-3.5 h-3.5" />
+                            </button>
 
-                      {/* Scam Category */}
-                      <td className="p-3 text-slate-700 max-w-[180px] truncate font-medium">
-                        {incident.scam_category || 'Commercial Transfer Flow'}
-                      </td>
+                            {/* Assign Officer Action */}
+                            <button
+                              onClick={() => setAssignModalIncident(incident)}
+                              className="p-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-[10px] font-bold transition-all"
+                              title="Assign Case Officer"
+                            >
+                              <UserPlus className="w-3.5 h-3.5" />
+                            </button>
 
-                      {/* Disputed Amount */}
-                      <td className="p-3 text-right font-bold text-slate-900 font-mono">
-                        {formatAmount(incident.reported_amount || 0)}
-                      </td>
-
-                      {/* Jurisdiction */}
-                      <td className="p-3 text-slate-600">
-                        {incident.district}, {incident.state}
-                      </td>
-
-                      {/* Risk Score */}
-                      <td className="p-3">
-                        <div className="flex items-center gap-2">
-                          <span className={`font-bold font-mono ${isHigh ? 'text-[#FF5500]' : isMedium ? 'text-amber-600' : 'text-emerald-600'}`}>
-                            {(incident.graphsage_risk_probability * 100).toFixed(1)}%
-                          </span>
-                          <div className="w-12 bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                            <div
-                              className={`h-full ${isHigh ? 'bg-[#FF5500]' : isMedium ? 'bg-amber-500' : 'bg-emerald-500'}`}
-                              style={{ width: `${incident.graphsage_risk_probability * 100}%` }}
-                            />
+                            {/* Open Dossier */}
+                            <button
+                              onClick={() => navigate(`/dossier/${incident.complaint_id}`)}
+                              className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 rounded-lg text-[10px] font-bold inline-flex items-center gap-1 transition-all"
+                              title="Open Full Case Dossier"
+                            >
+                              <span>OPEN</span>
+                              <ArrowRight className="w-3 h-3" />
+                            </button>
                           </div>
-                        </div>
-                      </td>
-
-                      {/* Operational Tier */}
-                      <td className="p-3">
-                        <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold uppercase ${
-                          isHigh
-                            ? 'bg-[#FF5500]/10 text-[#FF5500] border border-[#FF5500]/30'
-                            : isMedium
-                            ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                            : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                        }`}>
-                          {incident.confidence_tier}
-                        </span>
-                      </td>
-
-                      {/* Officer & Status */}
-                      <td className="p-3" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex flex-col gap-1">
-                          <div className="text-[10px] text-slate-700 font-medium truncate max-w-[120px]">
-                            {incident.assignedOfficerName ? (
-                              <span className="text-slate-900 font-bold">👮 {incident.assignedOfficerName}</span>
-                            ) : (
-                              <span className="text-slate-400 italic">Unassigned</span>
-                            )}
-                          </div>
-                          
-                          <select
-                            value={status}
-                            onChange={(e) => handleStatusChange(incident.complaint_id, e.target.value, e as any)}
-                            className="text-[9px] bg-slate-50 border border-slate-200 rounded px-1.5 py-0.5 text-slate-700 font-bold focus:outline-none focus:border-[#FF5500]"
-                          >
-                            <option value="UNDER_TRIAGE">TRIAGE</option>
-                            <option value="UNDER_INVESTIGATION">INVESTIGATING</option>
-                            <option value="FREEZE_INITIATED">FREEZE SENT</option>
-                            <option value="FUNDS_FROZEN">FROZEN</option>
-                            <option value="RESOLVED">RESOLVED</option>
-                          </select>
-                        </div>
-                      </td>
-
-                      {/* Actions */}
-                      <td className="p-3 text-center" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-center gap-1">
-                          {/* Quick Freeze Action */}
-                          <button
-                            onClick={() => setFreezeModalIncident(incident)}
-                            className="p-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg text-[10px] font-bold transition-all"
-                            title="Issue Immediate Bank Freeze Notice"
-                          >
-                            <AlertOctagon className="w-3.5 h-3.5" />
-                          </button>
-
-                          {/* Assign Officer Action */}
-                          <button
-                            onClick={() => setAssignModalIncident(incident)}
-                            className="p-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-[10px] font-bold transition-all"
-                            title="Assign Case Officer"
-                          >
-                            <UserPlus className="w-3.5 h-3.5" />
-                          </button>
-
-                          {/* Open Dossier */}
-                          <button
-                            onClick={() => navigate(`/dossier/${incident.complaint_id}`)}
-                            className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 rounded-lg text-[10px] font-bold inline-flex items-center gap-1 transition-all"
-                            title="Open Full Case Dossier"
-                          >
-                            <span>OPEN</span>
-                            <ArrowRight className="w-3 h-3" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
+                        </td>
+                      </tr>
+                    );
+                  });
+                })()
               )}
             </tbody>
           </table>
