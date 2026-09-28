@@ -21,9 +21,18 @@ import {
   JurisdictionMaster,
   StaffUserMaster,
   GraphSnapshot,
-  RegisteredModel
+  RegisteredModel,
+  LivePredictResponse
 } from '../types';
-import { MOCK_THREE_WAY_BENCHMARK } from './mockData';
+import { MOCK_THREE_WAY_BENCHMARK, MOCK_PIPELINE_STATS } from './mockData';
+
+export function isDemoMode(): boolean {
+  if (typeof window === 'undefined') return false;
+  return (
+    ((import.meta as any).env?.VITE_DEMO_MODE === 'true') ||
+    sessionStorage.getItem('sih_demo_sample_data') === 'true'
+  );
+}
 
 const BASE_URL = ((import.meta as any).env?.VITE_API_BASE_URL as string) || '/api';
 
@@ -171,13 +180,13 @@ export class ApiService {
     return {
       status: isOperational ? 'HEALTHY' : 'DEGRADED',
       timestamp: modelHealth?.timestamp || springHealth?.timestamp || new Date().toISOString(),
-      graphsage_model_loaded: modelHealth?.graphsage_model_loaded ?? true,
-      xgboost_model_loaded: modelHealth?.xgboost_model_loaded ?? true,
+      graphsage_model_loaded: modelHealth?.graphsage_model_loaded ?? false,
+      xgboost_model_loaded: modelHealth?.xgboost_model_loaded ?? false,
       database_connected: isSqliteConnected && isSpringDbConnected,
       sqlite_connected: isSqliteConnected,
       spring_db_connected: isSpringDbConnected,
-      streaming_graph_nodes: modelHealth?.streaming_graph_nodes ?? 263,
-      streaming_graph_edges: modelHealth?.streaming_graph_edges ?? 500
+      streaming_graph_nodes: modelHealth?.streaming_graph_nodes ?? 0,
+      streaming_graph_edges: modelHealth?.streaming_graph_edges ?? 0
     };
   }
 
@@ -195,18 +204,19 @@ export class ApiService {
         const json = await res.json();
         const data = unwrapResponse<any>(json);
         return {
-          total_incidents_monitored: data.total_incidents_monitored || data.totalComplaints || 1000,
-          predictions_calibrated: data.predictions_calibrated || data.triagedCount || 1000,
+          total_incidents_monitored: data.total_incidents_monitored ?? data.totalComplaints ?? 0,
+          predictions_calibrated: data.predictions_calibrated ?? data.triagedCount ?? 0,
+          high_risk_exposure: data.high_risk_exposure,
           tier_breakdown: data.tier_breakdown || {
-            HIGH_CONFIDENCE: data.highRiskCount || 191,
-            MEDIUM_CONFIDENCE: data.mediumRiskCount || 10,
-            NORMAL: data.lowRiskCount || 799
+            HIGH_CONFIDENCE: data.highRiskCount ?? 0,
+            MEDIUM_CONFIDENCE: data.mediumRiskCount ?? 0,
+            NORMAL: data.lowRiskCount ?? 0
           },
           model_comparison: data.model_comparison || {
-            GraphSAGE_Test_F1: "87.67% +/- 2.38%",
-            XGBoost_Baseline_F1: "89.48% +/- 4.66%",
-            Terminal_Prediction_MRR: "1.0",
-            Top1_CashOut_Accuracy: "100.0%"
+            GraphSAGE_Test_F1: "—",
+            XGBoost_Baseline_F1: "—",
+            Terminal_Prediction_MRR: "—",
+            Top1_CashOut_Accuracy: "—"
           }
         };
       }
@@ -223,22 +233,27 @@ export class ApiService {
         const json = await fallbackRes.json();
         const data = unwrapResponse<any>(json);
         return {
-          total_incidents_monitored: data.totalComplaints || 1000,
-          predictions_calibrated: data.triagedCount || 1000,
+          total_incidents_monitored: data.totalComplaints ?? 0,
+          predictions_calibrated: data.triagedCount ?? 0,
+          high_risk_exposure: data.high_risk_exposure,
           tier_breakdown: {
-            HIGH_CONFIDENCE: data.highRiskCount || 191,
-            MEDIUM_CONFIDENCE: data.mediumRiskCount || 10,
-            NORMAL: data.lowRiskCount || 799
+            HIGH_CONFIDENCE: data.highRiskCount ?? 0,
+            MEDIUM_CONFIDENCE: data.mediumRiskCount ?? 0,
+            NORMAL: data.lowRiskCount ?? 0
           },
           model_comparison: {
-            GraphSAGE_Test_F1: "87.67% +/- 2.38%",
-            XGBoost_Baseline_F1: "89.48% +/- 4.66%",
-            Terminal_Prediction_MRR: "1.0",
-            Top1_CashOut_Accuracy: "100.0%"
+            GraphSAGE_Test_F1: "—",
+            XGBoost_Baseline_F1: "—",
+            Terminal_Prediction_MRR: "—",
+            Top1_CashOut_Accuracy: "—"
           }
         };
       }
     } catch {}
+
+    if (isDemoMode()) {
+      return MOCK_PIPELINE_STATS;
+    }
 
     throw new Error("Failed to fetch pipeline stats");
   }
@@ -454,7 +469,7 @@ export class ApiService {
     return this.tunePolicy(threshold, dataset);
   }
 
-  public static async predictLiveEntity(entityId: string, maxHops: number = 3): Promise<any> {
+  public static async predictLiveEntity(entityId: string, maxHops: number = 3): Promise<LivePredictResponse> {
     try {
       const res = await fetch(`${BASE_URL}/incidents/${entityId}/predict`, {
         method: 'POST',
@@ -465,16 +480,30 @@ export class ApiService {
         const json = await res.json();
         const data = unwrapResponse<any>(json);
         return {
-          ...data,
-          graphsage_risk_probability: data.riskScore || data.graphsage_probability || 0.88,
-          confidence_tier: data.confidenceTier || 'HIGH_CONFIDENCE',
-          top_terminal_id: data.topTerminal || 'ATM-DEL-102',
-          top_terminal_city: data.topTerminalCity || 'Delhi',
-          subgraph_node_count: data.nodeCount || 8,
-          subgraph_edge_count: data.edgeCount || 12
+          seed_entity_id: data.seed_entity_id || entityId,
+          risk_probability: data.risk_probability ?? data.riskScore ?? data.graphsage_probability ?? 0,
+          confidence_tier: data.confidence_tier || data.confidenceTier || 'NORMAL',
+          is_suspicious: Boolean(data.is_suspicious ?? (data.riskScore && data.riskScore > 0.5)),
+          num_nodes: data.num_nodes ?? data.nodeCount ?? 0,
+          num_edges: data.num_edges ?? data.edgeCount ?? 0,
+          terminals: data.terminals || [],
+          subgraph_empty: Boolean(data.subgraph_empty),
+          low_information: Boolean(data.low_information),
+          status_reason: data.status_reason || null,
+          graphsage_risk_probability: data.graphsage_risk_probability ?? data.risk_probability ?? data.riskScore ?? 0,
+          top_terminal_id: data.terminals?.[0]?.terminal_id || data.topTerminal || 'NONE',
+          top_terminal_city: data.terminals?.[0]?.city || data.topTerminalCity || 'N/A',
+          subgraph_node_count: data.num_nodes ?? data.nodeCount ?? 0,
+          subgraph_edge_count: data.num_edges ?? data.edgeCount ?? 0,
+          subgraph_nodes: data.subgraph_nodes || null,
+          subgraph_edges: data.subgraph_edges || null
         };
+      } else {
+        console.warn(`[SimulationLab] Primary /incidents/${entityId}/predict returned status ${res.status}; falling back to /predict/subgraph`);
       }
-    } catch {}
+    } catch (err) {
+      console.warn(`[SimulationLab] Primary /incidents/${entityId}/predict failed; falling back to /predict/subgraph:`, err);
+    }
 
     const res = await fetch(`${BASE_URL}/predict/subgraph`, {
       method: 'POST',
@@ -486,13 +515,23 @@ export class ApiService {
     const json = await res.json();
     const data = unwrapResponse<any>(json);
     return {
-      ...data,
-      graphsage_risk_probability: data.risk_probability,
-      confidence_tier: data.confidence_tier,
+      seed_entity_id: data.seed_entity_id || entityId,
+      risk_probability: data.risk_probability ?? 0,
+      confidence_tier: data.confidence_tier || 'NORMAL',
+      is_suspicious: Boolean(data.is_suspicious),
+      num_nodes: data.num_nodes ?? 0,
+      num_edges: data.num_edges ?? 0,
+      terminals: data.terminals || [],
+      subgraph_empty: Boolean(data.subgraph_empty),
+      low_information: Boolean(data.low_information),
+      status_reason: data.status_reason || null,
+      graphsage_risk_probability: data.risk_probability ?? 0,
       top_terminal_id: data.terminals?.[0]?.terminal_id || 'NONE',
       top_terminal_city: data.terminals?.[0]?.city || 'N/A',
-      subgraph_node_count: data.num_nodes,
-      subgraph_edge_count: data.num_edges
+      subgraph_node_count: data.num_nodes ?? 0,
+      subgraph_edge_count: data.num_edges ?? 0,
+      subgraph_nodes: data.subgraph_nodes || null,
+      subgraph_edges: data.subgraph_edges || null
     };
   }
 
@@ -507,13 +546,13 @@ export class ApiService {
         const data = unwrapResponse<any>(json);
         if (data && (data.p50_latency_ms !== undefined || data.p50LatencyMs !== undefined)) {
           return {
-            ingestion_rate_tx_per_sec: data.ingestion_rate_tx_per_sec ?? data.throughputTxPerSec ?? 942.7,
-            p50_latency_ms: data.p50_latency_ms ?? data.p50LatencyMs ?? 0.99,
-            p90_latency_ms: data.p90_latency_ms ?? data.p90LatencyMs ?? 1.45,
-            p95_latency_ms: data.p95_latency_ms ?? data.p95LatencyMs ?? 1.70,
-            p99_latency_ms: data.p99_latency_ms ?? data.p99LatencyMs ?? 1.97,
-            total_transactions_ingested: data.transactions_ingested ?? data.totalProcessed ?? 5000,
-            sub_50ms_sla_compliant: data.sub_50ms_sla_passed ?? data.slaPassed ?? true
+            ingestion_rate_tx_per_sec: data.ingestion_rate_tx_per_sec ?? data.throughputTxPerSec ?? 0,
+            p50_latency_ms: data.p50_latency_ms ?? data.p50LatencyMs ?? 0,
+            p90_latency_ms: data.p90_latency_ms ?? data.p90LatencyMs ?? 0,
+            p95_latency_ms: data.p95_latency_ms ?? data.p95LatencyMs ?? 0,
+            p99_latency_ms: data.p99_latency_ms ?? data.p99LatencyMs ?? 0,
+            total_transactions_ingested: data.transactions_ingested ?? data.totalProcessed ?? 0,
+            sub_50ms_sla_compliant: Boolean(data.sub_50ms_sla_passed ?? data.slaPassed)
           };
         }
       }
@@ -528,26 +567,30 @@ export class ApiService {
         const json = await res.json();
         const data = unwrapResponse<any>(json);
         return {
-          ingestion_rate_tx_per_sec: data.throughputTxPerSec || 942.7,
-          p50_latency_ms: data.p50LatencyMs || 0.99,
-          p90_latency_ms: data.p90LatencyMs || 1.45,
-          p95_latency_ms: data.p95LatencyMs || 1.70,
-          p99_latency_ms: data.p99LatencyMs || 1.97,
-          total_transactions_ingested: data.totalProcessed || data.totalTransactions || 5000,
-          sub_50ms_sla_compliant: data.slaPassed !== undefined ? data.slaPassed : true
+          ingestion_rate_tx_per_sec: data.throughputTxPerSec ?? 0,
+          p50_latency_ms: data.p50LatencyMs ?? 0,
+          p90_latency_ms: data.p90LatencyMs ?? 0,
+          p95_latency_ms: data.p95LatencyMs ?? 0,
+          p99_latency_ms: data.p99LatencyMs ?? 0,
+          total_transactions_ingested: data.totalProcessed || data.totalTransactions || 0,
+          sub_50ms_sla_compliant: Boolean(data.slaPassed)
         };
       }
     } catch {}
 
-    return {
-      ingestion_rate_tx_per_sec: 942.7,
-      p50_latency_ms: 0.99,
-      p90_latency_ms: 1.45,
-      p95_latency_ms: 1.70,
-      p99_latency_ms: 1.97,
-      total_transactions_ingested: 5000,
-      sub_50ms_sla_compliant: true
-    };
+    if (isDemoMode()) {
+      return {
+        ingestion_rate_tx_per_sec: 942.7,
+        p50_latency_ms: 0.99,
+        p90_latency_ms: 1.45,
+        p95_latency_ms: 1.70,
+        p99_latency_ms: 1.97,
+        total_transactions_ingested: 5000,
+        sub_50ms_sla_compliant: true
+      };
+    }
+
+    throw new Error("Failed to fetch streaming benchmark");
   }
 
   public static async getThreeWayBenchmarks(): Promise<ThreeWayBenchmarkRow[]> {
@@ -562,13 +605,13 @@ export class ApiService {
         if (data && data.metrics) {
           return [
             {
-              dataset: data.dataset || 'Synthetic Seed 42',
+              dataset: data.dataset || 'Synthetic Holdout',
               evaluation_task: 'Graph Multi-Hop AML',
-              sample_size: `${data.metrics.sampleCount || 1000} samples`,
-              xgboost_f1: data.metrics.xgboostF1 || 0.84,
-              graphsage_f1: data.metrics.graphsageF1 || 0.94,
-              f1_delta: data.metrics.f1Delta || '+0.10',
-              pr_auc: data.metrics.graphsagePrAuc || 0.96
+              sample_size: `${data.metrics.sampleCount || 0} samples`,
+              xgboost_f1: data.metrics.xgboostF1 ?? "—",
+              graphsage_f1: data.metrics.graphsageF1 ?? "—",
+              f1_delta: data.metrics.f1Delta ?? "—",
+              pr_auc: data.metrics.graphsagePrAuc ?? "—"
             }
           ];
         }
@@ -588,16 +631,19 @@ export class ApiService {
             dataset: item.dataset,
             evaluation_task: item.task_type || item.evaluation_task,
             sample_size: item.n_test ? `${item.n_test} test samples` : item.sample_size,
-            xgboost_f1: item.xgboost_f1,
-            graphsage_f1: item.graphsage_f1,
-            f1_delta: item.f1_delta,
-            pr_auc: item.graphsage_pr_auc || item.pr_auc
+            xgboost_f1: item.xgboost_f1 ?? "—",
+            graphsage_f1: item.graphsage_f1 ?? "—",
+            f1_delta: item.f1_delta ?? "—",
+            pr_auc: item.graphsage_pr_auc || item.pr_auc || "—"
           }));
         }
       }
     } catch {}
 
-    return MOCK_THREE_WAY_BENCHMARK;
+    if (isDemoMode()) {
+      return MOCK_THREE_WAY_BENCHMARK;
+    }
+    return [];
   }
 
   public static async getThreeWayBenchmark(): Promise<ThreeWayBenchmarkRow[]> {
@@ -880,7 +926,11 @@ export class ApiService {
       }
     } catch {}
 
-    // Fallback citizen complaints
+    if (!isDemoMode()) {
+      return [];
+    }
+
+    // Fallback citizen complaints for demo mode only
     return [
       {
         id: "cmp_cit_001",
@@ -924,7 +974,7 @@ export class ApiService {
         status: "RESOLVED",
         createdAt: "2026-01-15 12:05:00",
         assignedOfficerName: "Sub-Insp. V. Joshi",
-        riskScore: 0.942,
+        riskScore: 0.88,
         confidenceTier: "HIGH_CONFIDENCE",
         freezeCount: 2
       }
@@ -946,24 +996,7 @@ export class ApiService {
     const found = all.find((c) => c.id === complaintId || c.referenceNumber === complaintId);
     if (found) return found;
 
-    return {
-      id: complaintId,
-      referenceNumber: "NCRB-CYBER-2026-9921",
-      complainantName: "Citizen Complainant",
-      phone: "+91 98765 43210",
-      victimAccount: "5010049281928",
-      victimIfsc: "HDFC0000128",
-      suspectAccount: "189532603540",
-      amount: 149500.0,
-      transactionUtr: "UTR-2026-98124912",
-      transactionTimestamp: "2026-02-26 14:32:00",
-      category: "UPI_FRAUD",
-      status: "UNDER_INVESTIGATION",
-      createdAt: new Date().toISOString(),
-      assignedOfficerName: "Insp. S. Rao",
-      riskScore: 0.94,
-      confidenceTier: "HIGH_CONFIDENCE"
-    };
+    throw new Error(`Complaint ${complaintId} not found`);
   }
 
   public static async submitComplaint(payload: ComplaintCreatePayload): Promise<CitizenComplaint> {
@@ -1264,6 +1297,10 @@ export class ApiService {
       }
     } catch {}
 
+    if (!isDemoMode()) {
+      return [];
+    }
+
     return [
       {
         id: "SNP-2026-02",
@@ -1272,7 +1309,7 @@ export class ApiService {
         totalNodes: 12450,
         totalEdges: 38920,
         anomalyRatePercent: 4.82,
-        f1Score: 0.942,
+        f1Score: 0.8767,
         datasetType: "STREAMING_LIVE"
       },
       {
@@ -1282,7 +1319,7 @@ export class ApiService {
         totalNodes: 10000,
         totalEdges: 29400,
         anomalyRatePercent: 3.91,
-        f1Score: 0.928,
+        f1Score: 0.8767,
         datasetType: "SYNTHETIC_A"
       }
     ];
@@ -1294,10 +1331,14 @@ export class ApiService {
       if (res.ok) return unwrapResponse(await res.json());
     } catch {}
 
+    if (!isDemoMode()) {
+      throw new Error("Failed to fetch MLOps dashboard");
+    }
+
     return {
       activeChampionModel: "GraphSAGE-v2.4-Inductive",
-      f1Score: 0.942,
-      prAuc: 0.961,
+      f1Score: 0.8767,
+      prAuc: 0.956,
       conceptDriftScore: 0.042,
       driftStatus: "STABLE",
       totalSnapshots: 18,
@@ -1315,10 +1356,14 @@ export class ApiService {
       }
     } catch {}
 
+    if (!isDemoMode()) {
+      return [];
+    }
+
     return [
-      { id: "MDL-001", modelName: "GraphSAGE Multi-Hop Inductive", version: "v2.4.0", framework: "PyTorch Geometric", f1Score: 0.942, prAuc: 0.961, mrrScore: 0.892, status: "CHAMPION", trainedAt: "2026-02-24T18:00:00Z", parametersCount: 1450000 },
-      { id: "MDL-002", modelName: "GraphSAGE Multi-Hop Retrained", version: "v2.5.0-RC1", framework: "PyTorch Geometric", f1Score: 0.956, prAuc: 0.974, mrrScore: 0.915, status: "CANDIDATE", trainedAt: "2026-02-26T04:30:00Z", parametersCount: 1450000 },
-      { id: "MDL-003", modelName: "XGBoost Tabular Temporal Baseline", version: "v1.8.2", framework: "XGBoost", f1Score: 0.841, prAuc: 0.865, mrrScore: 0.780, status: "ARCHIVED", trainedAt: "2026-01-10T12:00:00Z", parametersCount: 85000 }
+      { id: "MDL-001", modelName: "GraphSAGE Multi-Hop Inductive", version: "v2.4.0", framework: "PyTorch Geometric", f1Score: 0.8767, prAuc: 0.956, mrrScore: 1.0, status: "CHAMPION", trainedAt: "2026-02-24T18:00:00Z", parametersCount: 1450000 },
+      { id: "MDL-002", modelName: "GraphSAGE Multi-Hop Retrained", version: "v2.5.0-RC1", framework: "PyTorch Geometric", f1Score: 0.8812, prAuc: 0.960, mrrScore: 1.0, status: "CANDIDATE", trainedAt: "2026-02-26T04:30:00Z", parametersCount: 1450000 },
+      { id: "MDL-003", modelName: "XGBoost Tabular Temporal Baseline", version: "v1.8.2", framework: "XGBoost", f1Score: 0.8889, prAuc: 0.944, mrrScore: 1.0, status: "ARCHIVED", trainedAt: "2026-01-10T12:00:00Z", parametersCount: 85000 }
     ];
   }
 

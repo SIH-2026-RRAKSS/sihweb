@@ -35,6 +35,8 @@ import {
   getIntakeOriginLabel,
 } from '../incidents';
 
+import { formatCompactINR } from '../../utils/formatINR';
+
 interface CommandCenterProps {
   activeDataset?: string;
 }
@@ -48,19 +50,13 @@ const formatCurrency = (amount: number, dataset?: string): string => {
   if (dataset === 'ELLIPTIC_C') {
     return `₿ ${amount.toFixed(2)} BTC`;
   }
-  if (amount >= 10000000) {
-    return `₹${(amount / 10000000).toFixed(2)}Cr`;
-  }
-  if (amount >= 100000) {
-    return `₹${(amount / 100000).toFixed(2)}L`;
-  }
-  return `₹${amount.toLocaleString('en-IN')}`;
+  return formatCompactINR(amount);
 };
 
 export const CommandCenter: React.FC<CommandCenterProps> = ({ activeDataset }) => {
   const navigate = useNavigate();
-  const { status: fetchStatus, error: fetchError, run: runFetch } = useAsyncState<void>();
-  const { status: detailStatus, error: detailError, run: runDetailFetch } = useAsyncState<void>();
+  const { status: fetchStatus, error: fetchError, isOffline, run: runFetch, retry: retryFetch } = useAsyncState<void>();
+  const { status: detailStatus, error: detailError, run: runDetailFetch, retry: retryDetail } = useAsyncState<void>();
   const [stats, setStats] = useState<PipelineStats | null>(null);
   const [incidents, setIncidents] = useState<IncidentSummary[]>([]);
   const [tierFilter, setTierFilter] = useState<string>('ALL');
@@ -68,7 +64,14 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ activeDataset }) =
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const [incidentDetail, setIncidentDetail] = useState<IncidentDetail | null>(null);
 
-  useEffect(() => {
+  const fetchDetail = (id: string) => {
+    runDetailFetch(async () => {
+      const detail = await ApiService.getIncidentDetail(id);
+      setIncidentDetail(detail);
+    }).catch(() => {});
+  };
+
+  const loadData = () => {
     runFetch(async () => {
       const [statsData, incidentsResult] = await Promise.all([
         ApiService.getPipelineStats(),
@@ -82,25 +85,22 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ activeDataset }) =
       
       setStats(statsData);
       let items = incidentsResult.items || [];
+      setIncidents(items);
 
       if (items.length > 0) {
-        setIncidents(items);
         const topId = items[0].complaint_id;
         setSelectedIncidentId(topId);
-        runDetailFetch(async () => {
-          const detail = await ApiService.getIncidentDetail(topId);
-          setIncidentDetail(detail);
-        });
+        fetchDetail(topId);
+      } else {
+        setSelectedIncidentId(null);
+        setIncidentDetail(null);
       }
-    });
-  }, [activeDataset]);
-
-  const fetchDetail = (id: string) => {
-    runDetailFetch(async () => {
-      const detail = await ApiService.getIncidentDetail(id);
-      setIncidentDetail(detail);
-    });
+    }).catch(() => {});
   };
+
+  useEffect(() => {
+    loadData();
+  }, [activeDataset]);
 
   const handleSelectIncident = (id: string) => {
     setSelectedIncidentId(id);
@@ -126,9 +126,40 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ activeDataset }) =
     .filter(i => i.confidence_tier === 'HIGH_CONFIDENCE')
     .reduce((acc, curr) => acc + (curr.reported_amount || 0), 0);
 
+  if (fetchStatus === AsyncStatus.LOADING && !stats) {
+    return (
+      <div className="p-16 flex justify-center items-center bg-white rounded-2xl border border-slate-200 shadow-sm min-h-[400px]">
+        <LottieLoader status={fetchStatus} label="Initializing command center telemetry..." />
+      </div>
+    );
+  }
+
+  if (fetchStatus === AsyncStatus.ERROR && !stats) {
+    return (
+      <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+        <EmptyState
+          variant={isOffline ? 'offline' : 'empty'}
+          title={isOffline ? 'Server Unreachable' : 'Failed to Load Command Center'}
+          description={fetchError || 'Unable to retrieve incident pipeline statistics.'}
+          onRetry={loadData}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4 font-sans">
-      {fetchStatus === AsyncStatus.ERROR && <div className="bg-red-50 p-4 m-4 rounded-xl border border-red-200 text-red-600 font-bold text-sm z-50">{fetchError || 'Investigation data unavailable'}</div>}
+      {fetchStatus === AsyncStatus.ERROR && (
+        <div className="bg-red-50 p-4 rounded-xl border border-red-200 text-red-700 flex items-center justify-between text-xs">
+          <span>Telemetry update failed: {fetchError || 'Investigation data unavailable'}</span>
+          <button
+            onClick={retryFetch}
+            className="px-2.5 py-1 bg-white border border-red-200 text-red-700 font-bold rounded-lg hover:bg-red-50 text-[11px]"
+          >
+            Retry
+          </button>
+        </div>
+      )}
       {/* ── IMMERSIVE COMMAND HERO BANNER ── */}
       <CommandHeroBanner />
 
@@ -140,7 +171,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ activeDataset }) =
             <span className="text-[#FF5500] font-bold">+14% VEL</span>
           </div>
           <div className="text-2xl font-bold font-sans text-slate-900">
-            {stats ? stats.tier_breakdown.HIGH_CONFIDENCE : '142'}
+            {stats?.tier_breakdown?.HIGH_CONFIDENCE != null ? stats.tier_breakdown.HIGH_CONFIDENCE : '—'}
           </div>
           <div className="text-[10px] text-slate-500">ACTIVE SUSPECT CHAINS</div>
         </div>
@@ -151,18 +182,18 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ activeDataset }) =
             <span className="text-amber-400 font-bold">72H WIN</span>
           </div>
           <div className="text-2xl font-bold font-sans text-amber-400">
-            {stats ? stats.tier_breakdown.HIGH_CONFIDENCE : '48'} RINGS
+            {stats?.tier_breakdown?.HIGH_CONFIDENCE != null ? `${stats.tier_breakdown.HIGH_CONFIDENCE} RINGS` : '—'}
           </div>
           <div className="text-[10px] text-slate-500">COORDINATED GRAPH TOPOLOGY</div>
         </div>
 
         <div className="bg-white border border-slate-200 p-3.5 rounded-2xl space-y-1 shadow-sm">
           <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider flex items-center justify-between">
-            <span>CASH-OUT EXPOSURE</span>
-            <span className="text-amber-400 font-bold">PRIORITY</span>
+            <span>HIGH-CONFIDENCE EXPOSURE</span>
+            <span className="text-amber-500 font-bold">PRIORITY</span>
           </div>
           <div className="text-2xl font-bold font-sans text-slate-900">
-            {formatCurrency(highRiskExposure || 0, activeDataset)}
+            {highRiskExposure ? formatCurrency(highRiskExposure, activeDataset) : (stats?.high_risk_exposure ? formatCurrency(stats.high_risk_exposure, activeDataset) : '—')}
           </div>
           <div className="text-[10px] text-slate-500">ESTIMATED LAUNDERED SUM</div>
         </div>
@@ -173,7 +204,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ activeDataset }) =
             <span className="text-slate-700 font-bold">SLA &lt; 2H</span>
           </div>
           <div className="text-2xl font-bold font-sans text-slate-900">
-            {stats ? stats.tier_breakdown.MEDIUM_CONFIDENCE : '218'}
+            {stats ? stats.tier_breakdown.MEDIUM_CONFIDENCE : '—'}
           </div>
           <div className="text-[10px] text-slate-500">AWAITING INVESTIGATOR</div>
         </div>
@@ -181,10 +212,10 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ activeDataset }) =
         <div className="bg-white border border-slate-200 p-3.5 rounded-2xl space-y-1 shadow-sm">
           <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider flex items-center justify-between">
             <span>GNN F1 ACCURACY</span>
-            <span className="text-emerald-400 font-bold">MRR {stats?.model_comparison?.Terminal_Prediction_MRR || '1.0'}</span>
+            <span className="text-emerald-500 font-bold">MRR {stats?.model_comparison?.Terminal_Prediction_MRR || '1.0'}</span>
           </div>
-          <div className="text-2xl font-bold font-sans text-emerald-400">
-            {activeDataset === 'IBM_B' ? '75.78%' : activeDataset === 'ELLIPTIC_C' ? '46.44%' : (stats ? stats.model_comparison.GraphSAGE_Test_F1 : '87.67%')}
+          <div className="text-lg font-bold font-sans text-emerald-600 truncate">
+            {activeDataset === 'IBM_B' ? '75.78%' : activeDataset === 'ELLIPTIC_C' ? '46.44%' : (stats?.model_comparison?.GraphSAGE_Test_F1 || '—')}
           </div>
           <div className="text-[10px] text-slate-500">
             {activeDataset === 'IBM_B' ? 'IBM MULTI-BANK TEST' : activeDataset === 'ELLIPTIC_C' ? 'ELLIPTIC UTXO TEST' : 'GraphSAGE INDUCTIVE TEST'}
@@ -309,7 +340,6 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ activeDataset }) =
                         <AmountCell
                           amount={incident.reported_amount || 0}
                           dataset={activeDataset}
-                          compact
                         />
                         <div className="text-[10px] text-slate-400 font-medium mt-0.5">
                           {activeDataset === 'IBM_B' ? 'FLOW SUM' : activeDataset === 'ELLIPTIC_C' ? 'TX VALUE' : 'DISPUTED'}
@@ -317,7 +347,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ activeDataset }) =
                       </div>
 
                       <div className="w-20 text-right shrink-0">
-                        <RiskBar probability={incident.graphsage_risk_probability} />
+                        <RiskBar probability={incident.graphsage_risk_probability} tier={incident.confidence_tier} />
                       </div>
 
                       <button
@@ -346,7 +376,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ activeDataset }) =
               <Zap className="w-4 h-4 text-[#FF5500]" />
               <div>
                 <h2 className="text-xs font-bold tracking-tight text-slate-900 uppercase">
-                  "WHY FLAGGED?" // GNN EXPLAINABILITY
+                  "WHY FLAGGED?" // GNN EXPLAINABILITY ({selectedIncidentId || 'SELECT CASE'})
                 </h2>
                 <div className="text-[10px] text-slate-500">DECISION RATIONALE & EVIDENCE</div>
               </div>
@@ -362,8 +392,22 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ activeDataset }) =
               const selectedIncident = incidents.find(i => i.complaint_id === selectedIncidentId);
               if (detailStatus === AsyncStatus.LOADING) {
                 return (
-                  <div className="p-4 flex justify-center items-center h-48">
-                    <LottieLoader status={detailStatus} />
+                  <div className="p-8 flex justify-center items-center h-48">
+                    <LottieLoader status={detailStatus} label="Loading incident explainability..." />
+                  </div>
+                );
+              }
+
+              if (detailStatus === AsyncStatus.ERROR && !incidentDetail) {
+                return (
+                  <div className="p-6">
+                    <EmptyState
+                      title="Incident Triage Unavailable"
+                      description={detailError || 'Unable to retrieve case intelligence.'}
+                      onRetry={() => {
+                        if (selectedIncidentId) fetchDetail(selectedIncidentId);
+                      }}
+                    />
                   </div>
                 );
               }

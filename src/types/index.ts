@@ -147,6 +147,7 @@ export interface HealthResponse {
 export interface PipelineStats {
   total_incidents_monitored: number;
   predictions_calibrated: number;
+  high_risk_exposure?: number;
   tier_breakdown: {
     HIGH_CONFIDENCE: number;
     MEDIUM_CONFIDENCE: number;
@@ -170,8 +171,47 @@ export interface StreamingBenchmark {
   p90_latency_ms?: number;
   p95_latency_ms: number;
   p99_latency_ms: number;
+  mean_latency_ms?: number;
   max_latency_ms?: number;
   sub_50ms_sla_compliant?: boolean;
+}
+
+export interface LivePredictResponse {
+  seed_entity_id: string;
+  risk_probability: number;
+  confidence_tier: ConfidenceTier | string;
+  is_suspicious: boolean;
+  num_nodes: number;
+  num_edges: number;
+  terminals: any[];
+  subgraph_empty?: boolean;
+  low_information?: boolean;
+  status_reason?: string | null;
+  graphsage_risk_probability?: number;
+  top_terminal_id?: string;
+  top_terminal_city?: string;
+  subgraph_node_count?: number;
+  subgraph_edge_count?: number;
+  subgraph_nodes?: Array<{
+    id: string;
+    label: string;
+    role: 'ACCOUNT' | 'ATM' | 'CLEARING' | 'VICTIM';
+    city: string;
+    risk: number;
+    amount?: number;
+    hop_distance?: number;
+    is_seed: boolean;
+    is_terminal: boolean;
+  }>;
+  subgraph_edges?: Array<{
+    source: string;
+    target: string;
+    transaction_id: string;
+    amount: number;
+    timestamp?: string | null;
+    is_cash_out: boolean;
+    hop_level?: number;
+  }>;
 }
 
 export interface EntityLocation {
@@ -379,9 +419,10 @@ export interface RegisteredModel {
   modelName: string;
   version: string;
   framework: string;
-  f1Score: number;
-  prAuc: number;
-  mrrScore: number;
+  f1Score: number | null;
+  validationPeakEpoch?: number | null;
+  prAuc: number | null;
+  mrrScore?: number | null;
   status: 'CHAMPION' | 'CANDIDATE' | 'ARCHIVED';
   trainedAt: string;
   parametersCount: number;

@@ -18,13 +18,14 @@ import { ApiService } from '../../services/api';
 import { BankMaster, JurisdictionMaster, StaffUserMaster, UserRole } from '../../types';
 import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
 import { LottieLoader } from '../ui/LottieLoader';
+import { EmptyState } from '../ui/EmptyState';
 
 export const AdminConsole: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'BANKS' | 'JURISDICTIONS' | 'STAFF'>('BANKS');
   const [banks, setBanks] = useState<BankMaster[]>([]);
   const [jurisdictions, setJurisdictions] = useState<JurisdictionMaster[]>([]);
   const [staffUsers, setStaffUsers] = useState<StaffUserMaster[]>([]);
-  const { status: fetchStatus, error: fetchError, run: runFetch } = useAsyncState<void>();
+  const { status: fetchStatus, error: fetchError, isOffline, run: runFetch, retry: retryFetch } = useAsyncState<any>();
   const [search, setSearch] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -33,18 +34,21 @@ export const AdminConsole: React.FC = () => {
   const [bankCode, setBankCode] = useState('');
   const [bankName, setBankName] = useState('');
   const [ifscPrefixes, setIfscPrefixes] = useState('');
+  const [createBankError, setCreateBankError] = useState<string | null>(null);
+  const [isCreatingBank, setIsCreatingBank] = useState(false);
 
   const loadData = () => {
     runFetch(async () => {
       const [b, j, s] = await Promise.all([
-        ApiService.getBanks().catch(() => []),
-        ApiService.getJurisdictions().catch(() => []),
-        ApiService.getStaffRoster().catch(() => []),
+        ApiService.getBanks(),
+        ApiService.getJurisdictions(),
+        ApiService.getStaffRoster(),
       ]);
       setBanks(b);
       setJurisdictions(j);
       setStaffUsers(s);
-    });
+      return { banks: b, jurisdictions: j, staffUsers: s };
+    }).catch(() => {});
   };
 
   useEffect(() => {
@@ -54,6 +58,8 @@ export const AdminConsole: React.FC = () => {
   const handleCreateBank = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!bankCode || !bankName) return;
+    setCreateBankError(null);
+    setIsCreatingBank(true);
     try {
       const prefixes = ifscPrefixes.split(',').map((s) => s.trim().toUpperCase()).filter(Boolean);
       const newB = await ApiService.createBank({
@@ -68,8 +74,10 @@ export const AdminConsole: React.FC = () => {
       setBankCode('');
       setBankName('');
       setIfscPrefixes('');
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      setCreateBankError(err.message || 'Failed to onboard bank. Please try again.');
+    } finally {
+      setIsCreatingBank(false);
     }
   };
 
@@ -79,8 +87,24 @@ export const AdminConsole: React.FC = () => {
       setStaffUsers(synced);
       setSuccessMessage('Staff officer roster synchronized with State Police Directory.');
       setTimeout(() => setSuccessMessage(null), 4000);
-    });
+      return synced;
+    }).catch(() => {});
   };
+
+  const searchLower = search.trim().toLowerCase();
+  const filteredBanks = banks.filter(
+    (b) => b.code.toLowerCase().includes(searchLower) || b.name.toLowerCase().includes(searchLower)
+  );
+  const filteredJurisdictions = jurisdictions.filter(
+    (j) => j.id.toLowerCase().includes(searchLower) || j.name.toLowerCase().includes(searchLower) || (j.path || '').toLowerCase().includes(searchLower)
+  );
+  const filteredStaffUsers = staffUsers.filter(
+    (s) =>
+      s.name.toLowerCase().includes(searchLower) ||
+      (s.email || '').toLowerCase().includes(searchLower) ||
+      (s.employeeId || '').toLowerCase().includes(searchLower) ||
+      (s.role || '').toLowerCase().includes(searchLower)
+  );
 
   return (
     <div className="space-y-4 font-sans text-xs">
@@ -195,125 +219,167 @@ export const AdminConsole: React.FC = () => {
 
       {fetchStatus === AsyncStatus.LOADING ? (
         <div className="p-12 flex justify-center items-center bg-white rounded-2xl border border-slate-200 shadow-saas-card">
-          <LottieLoader status={fetchStatus} />
+          <LottieLoader status={fetchStatus} label="Loading administration data..." />
+        </div>
+      ) : fetchStatus === AsyncStatus.ERROR ? (
+        <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-saas-card">
+          <EmptyState
+            variant={isOffline ? 'offline' : 'empty'}
+            title={isOffline ? 'Server Unreachable' : 'Failed to Load Administration Data'}
+            description={fetchError || 'Unable to retrieve bank, jurisdiction, and staff registries.'}
+            onRetry={loadData}
+          />
         </div>
       ) : (
         <>
           {/* ── TAB 1: BANKS REGISTRY ── */}
-      {activeTab === 'BANKS' && (
-        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-saas-card">
-          <table className="w-full text-left text-xs font-sans">
-            <thead className="bg-slate-50 border-b border-slate-200 text-[10px] text-slate-500 font-bold uppercase tracking-wider">
-              <tr>
-                <th className="p-3">BANK CODE</th>
-                <th className="p-3">INSTITUTION NAME</th>
-                <th className="p-3">IFSC PREFIXES</th>
-                <th className="p-3">INTEGRATION STATUS</th>
-                <th className="p-3 text-center">ACTION</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 bg-white">
-              {banks.map((b) => (
-                <tr key={b.id} className="hover:bg-slate-50/80 transition-colors">
-                  <td className="p-3 font-mono font-bold text-slate-900">{b.code}</td>
-                  <td className="p-3 font-medium text-slate-800">{b.name}</td>
-                  <td className="p-3">
-                    <div className="flex flex-wrap gap-1">
-                      {b.ifscPrefixes?.map((p) => (
-                        <span key={p} className="font-mono text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">
-                          {p}
-                        </span>
-                      )) || <span className="text-slate-400 font-mono text-[10px]">ALL</span>}
-                    </div>
-                  </td>
-                  <td className="p-3">
-                    <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 rounded-full font-bold">
-                      CONNECTED (CBS API)
-                    </span>
-                  </td>
-                  <td className="p-3 text-center">
-                    <button className="text-[11px] text-blue-600 font-bold hover:underline">
-                      Configure Endpoints
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+          {activeTab === 'BANKS' && (
+            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-saas-card">
+              <table className="w-full text-left text-xs font-sans">
+                <thead className="bg-slate-50 border-b border-slate-200 text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                  <tr>
+                    <th className="p-3">BANK CODE</th>
+                    <th className="p-3">INSTITUTION NAME</th>
+                    <th className="p-3">IFSC PREFIXES</th>
+                    <th className="p-3">INTEGRATION STATUS</th>
+                    <th className="p-3 text-center">ACTION</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 bg-white">
+                  {filteredBanks.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="p-8 text-center">
+                        <EmptyState
+                          title={search ? 'No Matching Banks' : 'No Registered Banks'}
+                          description={search ? `No banks match "${search}".` : 'No financial institutions registered yet. Click Onboard New Bank above.'}
+                        />
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredBanks.map((b) => (
+                      <tr key={b.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="p-3 font-mono font-bold text-slate-900">{b.code}</td>
+                        <td className="p-3 font-medium text-slate-800">{b.name}</td>
+                        <td className="p-3">
+                          <div className="flex flex-wrap gap-1">
+                            {b.ifscPrefixes?.map((p) => (
+                              <span key={p} className="font-mono text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">
+                                {p}
+                              </span>
+                            )) || <span className="text-slate-400 font-mono text-[10px]">ALL</span>}
+                          </div>
+                        </td>
+                        <td className="p-3">
+                          <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 rounded-full font-bold">
+                            CONNECTED (CBS API)
+                          </span>
+                        </td>
+                        <td className="p-3 text-center">
+                          <button className="text-[11px] text-blue-600 font-bold hover:underline">
+                            Configure Endpoints
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
 
-      {/* ── TAB 2: JURISDICTIONS ── */}
-      {activeTab === 'JURISDICTIONS' && (
-        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-saas-card">
-          <table className="w-full text-left text-xs font-sans">
-            <thead className="bg-slate-50 border-b border-slate-200 text-[10px] text-slate-500 font-bold uppercase tracking-wider">
-              <tr>
-                <th className="p-3">JURISDICTION ID</th>
-                <th className="p-3">POLICE STATION / HQ NAME</th>
-                <th className="p-3">HIERARCHY LEVEL</th>
-                <th className="p-3">ORGANIZATIONAL PATH</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 bg-white">
-              {jurisdictions.map((j) => (
-                <tr key={j.id} className="hover:bg-slate-50/80 transition-colors">
-                  <td className="p-3 font-mono font-bold text-slate-900">{j.id}</td>
-                  <td className="p-3 font-medium text-slate-800">{j.name}</td>
-                  <td className="p-3">
-                    <span className="text-[10px] px-2 py-0.5 rounded font-bold uppercase bg-slate-100 text-slate-700">
-                      {j.level}
-                    </span>
-                  </td>
-                  <td className="p-3 font-mono text-[11px] text-slate-500">{j.path}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+          {/* ── TAB 2: JURISDICTIONS ── */}
+          {activeTab === 'JURISDICTIONS' && (
+            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-saas-card">
+              <table className="w-full text-left text-xs font-sans">
+                <thead className="bg-slate-50 border-b border-slate-200 text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                  <tr>
+                    <th className="p-3">JURISDICTION ID</th>
+                    <th className="p-3">POLICE STATION / HQ NAME</th>
+                    <th className="p-3">HIERARCHY LEVEL</th>
+                    <th className="p-3">ORGANIZATIONAL PATH</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 bg-white">
+                  {filteredJurisdictions.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="p-8 text-center">
+                        <EmptyState
+                          title={search ? 'No Matching Jurisdictions' : 'No Jurisdictions Configured'}
+                          description={search ? `No police jurisdictions match "${search}".` : 'No police jurisdictions configured.'}
+                        />
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredJurisdictions.map((j) => (
+                      <tr key={j.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="p-3 font-mono font-bold text-slate-900">{j.id}</td>
+                        <td className="p-3 font-medium text-slate-800">{j.name}</td>
+                        <td className="p-3">
+                          <span className="text-[10px] px-2 py-0.5 rounded font-bold uppercase bg-slate-100 text-slate-700">
+                            {j.level}
+                          </span>
+                        </td>
+                        <td className="p-3 font-mono text-[11px] text-slate-500">{j.path}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
 
-      {/* ── TAB 3: STAFF ROSTER ── */}
-      {activeTab === 'STAFF' && (
-        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-saas-card">
-          <table className="w-full text-left text-xs font-sans">
-            <thead className="bg-slate-50 border-b border-slate-200 text-[10px] text-slate-500 font-bold uppercase tracking-wider">
-              <tr>
-                <th className="p-3">OFFICER NAME</th>
-                <th className="p-3">ROLE CLEARANCE</th>
-                <th className="p-3">AFFILIATED UNIT / BANK</th>
-                <th className="p-3">BADGE / EMP ID</th>
-                <th className="p-3">STATUS</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 bg-white">
-              {staffUsers.map((s) => (
-                <tr key={s.id} className="hover:bg-slate-50/80 transition-colors">
-                  <td className="p-3">
-                    <div className="font-bold text-slate-900">{s.name}</div>
-                    <div className="text-[10px] text-slate-400">{s.email}</div>
-                  </td>
-                  <td className="p-3">
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase bg-slate-100 text-slate-800">
-                      {s.role}
-                    </span>
-                  </td>
-                  <td className="p-3 font-medium text-slate-700">
-                    {s.bankName || s.jurisdictionName || 'Central Cyber Cell'}
-                  </td>
-                  <td className="p-3 font-mono text-slate-700">{s.employeeId || 'N/A'}</td>
-                  <td className="p-3">
-                    <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full font-bold">
-                      {s.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-      </>
+          {/* ── TAB 3: STAFF ROSTER ── */}
+          {activeTab === 'STAFF' && (
+            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-saas-card">
+              <table className="w-full text-left text-xs font-sans">
+                <thead className="bg-slate-50 border-b border-slate-200 text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                  <tr>
+                    <th className="p-3">OFFICER NAME</th>
+                    <th className="p-3">ROLE CLEARANCE</th>
+                    <th className="p-3">AFFILIATED UNIT / BANK</th>
+                    <th className="p-3">BADGE / EMP ID</th>
+                    <th className="p-3">STATUS</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 bg-white">
+                  {filteredStaffUsers.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="p-8 text-center">
+                        <EmptyState
+                          title={search ? 'No Matching Staff' : 'No Staff Registered'}
+                          description={search ? `No staff officers match "${search}".` : 'No officer accounts found. Click Sync Police Roster above.'}
+                        />
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredStaffUsers.map((s) => (
+                      <tr key={s.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="p-3">
+                          <div className="font-bold text-slate-900">{s.name}</div>
+                          <div className="text-[10px] text-slate-400">{s.email}</div>
+                        </td>
+                        <td className="p-3">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase bg-slate-100 text-slate-800">
+                            {s.role}
+                          </span>
+                        </td>
+                        <td className="p-3 font-medium text-slate-700">
+                          {s.bankName || s.jurisdictionName || 'Central Cyber Cell'}
+                        </td>
+                        <td className="p-3 font-mono text-slate-700">{s.employeeId || 'N/A'}</td>
+                        <td className="p-3">
+                          <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full font-bold">
+                            {s.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
       )}
 
       {/* ── MODAL: ONBOARD NEW BANK ── */}
@@ -375,6 +441,12 @@ export const AdminConsole: React.FC = () => {
                 />
               </div>
 
+              {createBankError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 text-xs p-3 rounded-xl">
+                  {createBankError}
+                </div>
+              )}
+
               <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
                 <button
                   type="button"
@@ -385,9 +457,10 @@ export const AdminConsole: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-slate-900 text-white rounded-xl font-bold shadow-sm hover:bg-slate-800"
+                  disabled={isCreatingBank}
+                  className="px-4 py-2 bg-slate-900 text-white rounded-xl font-bold shadow-sm hover:bg-slate-800 transition-all disabled:opacity-50"
                 >
-                  Register Bank
+                  {isCreatingBank ? 'Registering...' : 'Register Bank'}
                 </button>
               </div>
             </form>

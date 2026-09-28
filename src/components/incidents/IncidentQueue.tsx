@@ -246,7 +246,6 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ activeDataset }) =
             <thead className="bg-slate-50/80 border-b border-slate-200 text-[10px] text-slate-500 font-bold uppercase tracking-wider">
               <tr>
                 <th className="p-3">COMPLAINT ID</th>
-                <th className="p-3">INTAKE ORIGIN</th>
                 <th className="p-3">SCAM CATEGORY</th>
                 <th className="p-3 text-right">
                   {activeDataset === 'IBM_B' ? 'FLOW AMOUNT ($)' : activeDataset === 'ELLIPTIC_C' ? 'TX AMOUNT (BTC)' : 'DISPUTED AMOUNT (₹)'}
@@ -261,13 +260,13 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ activeDataset }) =
             <tbody className="divide-y divide-slate-100 bg-white">
               {fetchStatus === AsyncStatus.LOADING ? (
                 <tr>
-                  <td colSpan={9} className="p-6 text-center">
+                  <td colSpan={8} className="p-6 text-center">
                     <LottieLoader status={fetchStatus} error={fetchError} />
                   </td>
                 </tr>
               ) : incidents.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="p-8 text-center">
+                  <td colSpan={8} className="p-8 text-center">
                     <EmptyState
                       title="No incidents found"
                       description="No records match your selected tier or search criteria."
@@ -296,14 +295,7 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ activeDataset }) =
                           />
                         </td>
 
-                        {/* Origin */}
-                        <td className="p-3">
-                          {showOriginChip ? (
-                            <IntakeOriginChip dataset={activeDataset} />
-                          ) : (
-                            <span className="text-[10px] text-slate-400 font-mono">—</span>
-                          )}
-                        </td>
+
 
                         {/* Scam Category */}
                         <td className="p-3 text-slate-700 max-w-[180px] truncate font-medium text-[11px]">
@@ -330,7 +322,7 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({ activeDataset }) =
 
                         {/* Risk Score */}
                         <td className="p-3">
-                          <RiskBar probability={incident.graphsage_risk_probability} />
+                          <RiskBar probability={incident.graphsage_risk_probability} tier={incident.confidence_tier} />
                         </td>
 
                         {/* Operational Tier */}

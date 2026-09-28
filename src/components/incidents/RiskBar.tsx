@@ -1,19 +1,22 @@
-import React from 'react';
-import { getRiskStyle } from './incidentConstants';
+import { ConfidenceTier } from '../../types';
+import { getRiskStyle, RISK_THRESHOLDS } from './incidentConstants';
 
 interface RiskBarProps {
   probability: number;
+  tier?: string | ConfidenceTier | null;
   className?: string;
   showBar?: boolean;
 }
 
 export const RiskBar: React.FC<RiskBarProps> = ({
   probability,
+  tier,
   className = '',
   showBar = true,
 }) => {
   const percent = Math.max(0, Math.min(100, probability * 100));
-  const style = getRiskStyle(probability);
+  const style = getRiskStyle(probability, tier);
+  const isHighButNotCritical = probability >= RISK_THRESHOLDS.CRITICAL && style.tier !== 'HIGH_CONFIDENCE';
 
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
@@ -29,6 +32,11 @@ export const RiskBar: React.FC<RiskBarProps> = ({
             style={{ width: `${percent}%` }}
           />
         </div>
+      )}
+      {isHighButNotCritical && (
+        <span className="text-[10px] text-amber-600 font-sans leading-tight" title="High risk probability, but insufficient topological evidence (e.g. no ATM cash-out or < 3 nodes) for critical operational triage">
+          High score, insufficient structure
+        </span>
       )}
     </div>
   );

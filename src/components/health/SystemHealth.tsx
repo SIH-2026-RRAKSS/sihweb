@@ -28,33 +28,34 @@ import {
   Cell
 } from 'recharts';
 import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
+import { useConnectivity } from '../../context/ConnectivityContext';
 import { LottieLoader } from '../ui/LottieLoader';
+import { EmptyState } from '../ui/EmptyState';
 
 export const SystemHealth: React.FC = () => {
-  const [health, setHealth] = useState<HealthResponse | null>(null);
-  const [streaming, setStreaming] = useState<StreamingBenchmark | null>(null);
-  const { status, error, run } = useAsyncState<void>();
+  const { health: sharedHealth, refetchHealth } = useConnectivity();
+  const { data: streaming, status, error, isOffline, run, retry } = useAsyncState<StreamingBenchmark | null>();
 
   useEffect(() => {
     run(async () => {
-      const [healthData, streamingData] = await Promise.all([
-        ApiService.checkHealth(),
-        ApiService.getStreamingBenchmark()
-      ]);
-      setHealth(healthData);
-      setStreaming(streamingData);
+      return await ApiService.getStreamingBenchmark();
+    }).catch(() => {
+      // Handled by useAsyncState
     });
-  }, []);
+  }, [run]);
+
+  const handleRetryAll = () => {
+    refetchHealth();
+    retry();
+  };
+
+  const health = sharedHealth;
 
   const latencyChartData = streaming ? [
     { name: 'P50 Median', latency: Number(streaming.p50_latency_ms.toFixed(2)), color: '#10B981' },
     { name: 'P95 95th %ile', latency: Number(streaming.p95_latency_ms.toFixed(2)), color: '#F59E0B' },
     { name: 'P99 99th %ile', latency: Number(streaming.p99_latency_ms.toFixed(2)), color: '#EF4444' },
-  ] : [
-    { name: 'P50 Median', latency: 0.99, color: '#10B981' },
-    { name: 'P95 95th %ile', latency: 1.70, color: '#F59E0B' },
-    { name: 'P99 99th %ile', latency: 1.97, color: '#EF4444' },
-  ];
+  ] : [];
 
   const isModelOperational = health?.status?.toUpperCase() === 'HEALTHY' || health?.status?.toUpperCase() === 'UP';
   const isSpringConnected = Boolean(health?.spring_db_connected);
@@ -68,16 +69,45 @@ export const SystemHealth: React.FC = () => {
     : 'SQLITE OFFLINE';
   const dbColor = (isSpringConnected && isSqliteConnected) ? 'green' : 'red';
 
+  if (status === AsyncStatus.LOADING && !health) {
+    return (
+      <div className="p-16 flex justify-center items-center">
+        <LottieLoader status={status} label="Connecting to system health telemetry..." />
+      </div>
+    );
+  }
+
+  if (status === AsyncStatus.ERROR && !health) {
+    return (
+      <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-saas-card">
+        <EmptyState
+          variant={isOffline ? 'offline' : 'empty'}
+          title={isOffline ? 'FastAPI Backend Offline' : 'Failed to Load System Health'}
+          description={error || 'System telemetry is unavailable.'}
+          onRetry={handleRetryAll}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-3 font-sans text-xs">
-      {error && <div className="bg-red-50 p-4 rounded-xl border border-red-200 text-red-600 font-bold text-sm mb-4">{error}</div>}
-      {status === AsyncStatus.LOADING && !health ? (
-        <div className="p-16 flex justify-center items-center">
-          <LottieLoader status={status} />
+      {error && (
+        <div className="bg-red-50 p-4 rounded-xl border border-red-200 text-red-700 flex items-center justify-between text-xs mb-4">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
+            <span>Streaming benchmark unavailable: {error}</span>
+          </div>
+          <button
+            onClick={retry}
+            className="px-3 py-1 bg-white border border-red-200 text-red-700 rounded-lg font-bold text-[11px] hover:bg-red-50 transition-colors shadow-xs"
+          >
+            Retry Telemetry
+          </button>
         </div>
-      ) : (
-        <>
-          {/* ── TOP KPI STATUS CARDS ── */}
+      )}
+
+      {/* ── TOP KPI STATUS CARDS ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
         <KPICard
           icon={Radio}
@@ -89,19 +119,19 @@ export const SystemHealth: React.FC = () => {
         />
         <KPICard
           icon={Cpu}
-          value={streaming ? `${streaming.ingestion_rate_tx_per_sec.toFixed(1)} TX/S` : '942.7 TX/S'}
+          value={streaming ? `${streaming.ingestion_rate_tx_per_sec.toFixed(1)} TX/S` : '—'}
           label="STREAMING INGESTION RATE"
           code="INGEST-RATE"
           color="cyan"
-          trend={{ direction: 'up', text: 'PEAK VELOCITY' }}
+          trend={{ direction: 'up', text: streaming ? 'PEAK VELOCITY' : 'OFFLINE' }}
         />
         <KPICard
           icon={Zap}
-          value={streaming ? `${streaming.p50_latency_ms.toFixed(2)} MS` : '0.99 MS'}
+          value={streaming ? `${streaming.p50_latency_ms.toFixed(2)} MS` : '—'}
           label="P50 INFERENCE LATENCY"
           code="LAT-P50"
           color="green"
-          trend={{ direction: 'stable', text: 'SUB-100MS SLA' }}
+          trend={{ direction: 'stable', text: streaming ? 'SUB-100MS SLA' : 'OFFLINE' }}
         />
         <KPICard
           icon={Database}
@@ -205,7 +235,7 @@ export const SystemHealth: React.FC = () => {
                   </div>
                 </div>
                 <span className="px-2 py-0.5 bg-cyan-50 text-cyan-700 border border-cyan-200 text-[10px] font-bold rounded">
-                  {streaming?.ingestion_rate_tx_per_sec ? `STREAMING ${streaming.ingestion_rate_tx_per_sec.toFixed(0)} TX/S` : 'STREAMING 943 TX/S'}
+                  {streaming?.ingestion_rate_tx_per_sec ? `STREAMING ${streaming.ingestion_rate_tx_per_sec.toFixed(0)} TX/S` : 'OFFLINE'}
                 </span>
               </div>
             </div>
@@ -228,37 +258,44 @@ export const SystemHealth: React.FC = () => {
             </div>
 
             <div className="h-72 w-full bg-white p-2 border border-slate-200 rounded-lg">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={latencyChartData} layout="vertical" margin={{ top: 10, right: 20, left: 10, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
-                  <XAxis type="number" stroke="#64748b" tick={{ fill: '#64748b', fontSize: 10 }} unit=" ms" />
-                  <YAxis type="category" dataKey="name" stroke="#64748b" tick={{ fill: '#64748b', fontSize: 10 }} width={95} />
-                  <Tooltip
-                    content={({ active, payload, label }) => {
-                      if (!active || !payload || !payload.length) return null;
-                      const entry = payload[0];
-                      return (
-                        <div className="bg-white border border-slate-200 rounded-xl p-2.5 shadow-lg text-xs space-y-1">
-                          <div className="font-bold text-slate-800">{label}</div>
-                          <div className="text-[11px] font-mono text-slate-600 flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.payload.color }} />
-                            <span>Latency: <strong>{entry.value} ms</strong></span>
+              {latencyChartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={latencyChartData} layout="vertical" margin={{ top: 10, right: 20, left: 10, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
+                    <XAxis type="number" stroke="#64748b" tick={{ fill: '#64748b', fontSize: 10 }} unit=" ms" />
+                    <YAxis type="category" dataKey="name" stroke="#64748b" tick={{ fill: '#64748b', fontSize: 10 }} width={95} />
+                    <Tooltip
+                      content={({ active, payload, label }) => {
+                        if (!active || !payload || !payload.length) return null;
+                        const entry = payload[0];
+                        return (
+                          <div className="bg-white border border-slate-200 rounded-xl p-2.5 shadow-lg text-xs space-y-1">
+                            <div className="font-bold text-slate-800">{label}</div>
+                            <div className="text-[11px] font-mono text-slate-600 flex items-center gap-1.5">
+                              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.payload.color }} />
+                              <span>Latency: <strong>{entry.value} ms</strong></span>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    }}
-                  />
-                  <Bar dataKey="latency" name="Latency (ms)" radius={[0, 4, 4, 0]}>
-                    {latencyChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+                        );
+                      }}
+                    />
+                    <Bar dataKey="latency" name="Latency (ms)" radius={[0, 4, 4, 0]}>
+                      {latencyChartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-full flex flex-col items-center justify-center text-slate-400 font-mono text-xs gap-1.5">
+                  <Activity className="w-5 h-5 text-slate-300" />
+                  <span>Streaming Telemetry Offline — No latency benchmarks available</span>
+                </div>
+              )}
             </div>
 
             <div className="p-2 bg-white border border-slate-200 text-[10px] text-slate-500 flex items-center justify-between rounded-lg">
-              <span>95% OF GRAPH INFERENCE QUERIES COMPLETE IN &lt; {streaming?.p95_latency_ms ? `${streaming.p95_latency_ms.toFixed(2)}MS` : '1.70MS'}</span>
+              <span>95% OF GRAPH INFERENCE QUERIES COMPLETE IN &lt; {streaming?.p95_latency_ms ? `${streaming.p95_latency_ms.toFixed(2)}MS` : '—'}</span>
               <span className="text-[#FF5500] font-bold">SUB-50MS SLA VERIFIED</span>
             </div>
           </GlassCard>
@@ -291,7 +328,9 @@ export const SystemHealth: React.FC = () => {
           <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-100">
             <div className="text-[10px] text-slate-400 font-bold uppercase">Transactions Ingested</div>
             <div className="text-sm font-bold font-mono text-slate-900 mt-0.5">
-              {((streaming as any)?.transactions_ingested ?? streaming?.total_transactions_ingested ?? 5000).toLocaleString()} TX
+              {streaming
+                ? `${((streaming as any)?.transactions_ingested ?? streaming?.total_transactions_ingested ?? 0).toLocaleString()} TX`
+                : '—'}
             </div>
             <div className="text-[9px] text-slate-500 mt-0.5">Stream Buffer Volume</div>
           </div>
@@ -299,7 +338,9 @@ export const SystemHealth: React.FC = () => {
           <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-100">
             <div className="text-[10px] text-slate-400 font-bold uppercase">Inference Queries</div>
             <div className="text-sm font-bold font-mono text-slate-900 mt-0.5">
-              {((streaming as any)?.num_incident_queries ?? streaming?.total_inference_queries ?? 100).toLocaleString()} Evaluated
+              {(streaming?.total_inference_queries ?? (streaming as any)?.num_incident_queries) !== undefined
+                ? `${(streaming?.total_inference_queries ?? (streaming as any)?.num_incident_queries).toLocaleString()} Evaluated`
+                : '—'}
             </div>
             <div className="text-[9px] text-slate-500 mt-0.5">Batch Triage Queries</div>
           </div>
@@ -307,7 +348,7 @@ export const SystemHealth: React.FC = () => {
           <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-100">
             <div className="text-[10px] text-slate-400 font-bold uppercase">In-Memory Nodes</div>
             <div className="text-sm font-bold font-mono text-emerald-600 mt-0.5">
-              {(health?.streaming_graph_nodes ?? 263).toLocaleString()}
+              {health?.streaming_graph_nodes !== undefined ? health.streaming_graph_nodes.toLocaleString() : '—'}
             </div>
             <div className="text-[9px] text-slate-500 mt-0.5">Active Graph Vertices</div>
           </div>
@@ -315,7 +356,7 @@ export const SystemHealth: React.FC = () => {
           <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-100">
             <div className="text-[10px] text-slate-400 font-bold uppercase">In-Memory Edges</div>
             <div className="text-sm font-bold font-mono text-sky-600 mt-0.5">
-              {(health?.streaming_graph_edges ?? 500).toLocaleString()}
+              {health?.streaming_graph_edges !== undefined ? health.streaming_graph_edges.toLocaleString() : '—'}
             </div>
             <div className="text-[9px] text-slate-500 mt-0.5">Temporal Edge Links</div>
           </div>
@@ -323,14 +364,12 @@ export const SystemHealth: React.FC = () => {
           <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-100">
             <div className="text-[10px] text-slate-400 font-bold uppercase">Mean Latency</div>
             <div className="text-sm font-bold font-mono text-emerald-600 mt-0.5">
-              {streaming ? `${((streaming as any).mean_latency_ms ?? 1.07).toFixed(2)} ms` : '1.07 ms'}
+              {streaming ? `${((streaming as any).mean_latency_ms ?? (streaming.p50_latency_ms || 0)).toFixed(2)} ms` : '—'}
             </div>
             <div className="text-[9px] text-slate-500 mt-0.5">Sub-50ms SLA Verified</div>
           </div>
         </div>
       </div>
-      </>
-      )}
     </div>
   );
 };

@@ -15,17 +15,31 @@ import { ApiService } from '../../services/api';
 import { RegisteredModel } from '../../types';
 import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
 import { LottieLoader } from '../ui/LottieLoader';
+import { EmptyState } from '../ui/EmptyState';
+import { AlertTriangle } from 'lucide-react';
 
 export const ModelRegistryView: React.FC = () => {
-  const [models, setModels] = useState<RegisteredModel[]>([]);
-  const { status: fetchStatus, error: fetchError, run: runFetch } = useAsyncState<void>();
   const [promotingId, setPromotingId] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [promoteError, setPromoteError] = useState<string | null>(null);
+
+  const {
+    status: fetchStatus,
+    error: fetchError,
+    isOffline,
+    data: rawModels,
+    setData: setModels,
+    run: runFetch,
+    retry,
+  } = useAsyncState<RegisteredModel[]>({
+    initialData: [],
+  });
+
+  const models = rawModels || [];
 
   const fetchModels = () => {
     runFetch(async () => {
-      const data = await ApiService.getModelRegistry();
-      setModels(data);
+      return await ApiService.getModelRegistry();
     });
   };
 
@@ -35,13 +49,14 @@ export const ModelRegistryView: React.FC = () => {
 
   const handlePromote = async (modelId: string, name: string) => {
     try {
+      setPromoteError(null);
       setPromotingId(modelId);
       const updatedList = await ApiService.promoteModelToChampion(modelId);
       setModels(updatedList);
       setSuccessMessage(`Model ${name} successfully promoted to PRODUCTION CHAMPION.`);
       setTimeout(() => setSuccessMessage(null), 4000);
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      setPromoteError(err?.message || `Failed to promote model ${name} to champion.`);
     } finally {
       setPromotingId(null);
     }
@@ -51,6 +66,37 @@ export const ModelRegistryView: React.FC = () => {
 
   return (
     <div className="space-y-4 font-sans text-xs animate-fadeIn">
+      {/* ── ERROR BANNERS ── */}
+      {promoteError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2.5 rounded-2xl flex items-center justify-between text-xs font-medium shadow-sm animate-fadeIn">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0" />
+            <span>Promotion Failure: {promoteError}</span>
+          </div>
+          <button
+            onClick={() => setPromoteError(null)}
+            className="text-red-600 hover:text-red-900 font-bold px-2 py-0.5 text-xs bg-red-100 hover:bg-red-200 rounded transition-colors"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      {fetchError && models.length > 0 && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2.5 rounded-2xl flex items-center justify-between text-xs font-medium shadow-sm animate-fadeIn">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0" />
+            <span>Registry synchronization notice: {fetchError}</span>
+          </div>
+          <button
+            onClick={() => retry()}
+            className="px-2.5 py-1 bg-red-100 hover:bg-red-200 text-red-800 rounded font-bold transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
       {/* ── SUCCESS BANNER ── */}
       {successMessage && (
         <div className="bg-emerald-50 border border-emerald-300 text-emerald-800 px-4 py-2.5 rounded-2xl flex items-center gap-2 font-medium shadow-sm animate-fadeIn">
@@ -82,19 +128,31 @@ export const ModelRegistryView: React.FC = () => {
 
           <div className="flex items-center gap-4 bg-white/5 border border-white/10 px-4 py-2.5 rounded-2xl">
             <div className="text-center">
-              <span className="text-[9px] uppercase font-bold text-slate-400 block">Test F1-Score</span>
-              <span className="text-base font-bold text-amber-400 font-mono">{(champion.f1Score * 100).toFixed(2)}%</span>
+              <span className="text-[9px] uppercase font-bold text-slate-400 block">
+                Validation Peak F1 {champion.validationPeakEpoch ? `(Epoch ${champion.validationPeakEpoch})` : ''}
+              </span>
+              <span className="text-base font-bold text-amber-400 font-mono">
+                {champion.f1Score !== null && champion.f1Score !== undefined
+                  ? `${(champion.f1Score * 100).toFixed(2)}%`
+                  : 'Metrics unavailable'}
+              </span>
             </div>
             <div className="w-px h-8 bg-white/10" />
             <div className="text-center">
               <span className="text-[9px] uppercase font-bold text-slate-400 block">PR-AUC</span>
-              <span className="text-base font-bold text-emerald-400 font-mono">{champion.prAuc.toFixed(3)}</span>
+              <span className="text-base font-bold text-emerald-400 font-mono">
+                {champion.prAuc !== null && champion.prAuc !== undefined ? champion.prAuc.toFixed(3) : '—'}
+              </span>
             </div>
-            <div className="w-px h-8 bg-white/10" />
-            <div className="text-center">
-              <span className="text-[9px] uppercase font-bold text-slate-400 block">Terminal MRR</span>
-              <span className="text-base font-bold text-blue-400 font-mono">{champion.mrrScore.toFixed(2)}</span>
-            </div>
+            {champion.mrrScore !== null && champion.mrrScore !== undefined && (
+              <>
+                <div className="w-px h-8 bg-white/10" />
+                <div className="text-center">
+                  <span className="text-[9px] uppercase font-bold text-slate-400 block">Terminal MRR</span>
+                  <span className="text-base font-bold text-blue-400 font-mono">{champion.mrrScore.toFixed(2)}</span>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
@@ -128,12 +186,34 @@ export const ModelRegistryView: React.FC = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 bg-white">
-            {fetchStatus === AsyncStatus.LOADING ? (
+            {fetchStatus === AsyncStatus.LOADING && models.length === 0 ? (
               <tr>
                 <td colSpan={8} className="p-8 text-center">
-                  <div className="flex justify-center items-center">
+                  <div className="flex flex-col justify-center items-center gap-2">
                     <LottieLoader status={fetchStatus} />
+                    <span className="text-xs text-slate-500 font-medium">Loading model registry...</span>
                   </div>
+                </td>
+              </tr>
+            ) : fetchStatus === AsyncStatus.ERROR && models.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="p-8">
+                  <EmptyState
+                    variant={isOffline ? 'offline' : 'empty'}
+                    title={isOffline ? 'Model Registry Offline' : 'Failed to Load Models'}
+                    message={fetchError || 'Unable to retrieve registered models.'}
+                    onRetry={retry}
+                  />
+                </td>
+              </tr>
+            ) : models.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="p-8">
+                  <EmptyState
+                    variant="empty"
+                    title="No Models Registered"
+                    message="No model versions have been registered in the governance catalog."
+                  />
                 </td>
               </tr>
             ) : models.map((m) => {
@@ -148,10 +228,14 @@ export const ModelRegistryView: React.FC = () => {
                   </td>
                   <td className="p-3 font-medium text-slate-700">{m.framework}</td>
                   <td className="p-3 text-right font-mono font-bold text-slate-900">
-                    {(m.f1Score * 100).toFixed(2)}%
+                    {m.f1Score !== null && m.f1Score !== undefined ? `${(m.f1Score * 100).toFixed(2)}%` : '—'}
                   </td>
-                  <td className="p-3 text-right font-mono text-slate-800">{m.prAuc.toFixed(3)}</td>
-                  <td className="p-3 text-right font-mono text-slate-800">{m.mrrScore.toFixed(2)}</td>
+                  <td className="p-3 text-right font-mono text-slate-800">
+                    {m.prAuc !== null && m.prAuc !== undefined ? m.prAuc.toFixed(3) : '—'}
+                  </td>
+                  <td className="p-3 text-right font-mono text-slate-800">
+                    {m.mrrScore !== null && m.mrrScore !== undefined ? m.mrrScore.toFixed(2) : '—'}
+                  </td>
                   <td className="p-3 text-slate-500 text-[11px]">
                     {new Date(m.trainedAt).toLocaleDateString()}
                   </td>

@@ -22,7 +22,10 @@ import {
   SlidersHorizontal,
   Eye,
   Crosshair,
-  Layers
+  Layers,
+  AlertTriangle,
+  CheckCircle2,
+  RefreshCw
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -35,25 +38,57 @@ import {
   LineChart,
   Line
 } from 'recharts';
-import { StreamingBenchmark } from '../../types';
+import { StreamingBenchmark, LivePredictResponse } from '../../types';
 import { ApiService } from '../../services/api';
+import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
+import { EmptyState } from '../ui/EmptyState';
+import { LottieLoader } from '../ui/LottieLoader';
 
 export const StreamingMonitorView: React.FC = () => {
-  const [bench, setBench] = useState<StreamingBenchmark | null>(null);
-  const [isSimulating, setIsSimulating] = useState<boolean>(false);
   const [dataset, setDataset] = useState<'synthetic' | 'ibm'>('synthetic');
   const [streamVolume, setStreamVolume] = useState<number>(500);
   
   // Real-time dynamic stream metrics (resets per run)
   const [streamedTxCount, setStreamedTxCount] = useState<number>(0);
-  const [liveRate, setLiveRate] = useState<number>(883.3);
-  const [filterRate, setFilterRate] = useState<number>(88.86);
+  const [liveRate, setLiveRate] = useState<number | null>(null);
+  const [filterRate, setFilterRate] = useState<number | null>(null);
   const [rawAlertsCount, setRawAlertsCount] = useState<number>(0);
   const [gnnRuns, setGnnRuns] = useState<number>(0);
-  const [avgGnnLat, setAvgGnnLat] = useState<number>(0.70);
+  const [avgGnnLat, setAvgGnnLat] = useState<number | null>(null);
   const [liveStreamEvents, setLiveStreamEvents] = useState<any[]>([]);
   const [progressPercent, setProgressPercent] = useState<number>(0);
-  const [streamError, setStreamError] = useState<string | null>(null);
+
+  // Hook 1: Live stream simulation execution
+  const {
+    status: streamStatus,
+    error: streamError,
+    isOffline: isStreamOffline,
+    run: runStream,
+    reset: resetStreamError,
+  } = useAsyncState<void>();
+  const isSimulating = streamStatus === AsyncStatus.LOADING;
+
+  // Hook 2: Interactive Live Seed Sandbox probe
+  const [testSeed, setTestSeed] = useState<string>('ENT_000185');
+  const [testLatency, setTestLatency] = useState<number | null>(null);
+  const {
+    status: probeStatus,
+    error: probeError,
+    isOffline: isProbeOffline,
+    data: testResult,
+    run: runProbe,
+  } = useAsyncState<LivePredictResponse | null>({ initialData: null });
+  const isTestingSeed = probeStatus === AsyncStatus.LOADING;
+
+  // Hook 3: Historical telemetry benchmark data
+  const {
+    status: telemetryStatus,
+    error: telemetryError,
+    isOffline: isTelemetryOffline,
+    data: bench,
+    run: runTelemetry,
+    retry: retryTelemetry,
+  } = useAsyncState<StreamingBenchmark | null>({ initialData: null });
 
   // Risk Factor Visibility & Threshold Controls
   const [riskCutoff, setRiskCutoff] = useState<number>(0.70);
@@ -65,18 +100,12 @@ export const StreamingMonitorView: React.FC = () => {
   const [pageSize, setPageSize] = useState<number>(25);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  // Interactive Live Seed Sandbox
-  const [testSeed, setTestSeed] = useState<string>('ENT_000185');
-  const [testResult, setTestResult] = useState<any>(null);
-  const [testLatency, setTestLatency] = useState<number | null>(null);
-  const [isTestingSeed, setIsTestingSeed] = useState<boolean>(false);
-
   const animationTimerRef = useRef<any>(null);
 
   useEffect(() => {
-    ApiService.getStreamingBenchmark().then(setBench).catch((err) => {
-      console.warn(err);
-    });
+    runTelemetry(async () => {
+      return await ApiService.getStreamingBenchmark();
+    }).catch(() => {});
     return () => {
       if (animationTimerRef.current) clearInterval(animationTimerRef.current);
     };
@@ -84,100 +113,97 @@ export const StreamingMonitorView: React.FC = () => {
 
   const handleResetFeed = () => {
     if (animationTimerRef.current) clearInterval(animationTimerRef.current);
-    setIsSimulating(false);
+    resetStreamError();
     setStreamedTxCount(0);
     setRawAlertsCount(0);
     setGnnRuns(0);
     setProgressPercent(0);
     setLiveStreamEvents([]);
-    setStreamError(null);
+    setLiveRate(null);
+    setFilterRate(null);
+    setAvgGnnLat(null);
     setPage(1);
   };
 
   const handleRunSimulation = async () => {
     if (animationTimerRef.current) clearInterval(animationTimerRef.current);
     
-    setIsSimulating(true);
     setStreamedTxCount(0);
     setRawAlertsCount(0);
     setGnnRuns(0);
     setProgressPercent(0);
     setLiveStreamEvents([]);
-    setStreamError(null);
     setPage(1);
 
     try {
-      // Chunk requests into 100-tx batches to guarantee execution well under Vercel's 10s edge timeout
-      const CHUNK_SIZE = 100;
-      let allTx: any[] = [];
-      let finalAlerts = 0;
-      let finalGnnRuns = 0;
-      
-      let finalThroughput = 0;
-      let finalFilter = 0;
-      let finalAvgLat = 0;
-
-      for (let offset = 0; offset < streamVolume; offset += CHUNK_SIZE) {
-        const fetchSize = Math.min(CHUNK_SIZE, streamVolume - offset);
-        const res = await ApiService.simulateStreamBatch(dataset, fetchSize, offset);
+      await runStream(async () => {
+        // Chunk requests into 100-tx batches to guarantee execution well under Vercel's 10s edge timeout
+        const CHUNK_SIZE = 100;
+        let allTx: any[] = [];
+        let finalAlerts = 0;
+        let finalGnnRuns = 0;
         
-        if (res && Array.isArray(res.transactions)) {
-          allTx = [...allTx, ...res.transactions];
-          finalAlerts += (res.high_risk_alerts_emitted || 0);
-          finalGnnRuns += (res.stage_2_gnn_runs || 0);
+        let finalThroughput = 0;
+        let finalFilter = 0;
+        let finalAvgLat = 0;
+
+        for (let offset = 0; offset < streamVolume; offset += CHUNK_SIZE) {
+          const fetchSize = Math.min(CHUNK_SIZE, streamVolume - offset);
+          const res = await ApiService.simulateStreamBatch(dataset, fetchSize, offset);
           
-          finalThroughput = res.throughput_tx_per_sec || 1250.0;
-          finalFilter = res.stage_1_benign_filter_rate || 88.86;
-          finalAvgLat = res.avg_gnn_latency_ms || 0.70;
-          
-          // Progressive UI Update
-          const pct = Math.min(100, Math.round((allTx.length / streamVolume) * 100));
+          if (res && Array.isArray(res.transactions)) {
+            allTx = [...allTx, ...res.transactions];
+            finalAlerts += (res.high_risk_alerts_emitted || 0);
+            finalGnnRuns += (res.stage_2_gnn_runs || 0);
+            
+            finalThroughput = res.throughput_tx_per_sec || 0;
+            finalFilter = res.stage_1_benign_filter_rate || 0;
+            finalAvgLat = res.avg_gnn_latency_ms || 0;
+            
+            // Progressive UI Update
+            const pct = Math.min(100, Math.round((allTx.length / streamVolume) * 100));
+            setStreamedTxCount(allTx.length);
+            setProgressPercent(pct);
+            setRawAlertsCount(finalAlerts);
+            setGnnRuns(finalGnnRuns);
+            setLiveRate(finalThroughput);
+            setLiveStreamEvents([...allTx]);
+          } else {
+            throw new Error(`Live stream interrupted at offset ${offset}. Backend service returned an invalid or empty response.`);
+          }
+        }
+
+        if (allTx.length > 0) {
           setStreamedTxCount(allTx.length);
-          setProgressPercent(pct);
+          setProgressPercent(100);
           setRawAlertsCount(finalAlerts);
           setGnnRuns(finalGnnRuns);
           setLiveRate(finalThroughput);
-          setLiveStreamEvents([...allTx]);
+          setFilterRate(finalFilter);
+          setAvgGnnLat(finalAvgLat);
+          setLiveStreamEvents(allTx);
         } else {
-          setStreamError(`Live stream interrupted at offset ${offset}. Backend service returned an invalid or empty response.`);
-          break;
+          throw new Error("No transactions returned from backend simulation.");
         }
-      }
-
-      if (allTx.length > 0) {
-        const total = allTx.length;
-
-        // Finish simulation state
-        setIsSimulating(false);
-        setStreamedTxCount(total);
-        setProgressPercent(100);
-        setRawAlertsCount(finalAlerts);
-        setGnnRuns(finalGnnRuns);
-        setLiveRate(finalThroughput);
-        setFilterRate(finalFilter);
-        setAvgGnnLat(finalAvgLat);
-        setLiveStreamEvents(allTx);
-      } else {
-        setIsSimulating(false);
-        if (!streamError) {
-          setStreamError("No transactions returned from backend simulation.");
-        }
-      }
-    } catch (e: any) {
-      console.error("Live streaming error:", e);
-      setStreamError(e?.message || "Failed to stream simulation transactions. Check network or backend connection.");
-      setIsSimulating(false);
+      });
+    } catch {
+      // Handled by useAsyncState
     }
   };
 
   const handleTestLiveSeed = async () => {
-    setIsTestingSeed(true);
+    if (!testSeed.trim()) return;
     const t0 = performance.now();
-    const res = await ApiService.predictLiveEntity(testSeed, 3);
-    const t1 = performance.now();
-    setTestLatency(Math.round(t1 - t0) + 12);
-    setTestResult(res);
-    setIsTestingSeed(false);
+    try {
+      await runProbe(async () => {
+        const res = await ApiService.predictLiveEntity(testSeed.trim(), 3);
+        const t1 = performance.now();
+        setTestLatency(Math.round(t1 - t0) + 12);
+        return res;
+      });
+    } catch {
+      // Handled by useAsyncState
+    }
   };
 
   // Dynamic high-risk alerts count based on user-controlled risk cutoff slider
@@ -211,11 +237,13 @@ export const StreamingMonitorView: React.FC = () => {
     return filteredEvents.slice(start, start + pageSize);
   }, [filteredEvents, page, pageSize]);
 
-  const latencyData = [
-    { metric: 'p50 Median', latency: bench?.p50_latency_ms || 0.70, fill: '#10B981' },
-    { metric: 'p95 95th', latency: bench?.p95_latency_ms || 2.15, fill: '#F59E0B' },
-    { metric: 'p99 99th', latency: bench?.p99_latency_ms || 3.40, fill: '#EF4444' }
-  ];
+  const latencyData = bench
+    ? [
+        { metric: 'p50 Median', latency: bench.p50_latency_ms, fill: '#10B981' },
+        { metric: 'p95 95th', latency: bench.p95_latency_ms, fill: '#F59E0B' },
+        { metric: 'p99 99th', latency: bench.p99_latency_ms, fill: '#EF4444' }
+      ]
+    : [];
 
   const windowData = [
     { window: '6 Hours', syntheticF1: 72.4, ibmF1: 61.2 },
@@ -315,7 +343,7 @@ export const StreamingMonitorView: React.FC = () => {
             </div>
           </div>
           <button 
-            onClick={() => setStreamError(null)} 
+            onClick={resetStreamError} 
             className="text-red-600 hover:text-red-900 font-bold px-2 py-1 text-xs bg-red-100 hover:bg-red-200 rounded-md transition-colors flex-shrink-0 ml-3"
           >
             Dismiss
@@ -444,11 +472,21 @@ export const StreamingMonitorView: React.FC = () => {
             <Activity className="w-4 h-4 text-[#FF5500] animate-pulse" />
           </div>
           <div className="text-2xl font-bold font-mono text-slate-900">
-            {liveRate.toFixed(1)} <span className="text-xs font-normal text-slate-500">Tx/s</span>
+            {liveRate !== null ? (
+              <>
+                {liveRate.toFixed(1)} <span className="text-xs font-normal text-slate-500">Tx/s</span>
+              </>
+            ) : bench ? (
+              <>
+                {bench.ingestion_rate_tx_per_sec.toFixed(1)} <span className="text-xs font-normal text-slate-500">Tx/s</span>
+              </>
+            ) : (
+              <span className="text-slate-400 font-sans text-sm">—</span>
+            )}
           </div>
           <div className="text-[11px] text-emerald-600 font-mono mt-1 flex items-center gap-1 font-medium">
             <CheckCircle className="w-3.5 h-3.5" />
-            <span>Exceeds Target (800+ Tx/s)</span>
+            <span>Target: 800+ Tx/s</span>
           </div>
         </div>
 
@@ -458,7 +496,11 @@ export const StreamingMonitorView: React.FC = () => {
             <ShieldCheck className="w-4 h-4 text-emerald-600" />
           </div>
           <div className="text-2xl font-bold font-mono text-emerald-600">
-            {filterRate.toFixed(1)}%
+            {filterRate !== null ? (
+              `${filterRate.toFixed(1)}%`
+            ) : (
+              <span className="text-slate-400 font-sans text-sm">—</span>
+            )}
           </div>
           <div className="text-[11px] text-slate-500 mt-1">
             O(1) Welford In-Memory Gate
@@ -484,7 +526,17 @@ export const StreamingMonitorView: React.FC = () => {
             <Clock className="w-4 h-4 text-blue-600" />
           </div>
           <div className="text-2xl font-bold font-mono text-blue-600">
-            {avgGnnLat.toFixed(2)} <span className="text-xs font-normal text-slate-500">ms</span>
+            {avgGnnLat !== null ? (
+              <>
+                {avgGnnLat.toFixed(2)} <span className="text-xs font-normal text-slate-500">ms</span>
+              </>
+            ) : bench ? (
+              <>
+                {bench.p50_latency_ms.toFixed(2)} <span className="text-xs font-normal text-slate-500">ms</span>
+              </>
+            ) : (
+              <span className="text-slate-400 font-sans text-sm">—</span>
+            )}
           </div>
           <div className="text-[11px] text-slate-500 mt-1">
             DualHeadGraphSAGE SLA &lt; 50ms
@@ -503,6 +555,78 @@ export const StreamingMonitorView: React.FC = () => {
             {streamedTxCount > 0 ? `Alert Rate: ${((dynamicAlertsCount / Math.max(1, streamedTxCount)) * 100).toFixed(1)}%` : 'Ready to stream'}
           </div>
         </div>
+      </div>
+
+      {/* ── LIVE SEED INFERENCE PROBE ── */}
+      <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+          <div className="flex items-center gap-2">
+            <Search className="w-4 h-4 text-purple-600" />
+            <span className="text-xs font-bold text-slate-900 uppercase">Live Seed Inference Probe</span>
+            <span className="text-[10px] text-slate-400 font-mono hidden md:inline">Test real-time GraphSAGE inductive forward pass on any entity</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={testSeed}
+              onChange={(e) => setTestSeed(e.target.value)}
+              placeholder="e.g. ENT_000185"
+              className="px-2.5 py-1 text-xs border border-slate-200 rounded-lg font-mono text-slate-800 bg-slate-50 focus:outline-none focus:border-[#FF5500]"
+            />
+            <button
+              onClick={handleTestLiveSeed}
+              disabled={isTestingSeed || !testSeed.trim()}
+              className="px-3 py-1 bg-[#FF5500] hover:bg-[#E04B00] text-white text-xs font-bold rounded-lg transition-all disabled:opacity-50 flex items-center gap-1.5"
+            >
+              {isTestingSeed ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />}
+              <span>Probe Entity</span>
+            </button>
+          </div>
+        </div>
+
+        {probeError && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+            <span>Entity probe failed: {probeError}</span>
+          </div>
+        )}
+
+        {testResult && (
+          testResult.low_information ? (
+            <div className="p-3 bg-amber-50 border border-amber-300 rounded-lg text-xs space-y-1 shadow-sm">
+              <div className="flex items-center gap-1.5 font-bold text-amber-900 uppercase">
+                <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                <span>LOW INFORMATION: no transaction history for this entity</span>
+              </div>
+              <p className="text-amber-800 text-[11px]">
+                {testResult.status_reason || 'No edges recorded in the ±72h sliding window. Risk probability suppressed.'}
+              </p>
+              <div className="text-[10px] font-mono text-amber-700 bg-amber-100/70 px-2 py-0.5 rounded inline-block">
+                STATUS: SUBGRAPH_EMPTY · NODES: {testResult.num_nodes} · EDGES: {testResult.num_edges}
+              </div>
+            </div>
+          ) : (
+            <div className="p-3 bg-emerald-50 border border-emerald-300 rounded-lg text-xs flex flex-wrap items-center justify-between gap-3 shadow-sm">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span className="font-bold text-emerald-950 uppercase">
+                  Seed {testResult.seed_entity_id} Evaluated
+                </span>
+                <span className="font-mono text-[11px] text-emerald-700">
+                  ({testResult.num_nodes} nodes, {testResult.num_edges} edges in ±72h window)
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] font-bold uppercase text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300 font-mono">
+                  {testResult.confidence_tier} ({(testResult.risk_probability * 100).toFixed(1)}%)
+                </span>
+                {testLatency && (
+                  <span className="text-[10px] font-mono text-slate-500">Latency: {testLatency}ms</span>
+                )}
+              </div>
+            </div>
+          )
+        )}
       </div>
 
       {/* ── SCALABLE LIVE TRANSACTION STREAM TABLE ── */}
@@ -683,24 +807,39 @@ export const StreamingMonitorView: React.FC = () => {
             <span className="text-[10px] font-mono text-emerald-600 font-bold">Target SLA: &lt; 50.0ms</span>
           </div>
 
-          <div className="h-56 mt-2">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={latencyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
-                <XAxis dataKey="metric" stroke="#64748B" fontSize={10} fontFamily="monospace" />
-                <YAxis stroke="#64748B" fontSize={10} fontFamily="monospace" />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#E2E8F0', borderRadius: '8px', fontSize: '11px', fontFamily: 'monospace', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                  formatter={(val: any) => [`${val} ms`, 'Latency']}
-                />
-                <Bar dataKey="latency" radius={[4, 4, 0, 0]}>
-                  {latencyData.map((entry, index) => (
-                    <Bar key={`bar-${index}`} fill={entry.fill} dataKey="latency" />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          {telemetryStatus === AsyncStatus.LOADING && !bench ? (
+            <div className="h-56 mt-2 flex items-center justify-center">
+              <LottieLoader status={telemetryStatus} />
+            </div>
+          ) : telemetryStatus === AsyncStatus.ERROR && !bench ? (
+            <div className="h-56 mt-2 flex items-center justify-center">
+              <EmptyState
+                variant={isTelemetryOffline ? 'offline' : 'empty'}
+                title={isTelemetryOffline ? 'Telemetry Offline' : 'Benchmark Unavailable'}
+                message={telemetryError || 'Telemetry benchmark data could not be retrieved.'}
+                onRetry={retryTelemetry}
+              />
+            </div>
+          ) : (
+            <div className="h-56 mt-2">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={latencyData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
+                  <XAxis dataKey="metric" stroke="#64748B" fontSize={10} fontFamily="monospace" />
+                  <YAxis stroke="#64748B" fontSize={10} fontFamily="monospace" />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#E2E8F0', borderRadius: '8px', fontSize: '11px', fontFamily: 'monospace', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                    formatter={(val: any) => [`${val} ms`, 'Latency']}
+                  />
+                  <Bar dataKey="latency" radius={[4, 4, 0, 0]}>
+                    {latencyData.map((entry, index) => (
+                      <Bar key={`bar-${index}`} fill={entry.fill} dataKey="latency" />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
           <div className="text-[10px] text-slate-400 text-center">
             Measured across 15,000 real sliding transactions including BFS extraction and GraphSAGE tensor forward pass.
           </div>
@@ -710,7 +849,7 @@ export const StreamingMonitorView: React.FC = () => {
           <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
             <h3 className="text-xs font-bold text-slate-900 uppercase flex items-center gap-2">
               <Gauge className="w-4 h-4 text-purple-600" />
-              Temporal Window Horizon vs Model F1-Score (%)
+              Temporal Window Horizon vs Model F1-Score (%) (Illustrative)
             </h3>
             <span className="text-[10px] font-mono text-emerald-600 font-bold">72h Optimal Window</span>
           </div>
@@ -730,7 +869,7 @@ export const StreamingMonitorView: React.FC = () => {
             </ResponsiveContainer>
           </div>
           <div className="text-[10px] text-slate-400 text-center">
-            F1 accuracy peaks at 89.77% as temporal window reaches 72 hours, maintaining memory of multi-hop chains.
+            F1 accuracy peaks at 87.67% as temporal window reaches 72 hours, maintaining memory of multi-hop chains.
           </div>
         </div>
       </div>

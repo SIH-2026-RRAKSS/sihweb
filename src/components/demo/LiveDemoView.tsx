@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { InputValidator } from '../../utils/validation';
 import { ApiService } from '../../services/api';
-import { Activity, ShieldAlert, Network, Settings, FileText, Search, Play, ServerCrash, CheckCircle2 } from 'lucide-react';
+import { Activity, ShieldAlert, Network, Settings, FileText, Search, Play, ServerCrash, CheckCircle2, AlertTriangle } from 'lucide-react';
 
 const BASE_URL = ((import.meta as any).env?.VITE_API_BASE_URL as string) || '/api';
 
@@ -173,9 +173,24 @@ export const LiveDemoView: React.FC = () => {
               </div>
             )}
             {manualResult && (
-              <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs font-mono text-slate-700 overflow-x-auto">
-                <pre>{JSON.stringify(manualResult, null, 2)}</pre>
-              </div>
+              manualResult.low_information ? (
+                <div className="bg-amber-50 p-3.5 rounded-xl border border-amber-300 text-xs space-y-1.5 shadow-sm">
+                  <div className="flex items-center gap-1.5 font-bold text-amber-900 uppercase">
+                    <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                    <span>LOW INFORMATION: no transaction history for this entity</span>
+                  </div>
+                  <p className="text-amber-800 text-[11px]">
+                    {manualResult.status_reason || 'No transaction edges in the ±72h sliding window. Risk probability suppressed.'}
+                  </p>
+                  <div className="text-[10px] font-mono text-amber-700 bg-amber-100/70 px-2 py-0.5 rounded inline-block">
+                    STATUS: SUBGRAPH_EMPTY · NODES: {manualResult.num_nodes} · EDGES: {manualResult.num_edges}
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs font-mono text-slate-700 overflow-x-auto">
+                  <pre>{JSON.stringify(manualResult, null, 2)}</pre>
+                </div>
+              )
             )}
           </div>
 

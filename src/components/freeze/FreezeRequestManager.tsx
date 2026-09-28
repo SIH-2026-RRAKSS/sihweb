@@ -18,22 +18,33 @@ import { FreezeRequest, FreezeStatus } from '../../types';
 import { QuickFreezeModal } from './QuickFreezeModal';
 import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
 import { LottieLoader } from '../ui/LottieLoader';
+import { EmptyState } from '../ui/EmptyState';
 
 export const FreezeRequestManager: React.FC = () => {
-  const [freezes, setFreezes] = useState<FreezeRequest[]>([]);
-  const { status: fetchStatus, error: fetchError, run: runFetch } = useAsyncState<void>();
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [search, setSearch] = useState('');
   const [showNewModal, setShowNewModal] = useState(false);
   const [selectedFreeze, setSelectedFreeze] = useState<FreezeRequest | null>(null);
   const [currentTime, setCurrentTime] = useState<number>(Date.now());
 
+  const {
+    status: fetchStatus,
+    error: fetchError,
+    isOffline,
+    data: rawFreezes,
+    run: runFetch,
+    retry,
+  } = useAsyncState<FreezeRequest[]>({
+    initialData: [],
+  });
+
+  const freezes = rawFreezes || [];
+
   const fetchFreezes = () => {
     runFetch(async () => {
-      const data = await ApiService.getFreezeRequests(
+      return await ApiService.getFreezeRequests(
         statusFilter === 'ALL' ? undefined : (statusFilter as FreezeStatus)
       );
-      setFreezes(data);
     });
   };
 
@@ -57,9 +68,13 @@ export const FreezeRequestManager: React.FC = () => {
 
   const formatSlaCountdown = (seconds: number) => {
     if (seconds <= 0) return '00:00 (BREACHED)';
-    const mins = Math.floor(seconds / 60);
+    const hours = Math.floor(seconds / 3600);
+    const remainingMins = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    if (hours > 0) {
+      return `${String(hours).padStart(2, '0')}:${String(remainingMins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+    return `${String(remainingMins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
 
   const filteredFreezes = freezes.filter((f) => {
@@ -83,6 +98,22 @@ export const FreezeRequestManager: React.FC = () => {
 
   return (
     <div className="space-y-4 font-sans text-xs">
+      {/* ── BACKGROUND SYNC ERROR BANNER ── */}
+      {fetchError && freezes.length > 0 && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2.5 rounded-xl flex items-center justify-between text-xs font-medium">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
+            <span>Notice synchronization error: {fetchError}</span>
+          </div>
+          <button
+            onClick={() => retry()}
+            className="px-2.5 py-1 bg-red-100 hover:bg-red-200 text-red-800 rounded font-bold transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
       {/* ── TOP BANNER & ACTION BAR ── */}
       <div className="bg-white border border-slate-200 p-4 rounded-2xl flex flex-wrap items-center justify-between gap-3 shadow-saas-card">
         <div className="flex items-center gap-3">
@@ -218,7 +249,7 @@ export const FreezeRequestManager: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
-              {fetchStatus === AsyncStatus.LOADING ? (
+              {fetchStatus === AsyncStatus.LOADING && freezes.length === 0 ? (
                 <tr>
                   <td colSpan={9} className="p-8 text-center text-slate-400">
                     <div className="flex justify-center items-center">
@@ -226,10 +257,33 @@ export const FreezeRequestManager: React.FC = () => {
                     </div>
                   </td>
                 </tr>
+              ) : fetchStatus === AsyncStatus.ERROR && freezes.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className="p-8">
+                    <EmptyState
+                      variant={isOffline ? 'offline' : 'empty'}
+                      title={isOffline ? 'Freeze Service Offline' : 'Failed to Load Freeze Notices'}
+                      message={fetchError || 'Unable to retrieve emergency freeze notices from the registry.'}
+                      onRetry={retry}
+                    />
+                  </td>
+                </tr>
               ) : filteredFreezes.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="p-8 text-center text-slate-500">
-                    No freeze requests match your current filters.
+                  <td colSpan={9} className="p-8">
+                    <EmptyState
+                      variant="empty"
+                      title="No Freeze Notices Found"
+                      message={
+                        search.trim()
+                          ? `No freeze notices match your search term "${search}".`
+                          : statusFilter !== 'ALL'
+                          ? `No freeze notices found with status ${statusFilter}.`
+                          : 'No emergency freeze requests have been recorded yet.'
+                      }
+                      actionLabel={search.trim() ? 'Clear Search' : undefined}
+                      onAction={search.trim() ? () => setSearch('') : undefined}
+                    />
                   </td>
                 </tr>
               ) : (

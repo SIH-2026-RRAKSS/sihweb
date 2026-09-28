@@ -18,6 +18,8 @@ import {
 import { ApiService } from '../../services/api';
 import { CitizenComplaint } from '../../types';
 import { useAuth } from '../../context/AuthContext';
+import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
+import { EmptyState } from '../ui/EmptyState';
 import { ComplaintForm } from './ComplaintForm';
 import { ComplaintTimeline } from './ComplaintTimeline';
 import { MyComplaintsList } from './MyComplaintsList';
@@ -31,18 +33,28 @@ export const CitizenPortal: React.FC<CitizenPortalProps> = ({ initialView = 'hom
   const [view, setView] = useState<'home' | 'new' | 'list' | 'timeline'>(
     initialView === 'new-complaint' ? 'new' : initialView === 'my-complaints' ? 'list' : 'home'
   );
-  const [complaints, setComplaints] = useState<CitizenComplaint[]>([]);
   const [selectedComplaintId, setSelectedComplaintId] = useState<string | null>(null);
   const [quickTrackUtr, setQuickTrackUtr] = useState('');
   const [trackError, setTrackError] = useState<string | null>(null);
 
-  const fetchSummary = async () => {
-    try {
-      const data = await ApiService.getCitizenComplaints(user?.id);
-      setComplaints(data);
-    } catch (err) {
-      console.error(err);
-    }
+  const {
+    status: fetchStatus,
+    error: fetchError,
+    isOffline,
+    data: rawComplaints,
+    setData: setComplaints,
+    run: runFetch,
+    retry,
+  } = useAsyncState<CitizenComplaint[]>({
+    initialData: [],
+  });
+
+  const complaints = rawComplaints || [];
+
+  const fetchSummary = () => {
+    runFetch(async () => {
+      return await ApiService.getCitizenComplaints(user?.id);
+    }).catch(() => {});
   };
 
   useEffect(() => {
@@ -68,7 +80,7 @@ export const CitizenPortal: React.FC<CitizenPortalProps> = ({ initialView = 'hom
   };
 
   const handleComplaintCreated = (newComplaint: CitizenComplaint) => {
-    setComplaints((prev) => [newComplaint, ...prev]);
+    setComplaints([newComplaint, ...complaints]);
     setSelectedComplaintId(newComplaint.id);
     setView('timeline');
   };
@@ -111,6 +123,22 @@ export const CitizenPortal: React.FC<CitizenPortalProps> = ({ initialView = 'hom
 
   return (
     <div className="space-y-5 font-sans text-xs animate-fadeIn">
+      {/* ── SYNC ERROR BANNER ── */}
+      {fetchError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2.5 rounded-xl flex items-center justify-between text-xs font-medium">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
+            <span>Complaint synchronization notice: {fetchError}</span>
+          </div>
+          <button
+            onClick={() => retry()}
+            className="px-2.5 py-1 bg-red-100 hover:bg-red-200 text-red-800 rounded font-bold transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
       {/* ── 1. WELCOME & 1930 HELPLINE HERO ── */}
       <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white rounded-3xl p-6 shadow-saas-card relative overflow-hidden">
         <div className="absolute right-0 top-0 bottom-0 w-96 bg-gradient-to-l from-[#FF5500]/10 to-transparent pointer-events-none" />

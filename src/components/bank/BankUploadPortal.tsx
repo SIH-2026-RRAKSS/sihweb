@@ -19,13 +19,14 @@ import { BankUploadBatch } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
 import { LottieLoader } from '../ui/LottieLoader';
+import { EmptyState } from '../ui/EmptyState';
 
 export const BankUploadPortal: React.FC = () => {
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [batches, setBatches] = useState<BankUploadBatch[]>([]);
-  const { status: fetchStatus, error: fetchError, run: runFetch } = useAsyncState<void>();
+  const { status: fetchStatus, error: fetchError, isOffline, run: runFetch, retry: retryFetch } = useAsyncState<BankUploadBatch[]>();
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -41,7 +42,8 @@ export const BankUploadPortal: React.FC = () => {
     runFetch(async () => {
       const data = await ApiService.getBankUploads();
       setBatches(data);
-    });
+      return data;
+    }).catch(() => {});
   };
 
   useEffect(() => {
@@ -96,8 +98,8 @@ export const BankUploadPortal: React.FC = () => {
       setBatches((prev) => prev.map((b) => (b.id === selectedBatch.id ? updated : b)));
       setSelectedBatch(null);
       setReviewNotes('');
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Failed to submit batch audit review.');
     } finally {
       setSubmittingReview(false);
     }
@@ -263,14 +265,28 @@ export const BankUploadPortal: React.FC = () => {
                 <tr>
                   <td colSpan={8} className="p-8 text-center text-slate-400">
                     <div className="flex justify-center items-center">
-                      <LottieLoader status={fetchStatus} />
+                      <LottieLoader status={fetchStatus} label="Loading statement upload batches..." />
                     </div>
+                  </td>
+                </tr>
+              ) : fetchStatus === AsyncStatus.ERROR ? (
+                <tr>
+                  <td colSpan={8} className="p-8 text-center">
+                    <EmptyState
+                      variant={isOffline ? 'offline' : 'empty'}
+                      title={isOffline ? 'Server Unreachable' : 'Failed to Load Batches'}
+                      description={fetchError || 'Unable to retrieve bank statement batches.'}
+                      onRetry={fetchBatches}
+                    />
                   </td>
                 </tr>
               ) : batches.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="p-8 text-center text-slate-500">
-                    No transaction statement batches uploaded yet.
+                  <td colSpan={8} className="p-8 text-center">
+                    <EmptyState
+                      title="No Batches Uploaded"
+                      description="No transaction statement batches uploaded yet. Use the upload area above to ingest bank transactions."
+                    />
                   </td>
                 </tr>
               ) : (

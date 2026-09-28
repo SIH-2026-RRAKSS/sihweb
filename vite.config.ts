@@ -13,5 +13,17 @@ export default defineConfig({
         secure: false,
       }
     }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-three': ['three'],
+          'vendor-recharts': ['recharts'],
+          'vendor-leaflet': ['leaflet', 'react-leaflet'],
+          'vendor-framer': ['framer-motion'],
+        }
+      }
+    }
   }
 })

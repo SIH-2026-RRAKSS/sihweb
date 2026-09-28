@@ -16,6 +16,7 @@ import { CitizenComplaint } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
 import { LottieLoader } from '../ui/LottieLoader';
+import { EmptyState } from '../ui/EmptyState';
 
 interface MyComplaintsListProps {
   onSelectComplaint: (id: string) => void;
@@ -27,15 +28,25 @@ export const MyComplaintsList: React.FC<MyComplaintsListProps> = ({
   onNewComplaint,
 }) => {
   const { user } = useAuth();
-  const [complaints, setComplaints] = useState<CitizenComplaint[]>([]);
-  const { status: fetchStatus, error: fetchError, run: runFetch } = useAsyncState<void>();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
 
+  const {
+    status: fetchStatus,
+    error: fetchError,
+    isOffline,
+    data: rawComplaints,
+    run: runFetch,
+    retry,
+  } = useAsyncState<CitizenComplaint[]>({
+    initialData: [],
+  });
+
+  const complaints = rawComplaints || [];
+
   const fetchComplaints = () => {
     runFetch(async () => {
-      const data = await ApiService.getCitizenComplaints(user?.id);
-      setComplaints(data);
+      return await ApiService.getCitizenComplaints(user?.id);
     });
   };
 
@@ -144,23 +155,34 @@ export const MyComplaintsList: React.FC<MyComplaintsListProps> = ({
       </div>
 
       {/* ── COMPLAINT CARDS ── */}
-      {fetchStatus === AsyncStatus.LOADING ? (
+      {fetchStatus === AsyncStatus.LOADING && complaints.length === 0 ? (
         <div className="p-12 flex justify-center items-center">
           <LottieLoader status={fetchStatus} />
         </div>
+      ) : fetchStatus === AsyncStatus.ERROR && complaints.length === 0 ? (
+        <div className="bg-white border border-slate-200 rounded-2xl p-12 shadow-saas-card">
+          <EmptyState
+            variant={isOffline ? 'offline' : 'empty'}
+            title={isOffline ? 'Service Offline' : 'Failed to Load Complaints'}
+            message={fetchError || 'Unable to retrieve your reported complaints from the registry.'}
+            onRetry={retry}
+          />
+        </div>
       ) : filtered.length === 0 ? (
-        <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center space-y-3 shadow-saas-card">
-          <ShieldAlert className="w-10 h-10 text-slate-300 mx-auto" />
-          <h3 className="font-bold text-slate-800 text-sm">No complaints found</h3>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto">
-            You have not reported any cyber fraud incidents matching this filter.
-          </p>
-          <button
-            onClick={onNewComplaint}
-            className="px-4 py-2 bg-[#FF5500] text-white rounded-xl text-xs font-bold shadow-sm"
-          >
-            File First Complaint
-          </button>
+        <div className="bg-white border border-slate-200 rounded-2xl p-12 shadow-saas-card">
+          <EmptyState
+            variant="empty"
+            title={search ? 'No Matching Complaints' : 'No Complaints Found'}
+            message={
+              search
+                ? `No complaints match your query "${search}".`
+                : statusFilter !== 'ALL'
+                ? `No complaints recorded under ${statusFilter}.`
+                : 'You have not reported any cyber fraud incidents yet.'
+            }
+            actionLabel={search ? 'Clear Search' : 'File First Complaint'}
+            onAction={search ? () => setSearch('') : onNewComplaint}
+          />
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

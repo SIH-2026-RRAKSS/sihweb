@@ -206,7 +206,7 @@ export const DossierPeekHUD: React.FC<DossierPeekHUDProps> = ({
               <div className="p-4 bg-slate-50/90 border border-slate-200/80 rounded-xl space-y-3">
                 <div className="flex items-center justify-between text-[10px] font-mono text-slate-500">
                   <span>TERMINAL EXIT TARGET</span>
-                  <span className="text-amber-600 font-bold">MRR 1.0000</span>
+                  <span className="text-slate-700 font-bold">MRR 1.0 (Top-1, n=101, avg 1.9 cands)</span>
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -220,7 +220,7 @@ export const DossierPeekHUD: React.FC<DossierPeekHUDProps> = ({
                   </div>
 
                   <div className="text-right">
-                    <div className="text-lg font-bold font-mono text-amber-600">
+                    <div className="text-lg font-bold font-mono text-[#FF5500]">
                       {((incidentDetail.model_prediction.top_terminal_score || 0.95) * 100).toFixed(1)}%
                     </div>
                     <div className="text-[9px] font-mono text-slate-400">CONVERGENCE</div>

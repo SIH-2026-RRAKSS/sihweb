@@ -24,14 +24,14 @@ export const MOCK_PIPELINE_STATS: PipelineStats = {
   total_incidents_monitored: 1000,
   predictions_calibrated: 1000,
   tier_breakdown: {
-    HIGH_CONFIDENCE: 142,
-    MEDIUM_CONFIDENCE: 218,
-    NORMAL: 640
+    HIGH_CONFIDENCE: 191,
+    MEDIUM_CONFIDENCE: 10,
+    NORMAL: 799
   },
   model_comparison: {
-    GraphSAGE_Test_F1: "89.77% ± 1.58%",
-    XGBoost_Baseline_F1: "86.87% ± 2.28%",
-    Terminal_Prediction_MRR: "1.0000",
+    GraphSAGE_Test_F1: "87.67% +/- 2.38%",
+    XGBoost_Baseline_F1: "89.48% +/- 4.66%",
+    Terminal_Prediction_MRR: "1.0",
     Top1_CashOut_Accuracy: "100.0%"
   }
 };
@@ -425,9 +425,9 @@ export const MOCK_THREE_WAY_BENCHMARK: ThreeWayBenchmarkRow[] = [
     dataset: "Dataset A (Synthetic Typologies)",
     evaluation_task: "Incident Subgraph Binary Classification",
     sample_size: "N = 200 (37 Illicit / 18.5%)",
-    xgboost_f1: "86.87% ± 2.28%",
-    graphsage_f1: "89.77% ± 1.58%",
-    f1_delta: "+3.69% (p = 0.0231 < 0.05)",
+    xgboost_f1: "89.48% ± 4.66%",
+    graphsage_f1: "87.67% ± 2.38%",
+    f1_delta: "-1.81% (GraphSAGE Inductive)",
     pr_auc: "0.9680 ± 0.0117"
   },
   {

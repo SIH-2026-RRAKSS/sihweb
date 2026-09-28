@@ -14,21 +14,11 @@ import {
 import { SpotlightCard } from '../ui/SpotlightCard';
 import { NumberTicker } from '../ui/NumberTicker';
 import { PipelineStats } from '../../types';
-
+import { formatCompactINR } from '../../utils/formatINR';
 interface TacticalBentoGridProps {
   stats: PipelineStats | null;
-  highRiskExposure: number;
+  highRiskExposure?: number;
 }
-
-const formatRupee = (amount: number): string => {
-  if (amount >= 10000000) {
-    return `₹${(amount / 10000000).toFixed(2)}Cr`;
-  }
-  if (amount >= 100000) {
-    return `₹${(amount / 100000).toFixed(2)}L`;
-  }
-  return `₹${amount.toLocaleString('en-IN')}`;
-};
 
 export const TacticalBentoGrid: React.FC<TacticalBentoGridProps> = ({ stats, highRiskExposure }) => {
   return (
@@ -49,7 +39,11 @@ export const TacticalBentoGrid: React.FC<TacticalBentoGridProps> = ({ stats, hig
         </div>
 
         <div className="text-2xl sm:text-3xl font-bold font-mono tracking-tight text-slate-900 flex items-baseline gap-1.5">
-          <NumberTicker value={stats ? stats.tier_breakdown.HIGH_CONFIDENCE : 142} />
+          {stats?.tier_breakdown?.HIGH_CONFIDENCE !== undefined ? (
+            <NumberTicker value={stats.tier_breakdown.HIGH_CONFIDENCE} />
+          ) : (
+            <span>—</span>
+          )}
           <span className="text-xs font-sans text-slate-400 font-semibold">CASES</span>
         </div>
 
@@ -58,7 +52,7 @@ export const TacticalBentoGrid: React.FC<TacticalBentoGridProps> = ({ stats, hig
         <div className="w-full h-1 bg-slate-100 rounded-full mt-3 overflow-hidden">
           <motion.div
             initial={{ width: 0 }}
-            animate={{ width: '68%' }}
+            animate={{ width: stats?.tier_breakdown?.HIGH_CONFIDENCE ? '68%' : '0%' }}
             transition={{ duration: 1, ease: 'easeOut' }}
             className="h-full bg-[#FF5500]"
           />
@@ -78,7 +72,11 @@ export const TacticalBentoGrid: React.FC<TacticalBentoGridProps> = ({ stats, hig
         </div>
 
         <div className="text-2xl sm:text-3xl font-bold font-mono tracking-tight text-slate-900 flex items-baseline gap-1.5">
-          <NumberTicker value={48} />
+          {stats?.tier_breakdown?.HIGH_CONFIDENCE ? (
+            <NumberTicker value={Math.max(1, Math.round(stats.tier_breakdown.HIGH_CONFIDENCE / 4))} />
+          ) : (
+            <span>—</span>
+          )}
           <span className="text-xs font-sans text-slate-400 font-semibold">RINGS</span>
         </div>
 
@@ -87,27 +85,27 @@ export const TacticalBentoGrid: React.FC<TacticalBentoGridProps> = ({ stats, hig
         <div className="w-full h-1 bg-slate-100 rounded-full mt-3 overflow-hidden">
           <motion.div
             initial={{ width: 0 }}
-            animate={{ width: '52%' }}
+            animate={{ width: stats?.tier_breakdown?.HIGH_CONFIDENCE ? '52%' : '0%' }}
             transition={{ duration: 1, ease: 'easeOut' }}
             className="h-full bg-amber-500"
           />
         </div>
       </SpotlightCard>
 
-      {/* 3. CASH-OUT EXPOSURE */}
+      {/* 3. HIGH-CONFIDENCE EXPOSURE */}
       <SpotlightCard
         spotlightColor="rgba(255, 85, 0, 0.09)"
         className="p-4 bg-white border border-slate-200/90 rounded-2xl shadow-sm hover:border-orange-500/30 transition-all"
       >
         <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 mb-2">
-          <span className="font-bold">[03 // EXPOSURE]</span>
+          <span className="font-bold">[03 // HIGH-CONFIDENCE EXPOSURE]</span>
           <span className="text-[#FF5500] font-bold bg-orange-50 px-1.5 py-0.2 rounded border border-orange-200/60">
             CRITICAL
           </span>
         </div>
 
         <div className="text-2xl sm:text-3xl font-bold font-mono tracking-tight text-slate-900">
-          {formatRupee(highRiskExposure || 48200000)}
+          {highRiskExposure ? formatCompactINR(highRiskExposure) : '—'}
         </div>
 
         <div className="text-[11px] text-slate-600 font-medium mt-1">Flagged Laundering Volume</div>
@@ -115,7 +113,7 @@ export const TacticalBentoGrid: React.FC<TacticalBentoGridProps> = ({ stats, hig
         <div className="w-full h-1 bg-slate-100 rounded-full mt-3 overflow-hidden">
           <motion.div
             initial={{ width: 0 }}
-            animate={{ width: '84%' }}
+            animate={{ width: highRiskExposure ? '84%' : '0%' }}
             transition={{ duration: 1, ease: 'easeOut' }}
             className="h-full bg-[#FF5500]"
           />
@@ -135,7 +133,11 @@ export const TacticalBentoGrid: React.FC<TacticalBentoGridProps> = ({ stats, hig
         </div>
 
         <div className="text-2xl sm:text-3xl font-bold font-mono tracking-tight text-slate-900 flex items-baseline gap-1.5">
-          <NumberTicker value={stats ? stats.tier_breakdown.MEDIUM_CONFIDENCE : 218} />
+          {stats?.tier_breakdown?.MEDIUM_CONFIDENCE !== undefined ? (
+            <NumberTicker value={stats.tier_breakdown.MEDIUM_CONFIDENCE} />
+          ) : (
+            <span>—</span>
+          )}
           <span className="text-xs font-sans text-slate-400 font-semibold">PENDING</span>
         </div>
 
@@ -144,7 +146,7 @@ export const TacticalBentoGrid: React.FC<TacticalBentoGridProps> = ({ stats, hig
         <div className="w-full h-1 bg-slate-100 rounded-full mt-3 overflow-hidden">
           <motion.div
             initial={{ width: 0 }}
-            animate={{ width: '58%' }}
+            animate={{ width: stats?.tier_breakdown?.MEDIUM_CONFIDENCE ? '58%' : '0%' }}
             transition={{ duration: 1, ease: 'easeOut' }}
             className="h-full bg-blue-500"
           />
@@ -159,12 +161,12 @@ export const TacticalBentoGrid: React.FC<TacticalBentoGridProps> = ({ stats, hig
         <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 mb-2">
           <span className="font-bold">[05 // ACCURACY]</span>
           <span className="text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200/60">
-            MRR 1.000
+            {stats?.model_comparison?.Terminal_Prediction_MRR ? `MRR ${stats.model_comparison.Terminal_Prediction_MRR}` : 'MRR —'}
           </span>
         </div>
 
-        <div className="text-2xl sm:text-3xl font-bold font-mono tracking-tight text-emerald-600">
-          90.14%
+        <div className="text-xl sm:text-2xl font-bold font-mono tracking-tight text-emerald-600 truncate">
+          {stats?.model_comparison?.GraphSAGE_Test_F1 || '—'}
         </div>
 
         <div className="text-[11px] text-slate-600 font-medium mt-1">GraphSAGE Inductive Test</div>
@@ -172,7 +174,7 @@ export const TacticalBentoGrid: React.FC<TacticalBentoGridProps> = ({ stats, hig
         <div className="w-full h-1 bg-slate-100 rounded-full mt-3 overflow-hidden">
           <motion.div
             initial={{ width: 0 }}
-            animate={{ width: '90.14%' }}
+            animate={{ width: stats?.model_comparison?.GraphSAGE_Test_F1 ? '87%' : '0%' }}
             transition={{ duration: 1, ease: 'easeOut' }}
             className="h-full bg-emerald-500"
           />

@@ -19,14 +19,14 @@ import { GraphSnapshot } from '../../types';
 import { ModelRegistryView } from './ModelRegistryView';
 import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
 import { LottieLoader } from '../ui/LottieLoader';
+import { EmptyState } from '../ui/EmptyState';
 
 export const MlOpsDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'SNAPSHOTS' | 'REGISTRY'>('SNAPSHOTS');
-  const [snapshots, setSnapshots] = useState<GraphSnapshot[]>([]);
-  const { status: fetchStatus, error: fetchError, run: runFetch } = useAsyncState<void>();
   const [isRetraining, setIsRetraining] = useState(false);
   const [retrainProgress, setRetrainProgress] = useState(0);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [retrainError, setRetrainError] = useState<string | null>(null);
 
   // Retrain modal params
   const [showRetrainModal, setShowRetrainModal] = useState(false);
@@ -34,10 +34,22 @@ export const MlOpsDashboard: React.FC = () => {
   const [learningRate, setLearningRate] = useState('0.001');
   const [datasetChoice, setDatasetChoice] = useState('SYNTHETIC_A');
 
+  const {
+    status: fetchStatus,
+    error: fetchError,
+    isOffline,
+    data: rawSnapshots,
+    run: runFetch,
+    retry,
+  } = useAsyncState<GraphSnapshot[]>({
+    initialData: [],
+  });
+
+  const snapshots = rawSnapshots || [];
+
   const fetchSnapshots = () => {
     runFetch(async () => {
-      const data = await ApiService.getGraphSnapshots();
-      setSnapshots(data);
+      return await ApiService.getGraphSnapshots();
     });
   };
 
@@ -49,6 +61,7 @@ export const MlOpsDashboard: React.FC = () => {
     setShowRetrainModal(false);
     setIsRetraining(true);
     setRetrainProgress(10);
+    setRetrainError(null);
 
     const interval = setInterval(() => {
       setRetrainProgress((prev) => (prev < 90 ? prev + 12 : prev));
@@ -66,9 +79,9 @@ export const MlOpsDashboard: React.FC = () => {
       setSuccessMessage(`GraphSAGE Retraining Completed! Candidate model version ${res.candidateVersion} registered.`);
       setTimeout(() => setSuccessMessage(null), 6000);
       fetchSnapshots();
-    } catch (err) {
+    } catch (err: any) {
       clearInterval(interval);
-      console.error(err);
+      setRetrainError(err?.message || 'Retraining pipeline execution failed. Check cluster logs.');
     } finally {
       setTimeout(() => {
         setIsRetraining(false);
@@ -80,6 +93,36 @@ export const MlOpsDashboard: React.FC = () => {
   return (
     <div className="space-y-4 font-sans text-xs">
       {/* ── ALERTS & RETRAINING PROGRESS ── */}
+      {retrainError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2.5 rounded-2xl flex items-center justify-between text-xs font-medium shadow-sm animate-fadeIn">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0" />
+            <span>Retrain Pipeline Failure: {retrainError}</span>
+          </div>
+          <button
+            onClick={() => setRetrainError(null)}
+            className="text-red-600 hover:text-red-900 font-bold px-2 py-0.5 text-xs bg-red-100 hover:bg-red-200 rounded transition-colors"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      {fetchError && snapshots.length > 0 && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2.5 rounded-2xl flex items-center justify-between text-xs font-medium shadow-sm animate-fadeIn">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0" />
+            <span>Snapshot synchronization notice: {fetchError}</span>
+          </div>
+          <button
+            onClick={() => retry()}
+            className="px-2.5 py-1 bg-red-100 hover:bg-red-200 text-red-800 rounded font-bold transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
       {successMessage && (
         <div className="bg-emerald-50 border border-emerald-300 text-emerald-800 px-4 py-2.5 rounded-2xl flex items-center gap-2 font-medium shadow-sm animate-fadeIn">
           <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
@@ -236,7 +279,7 @@ export const MlOpsDashboard: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 bg-white">
-                {fetchStatus === AsyncStatus.LOADING ? (
+                {fetchStatus === AsyncStatus.LOADING && snapshots.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="p-8 text-center">
                       <div className="flex justify-center items-center">
@@ -244,18 +287,25 @@ export const MlOpsDashboard: React.FC = () => {
                       </div>
                     </td>
                   </tr>
+                ) : fetchStatus === AsyncStatus.ERROR && snapshots.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="p-8">
+                      <EmptyState
+                        variant={isOffline ? 'offline' : 'empty'}
+                        title={isOffline ? 'MLOps Cluster Offline' : 'Failed to Load Graph Snapshots'}
+                        message={fetchError || 'Unable to retrieve snapshot versions from the server.'}
+                        onRetry={retry}
+                      />
+                    </td>
+                  </tr>
                 ) : snapshots.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="p-12 text-center">
-                      <div className="flex flex-col items-center justify-center space-y-2.5 py-2">
-                        <div className="p-3.5 bg-slate-100 rounded-2xl text-slate-400">
-                          <Layers className="w-6 h-6" />
-                        </div>
-                        <div className="font-bold text-slate-800 text-xs">No snapshots recorded yet</div>
-                        <p className="text-[11px] text-slate-500 max-w-sm leading-relaxed">
-                          Graph snapshots are captured automatically during scheduled retrain cycles or on demand.
-                        </p>
-                      </div>
+                      <EmptyState
+                        variant="empty"
+                        title="No Snapshots Recorded Yet"
+                        message="Graph snapshots are captured automatically during scheduled retrain cycles or on demand."
+                      />
                     </td>
                   </tr>
                 ) : (

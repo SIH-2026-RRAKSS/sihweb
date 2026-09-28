@@ -73,9 +73,36 @@ export const getTierFromScore = (probability: number): ConfidenceTier => {
 };
 
 /**
- * Shared risk styling based on uniform thresholds
+ * Shared risk styling based on backend tier when present, with threshold fallback
  */
-export const getRiskStyle = (probability: number) => {
+export const getRiskStyle = (probability: number, tier?: string | ConfidenceTier | null) => {
+  const normTier = tier ? getTierLabel(tier) : null;
+
+  if (normTier) {
+    if (normTier === 'Critical') {
+      return {
+        textColor: 'text-red-600',
+        barColor: 'bg-red-500',
+        tier: 'HIGH_CONFIDENCE' as ConfidenceTier,
+        label: 'Critical' as UnifiedTierLabel,
+      };
+    }
+    if (normTier === 'Suspicious') {
+      return {
+        textColor: 'text-amber-600',
+        barColor: 'bg-amber-500',
+        tier: 'MEDIUM_CONFIDENCE' as ConfidenceTier,
+        label: 'Suspicious' as UnifiedTierLabel,
+      };
+    }
+    return {
+      textColor: 'text-emerald-600',
+      barColor: 'bg-emerald-500',
+      tier: 'NORMAL' as ConfidenceTier,
+      label: 'Normal' as UnifiedTierLabel,
+    };
+  }
+
   if (probability >= RISK_THRESHOLDS.CRITICAL) {
     return {
       textColor: 'text-red-600',

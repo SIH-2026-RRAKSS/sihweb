@@ -7,6 +7,7 @@ interface LocationCellProps {
   predictedExitCity?: string;
   predictedExitTerminalId?: string;
   showPredictedExit?: boolean;
+  showJurisdictionLabel?: boolean;
   className?: string;
 }
 
@@ -16,6 +17,7 @@ export const LocationCell: React.FC<LocationCellProps> = ({
   predictedExitCity,
   predictedExitTerminalId,
   showPredictedExit = true,
+  showJurisdictionLabel = false,
   className = '',
 }) => {
   const hasJurisdiction = !!(district || state);
@@ -32,7 +34,7 @@ export const LocationCell: React.FC<LocationCellProps> = ({
       {hasJurisdiction && (
         <div className="flex items-center gap-1 text-slate-600">
           <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
-          <span className="text-slate-400 font-medium">Jurisdiction:</span>
+          {showJurisdictionLabel && <span className="text-slate-400 font-medium">Jurisdiction:</span>}
           <span className="font-semibold text-slate-700 truncate">{jurisdictionText}</span>
         </div>
       )}

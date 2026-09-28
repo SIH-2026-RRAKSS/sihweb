@@ -3,10 +3,12 @@ import { Routes, Route, Navigate, useNavigate, Outlet } from 'react-router-dom';
 import { AppShell } from './components/layout/AppShell';
 import { LandingSplash } from './components/splash/LandingSplash';
 import { CommandCenter } from './components/command/CommandCenter';
-import { SimulationLab } from './components/simulation/SimulationLab';
 import { IncidentQueue } from './components/incidents/IncidentQueue';
-import { NetworkExplorer } from './components/network/NetworkExplorer';
 import { CashOutMap } from './components/geo/CashOutMap';
+
+// Lazy-loaded 3D WebGL components
+const SimulationLab = React.lazy(() => import('./components/simulation/SimulationLab').then((m) => ({ default: m.SimulationLab })));
+const NetworkExplorer = React.lazy(() => import('./components/network/NetworkExplorer').then((m) => ({ default: m.NetworkExplorer })));
 import { PolicyBenchmark } from './components/policy/PolicyBenchmark';
 import { CaseDossier } from './components/dossier/CaseDossier';
 import { SystemHealth } from './components/health/SystemHealth';
@@ -23,6 +25,7 @@ import { SessionExpiredModal } from './components/auth/SessionExpiredModal';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ConnectivityProvider, useConnectivity } from './context/ConnectivityContext';
 import { NotFound } from './components/layout/NotFound';
+import { ErrorBoundary } from './components/ui/ErrorBoundary';
 
 const SplashGate = () => {
   const navigate = useNavigate();
@@ -96,7 +99,9 @@ const AppShellLayout = ({ activeDataset, setActiveDataset }: { activeDataset: 'S
       activeDataset={activeDataset}
       onToggleDataset={setActiveDataset}
     >
-      <Outlet />
+      <ErrorBoundary>
+        <Outlet />
+      </ErrorBoundary>
     </AppShell>
   );
 };
@@ -114,11 +119,29 @@ const AppContent: React.FC = () => {
         <Route path="/command" element={<ProtectedRoute allowedRoles={['CYBER_OFFICER', 'ADMIN']}><CommandCenter activeDataset={activeDataset} /></ProtectedRoute>} />
         <Route path="/incidents" element={<ProtectedRoute allowedRoles={['CYBER_OFFICER', 'POLICE', 'ADMIN']}><IncidentQueue activeDataset={activeDataset} /></ProtectedRoute>} />
         <Route path="/freeze-leo" element={<ProtectedRoute allowedRoles={['CYBER_OFFICER', 'POLICE', 'ADMIN']}><FreezeRequestManager /></ProtectedRoute>} />
-        <Route path="/network" element={<ProtectedRoute allowedRoles={['CYBER_OFFICER', 'POLICE', 'ADMIN']}><NetworkExplorer /></ProtectedRoute>} />
+        <Route
+          path="/network"
+          element={
+            <ProtectedRoute allowedRoles={['CYBER_OFFICER', 'POLICE', 'ADMIN']}>
+              <React.Suspense fallback={<div className="flex items-center justify-center min-h-[460px] text-xs font-mono text-slate-400">Loading 3D Network Explorer...</div>}>
+                <NetworkExplorer />
+              </React.Suspense>
+            </ProtectedRoute>
+          }
+        />
         <Route path="/cashout-map" element={<ProtectedRoute allowedRoles={['CYBER_OFFICER', 'POLICE', 'ADMIN']}><CashOutMap activeDataset={activeDataset} /></ProtectedRoute>} />
         <Route path="/dossier/:caseId" element={<ProtectedRoute allowedRoles={['CYBER_OFFICER', 'POLICE', 'ADMIN']}><CaseDossier /></ProtectedRoute>} />
         <Route path="/dossier" element={<Navigate to="/incidents" replace />} />
-        <Route path="/simulation" element={<ProtectedRoute allowedRoles={['CYBER_OFFICER', 'ADMIN']}><SimulationLab /></ProtectedRoute>} />
+        <Route
+          path="/simulation"
+          element={
+            <ProtectedRoute allowedRoles={['CYBER_OFFICER', 'ADMIN']}>
+              <React.Suspense fallback={<div className="flex items-center justify-center min-h-[460px] text-xs font-mono text-slate-400">Loading 3D Simulation Lab...</div>}>
+                <SimulationLab />
+              </React.Suspense>
+            </ProtectedRoute>
+          }
+        />
         <Route path="/policy" element={<ProtectedRoute allowedRoles={['CYBER_OFFICER', 'ADMIN']}><PolicyBenchmark activeDataset={activeDataset} /></ProtectedRoute>} />
         <Route path="/bank-freeze" element={<ProtectedRoute allowedRoles={['BANK_MANAGER', 'BANK_EMPLOYEE', 'ADMIN']}><BankFreezeInbox /></ProtectedRoute>} />
         <Route path="/bank-uploads" element={<ProtectedRoute allowedRoles={['BANK_MANAGER', 'BANK_EMPLOYEE', 'ADMIN']}><BankUploadPortal /></ProtectedRoute>} />

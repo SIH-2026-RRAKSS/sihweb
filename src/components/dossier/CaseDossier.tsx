@@ -30,7 +30,7 @@ import { LottieLoader } from '../ui/LottieLoader';
 export const CaseDossier: React.FC = () => {
   const { caseId } = useParams<{ caseId: string }>();
   const navigate = useNavigate();
-  const { status: fetchStatus, error: fetchError, run: runFetch } = useAsyncState<void>();
+  const { status: fetchStatus, error: fetchError, isOffline, run: runFetch, retry: retryFetch } = useAsyncState<IncidentDetail>();
   const [detail, setDetail] = useState<IncidentDetail | null>(null);
   const [copiedType, setCopiedType] = useState<string | null>(null);
 
@@ -41,13 +41,17 @@ export const CaseDossier: React.FC = () => {
     (detail as any)?.explainability?.investigative_evidence_bullets || 
     [];
 
-  useEffect(() => {
+  const loadDetail = () => {
     if (!caseId) return;
-
     runFetch(async () => {
       const detailData = await ApiService.getIncidentDetail(caseId);
       setDetail(detailData);
-    });
+      return detailData;
+    }).catch(() => {});
+  };
+
+  useEffect(() => {
+    loadDetail();
   }, [caseId]);
 
   const handleExportMarkdown = () => {
@@ -103,12 +107,54 @@ ${evidenceBullets.map(b => `- ${b}`).join('\n') || '- Standard transaction graph
     );
   }
 
-  const isHigh = detail?.model_prediction?.confidence_tier === 'HIGH_CONFIDENCE';
-  const isMedium = detail?.model_prediction?.confidence_tier === 'MEDIUM_CONFIDENCE';
+  if (fetchStatus === AsyncStatus.LOADING && !detail) {
+    return (
+      <div className="p-16 flex flex-col items-center justify-center min-h-[460px] bg-white rounded-2xl border border-slate-200 shadow-sm">
+        <LottieLoader status={fetchStatus} label={`Retrieving classified investigation dossier for case #${caseId}...`} />
+      </div>
+    );
+  }
+
+  if (fetchStatus === AsyncStatus.ERROR && !detail) {
+    return (
+      <div className="p-8 bg-white rounded-2xl border border-slate-200 shadow-sm">
+        <EmptyState
+          variant={isOffline ? 'offline' : 'empty'}
+          title={isOffline ? 'Server Unreachable' : 'Dossier Retrieval Error'}
+          description={fetchError || `Unable to load classified case dossier for ${caseId}.`}
+          onRetry={loadDetail}
+        />
+      </div>
+    );
+  }
+
+  if (!detail) {
+    return (
+      <div className="p-8 bg-white rounded-2xl border border-slate-200 shadow-sm">
+        <EmptyState
+          title="Incident Not Found"
+          description={`No recorded investigation records match case ID ${caseId}.`}
+        />
+      </div>
+    );
+  }
+
+  const isHigh = detail.model_prediction?.confidence_tier === 'HIGH_CONFIDENCE';
+  const isMedium = detail.model_prediction?.confidence_tier === 'MEDIUM_CONFIDENCE';
 
   return (
     <div className="space-y-4 font-sans text-xs">
-      {fetchStatus === AsyncStatus.ERROR && (<div className="bg-red-50 text-red-600 p-4 rounded-lg font-bold border border-red-200 mb-4">⚠ {fetchError || "Failed to load Case Dossier"}</div>)}
+      {fetchStatus === AsyncStatus.ERROR && (
+        <div className="bg-red-50 text-red-700 p-4 rounded-xl font-bold border border-red-200 mb-4 flex items-center justify-between">
+          <span>Failed to refresh dossier: {fetchError}</span>
+          <button
+            onClick={retryFetch}
+            className="px-2.5 py-1 bg-white border border-red-200 rounded-lg text-xs font-bold text-red-700 hover:bg-red-50"
+          >
+            Retry
+          </button>
+        </div>
+      )}
 
       {/* ── TOP ACTION HEADER BAR ── */}
       <div className="bg-white border border-slate-200 p-3.5 rounded-2xl flex flex-wrap items-center justify-between gap-3 shadow-sm">
@@ -126,13 +172,11 @@ ${evidenceBullets.map(b => `- ${b}`).join('\n') || '- Standard transaction graph
               <span className="font-bold text-sm text-slate-900 font-sans">
                 CLASSIFIED DOSSIER: {caseId}
               </span>
-              {detail && (
-                <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${
-                  isHigh ? 'bg-[#FF5500]/15 text-[#FF5500] border border-[#FF5500]/30' : isMedium ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
-                }`}>
-                  {detail?.model_prediction?.confidence_tier}
-                </span>
-              )}
+              <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${
+                isHigh ? 'bg-[#FF5500]/15 text-[#FF5500] border border-[#FF5500]/30' : isMedium ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+              }`}>
+                {detail.model_prediction?.confidence_tier}
+              </span>
             </div>
             <div className="text-[10px] text-slate-500">
               NATIONAL CYBERCRIME AML INTELLIGENCE DOSSIER
@@ -168,19 +212,7 @@ ${evidenceBullets.map(b => `- ${b}`).join('\n') || '- Standard transaction graph
         </div>
       </div>
 
-      {fetchStatus === AsyncStatus.ERROR ? (
-        <div className="p-8 text-center text-red-400 bg-slate-900 rounded-lg mx-3.5 mt-4 border border-red-900/50">
-          <AlertTriangle size={32} className="mx-auto mb-3 opacity-50" />
-          <p className="font-mono text-sm">{fetchError}</p>
-        </div>
-      ) : !caseId ? (
-        <div className="p-8 text-center text-slate-500 font-bold">Select a case from the Incident Queue to view its dossier.</div>
-      ) : fetchStatus === AsyncStatus.LOADING || !detail ? (
-        <div className="p-8 flex justify-center items-center min-h-[400px]">
-          <LottieLoader status={fetchStatus} />
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
           
           {/* ── LEFT COLUMN: COMPLAINT PROFILE & CANONICAL ENTITY (7 COLS) ── */}
           <div className="lg:col-span-7 space-y-3.5">
@@ -286,10 +318,6 @@ ${evidenceBullets.map(b => `- ${b}`).join('\n') || '- Standard transaction graph
                     {detail?.model_prediction?.confidence_tier}
                   </span>
                 </div>
-                <div className="text-[9px] text-cyan-400 font-bold uppercase tracking-widest flex items-center gap-1">
-                  <Activity className="w-3 h-3" />
-                  <span>Latency: 2.14 ms (Sub-5ms SLA Satisfied)</span>
-                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-2">
@@ -345,12 +373,12 @@ ${evidenceBullets.map(b => `- ${b}`).join('\n') || '- Standard transaction graph
 
               return (
                 <div className="bg-white border border-slate-200 rounded-2xl p-4 space-y-3 shadow-sm">
-                  <div className="flex items-center justify-between text-xs font-bold text-amber-400 uppercase border-b border-slate-200 pb-2">
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-800 uppercase border-b border-slate-200 pb-2">
                     <span className="flex items-center gap-1.5">
-                      <MapPin className="w-4 h-4 text-amber-400" />
+                      <MapPin className="w-4 h-4 text-[#FF5500]" />
                       <span>TOP 3 CASH-OUT TERMINALS</span>
                     </span>
-                    <span>MRR: 0.9412</span>
+                    <span className="text-slate-600 font-semibold font-mono text-[10px]">MRR: 1.0 (Top-1, n=101, avg 1.9 candidates)</span>
                   </div>
 
                   {topTerminals.length > 0 ? (
@@ -412,7 +440,6 @@ ${evidenceBullets.map(b => `- ${b}`).join('\n') || '- Standard transaction graph
           </div>
 
         </div>
-      )}
     </div>
   );
 };

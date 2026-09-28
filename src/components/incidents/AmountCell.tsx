@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatINR } from '../../utils/formatINR';
 
 interface AmountCellProps {
   amount: number;
@@ -20,12 +21,8 @@ export const formatIncidentAmount = (amount: number, dataset?: string, compact: 
     return `₿ ${amount.toFixed(4)} BTC`;
   }
 
-  // Default Indian Rupee (INR)
-  if (compact) {
-    if (amount >= 10000000) return `₹${(amount / 10000000).toFixed(2)}Cr`;
-    if (amount >= 100000) return `₹${(amount / 100000).toFixed(2)}L`;
-  }
-  return `₹${amount.toLocaleString('en-IN')}`;
+  // Row-level INR amounts strictly use full formatINR grouping (no compact 4.03L)
+  return formatINR(amount);
 };
 
 export const AmountCell: React.FC<AmountCellProps> = ({

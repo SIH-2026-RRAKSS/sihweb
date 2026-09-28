@@ -76,16 +76,20 @@ export const TrinetraLogo: React.FC<TrinetraLogoProps> = ({
         <div className="space-y-1 text-left">
           <div className="flex items-baseline font-sans font-bold tracking-tight text-slate-900 text-xl sm:text-2xl">
             <div className="relative inline-block overflow-hidden min-w-[1.2em] text-right">
-              <AnimatePresence mode="wait">
+              {/* Fallback persistent anchor so the segment never renders blank */}
+              <span className="invisible select-none" aria-hidden="true">
+                {current.prefix || 'त्रि'}
+              </span>
+              <AnimatePresence mode="popLayout">
                 <motion.span
                   key={current.script}
-                  initial={{ opacity: 0, y: 8 }}
+                  initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.25 }}
-                  className="inline-block text-[#FF5500]"
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute inset-0 inline-block text-[#FF5500]"
                 >
-                  {current.prefix}
+                  {current.prefix || 'त्रि'}
                 </motion.span>
               </AnimatePresence>
             </div>
@@ -187,17 +191,20 @@ export const TrinetraLogo: React.FC<TrinetraLogoProps> = ({
       {/* Dynamic Wordmark */}
       <div className="flex flex-col text-left leading-none">
         <div className={`flex items-baseline font-sans font-bold tracking-tight text-slate-900 ${sizeConfig.textSize}`}>
-          <div className="relative inline-block overflow-hidden min-w-[1.2em] text-right">
-            <AnimatePresence mode="wait">
+          <div className="relative inline-block text-right">
+            <span className={`invisible select-none ${sizeConfig.prefixSize}`} aria-hidden="true">
+              {current.prefix || 'त्रि'}
+            </span>
+            <AnimatePresence mode="popLayout">
               <motion.span
                 key={current.script}
-                initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -8, scale: 0.95 }}
-                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                className={`inline-block text-[#FF5500] ${sizeConfig.prefixSize}`}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.2 }}
+                className={`absolute inset-0 inline-block text-[#FF5500] ${sizeConfig.prefixSize}`}
               >
-                {current.prefix}
+                {current.prefix || 'त्रि'}
               </motion.span>
             </AnimatePresence>
           </div>

@@ -27,8 +27,10 @@ import {
 
 import { TrinetraLogo } from '../ui/TrinetraLogo';
 import { useAuth } from '../../context/AuthContext';
+import { useConnectivity } from '../../context/ConnectivityContext';
+import { formatCompactINR } from '../../utils/formatINR';
 import { UserRole } from '../../types';
-import { ApiService } from '../../services/api';
+import { ApiService, isDemoMode } from '../../services/api';
 
 export type NavPage =
   | 'command'
@@ -120,28 +122,7 @@ export const AppShell: React.FC<AppShellProps> = ({
   const [stats, setStats] = useState<any>(null);
   const [bench, setBench] = useState<any>(null);
 
-  const [restStatus, setRestStatus] = useState<string>('PINGING...');
-  const [fastApiStatus, setFastApiStatus] = useState<string>('PINGING...');
-
-  useEffect(() => {
-    const checkHealth = async () => {
-      const baseUrl = ((import.meta as any).env?.VITE_API_BASE_URL as string) || '/api';
-      try {
-        const restRes = await fetch(baseUrl + '/health');
-        if (restRes.ok) setRestStatus('200 OK');
-        else setRestStatus(`ERROR ${restRes.status}`);
-      } catch (e) { setRestStatus('OFFLINE'); }
-
-      try {
-        const fastRes = await fetch(baseUrl + '/model-health');
-        if (fastRes.ok) setFastApiStatus('200 OK');
-        else setFastApiStatus(`ERROR ${fastRes.status}`);
-      } catch (e) { setFastApiStatus('OFFLINE'); }
-    };
-    checkHealth();
-    const interval = setInterval(checkHealth, 10000);
-    return () => clearInterval(interval);
-  }, []);
+  const { fastApiStatus, restStatus } = useConnectivity();
 
   useEffect(() => {
     Promise.all([
@@ -259,6 +240,13 @@ export const AppShell: React.FC<AppShellProps> = ({
 
         {/* RIGHT CLUSTER: Military Clock + Real User Profile Dropdown */}
         <div className="flex items-center gap-2.5">
+          {/* Sample Data Badge (shown only if demo mode is enabled) */}
+          {isDemoMode() && (
+            <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-300 uppercase tracking-widest font-mono shadow-xs">
+              SAMPLE DATA
+            </span>
+          )}
+
           {/* Military Dual Clock Chip */}
           <div className="hidden sm:flex items-center bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 gap-1.5 text-[11px] text-slate-700 font-mono shadow-xs">
             <Clock className="w-3.5 h-3.5 text-slate-400" />
@@ -482,7 +470,7 @@ export const AppShell: React.FC<AppShellProps> = ({
 
           <div>
             <span className="font-bold text-amber-600">
-              CASH-OUT EXPOSURE: {stats?.total_exposure ? `₹${(stats.total_exposure / 10000000).toFixed(2)} CR` : '₹4.82 CR'}
+              HIGH-CONFIDENCE EXPOSURE: {stats?.high_risk_exposure ? formatCompactINR(stats.high_risk_exposure) : '—'}
             </span>
           </div>
         </div>

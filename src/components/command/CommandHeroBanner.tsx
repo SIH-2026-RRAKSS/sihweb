@@ -48,8 +48,8 @@ export const CommandHeroBanner: React.FC<CommandHeroBannerProps> = () => {
             <span className="px-2.5 py-0.5 bg-slate-100 border border-slate-200 text-slate-700 text-[10px] font-bold rounded">
               GraphSAGE GNN v2.4 OPERATIONAL
             </span>
-            <span className="px-2.5 py-0.5 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-bold rounded">
-              TERMINAL MRR: 0.9412
+            <span className="px-2.5 py-0.5 bg-orange-50 border border-orange-200 text-orange-700 text-[10px] font-bold rounded">
+              TERMINAL MRR: 1.0 (Top-1, n=101, avg 1.9 cands)
             </span>
           </div>
 

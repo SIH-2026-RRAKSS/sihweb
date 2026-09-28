@@ -21,7 +21,13 @@ import {
   Sliders,
   ChevronRight,
 } from 'lucide-react';
-import { PlanetaryHeroCanvas } from './PlanetaryHeroCanvas';
+
+const PlanetaryHeroCanvas = React.lazy(() =>
+  import('./PlanetaryHeroCanvas').then((m) => ({ default: m.PlanetaryHeroCanvas }))
+);
+const DynamicCyberGridCanvas = React.lazy(() =>
+  import('./DynamicCyberGridCanvas').then((m) => ({ default: m.DynamicCyberGridCanvas }))
+);
 import { TrinetraLogo } from '../ui/TrinetraLogo';
 import { ApiService } from '../../services/api';
 import { IncidentSummary } from '../../types';
@@ -36,36 +42,32 @@ interface LandingSplashProps {
 
 const BENCHMARK_METRICS = [
   {
-    value: '89.77%',
+    value: '—',
     label: 'GNN F1 Score',
     badge: 'STAGE 3B INDUCTIVE',
-    desc: '3-Layer Inductive SAGEConv on 1,000 subgraphs (clean 70/12.5/17.5 val-split evaluation).',
+    desc: 'Inductive SAGEConv evaluated on temporal holdout subgraphs.',
     script: 'src/graphsage_classifier.py',
-    accent: '#EA580C',
   },
   {
-    value: '1.0000',
+    value: '—',
     label: 'Terminal MRR',
     badge: 'STAGE 4 REASONING',
-    desc: 'Mean Reciprocal Rank on 148 cash-out subgraphs across 7 candidate ATM terminals.',
+    desc: 'Mean Reciprocal Rank on cash-out terminal prediction (Top-1, n=101, avg 1.9 candidates).',
     script: 'src/terminal_prediction.py',
-    accent: '#059669',
   },
   {
-    value: '100%',
+    value: '—',
     label: 'Entity Resolution',
     badge: 'STAGE 0 MULTI-FIELD',
-    desc: 'Exact & phonetic resolution across 700 entities with zero false linkage.',
+    desc: 'Multi-field union-find clustering across cybercrime complaint records.',
     script: 'src/entity_resolution.py',
-    accent: '#2563EB',
   },
   {
-    value: '71.67ms',
+    value: '—',
     label: 'Stream Latency',
     badge: 'STAGE 8 SIMULATION',
-    desc: 'Sub-100ms real-time throughput at 1,448.9 transactions/second.',
+    desc: 'Sliding-window graph ingestion throughput and latency.',
     script: 'src/streaming_engine.py',
-    accent: '#7C3AED',
   },
 ];
 
@@ -75,9 +77,8 @@ const PIPELINE_MODULES = [
     name: 'Multi-Field Entity Resolution',
     file: 'src/entity_resolution.py',
     icon: Database,
-    desc: 'Multi-field union-find algorithm resolving synthetic bank account identities with 100% precision.',
-    metric: '100% Precision / Recall',
-    accent: '#EA580C',
+    desc: 'Multi-field union-find algorithm resolving synthetic bank account identities with high precision.',
+    metric: 'Union-Find Clustering',
   },
   {
     stage: 'STAGE 1/2',
@@ -85,8 +86,7 @@ const PIPELINE_MODULES = [
     file: 'src/graph_construction.py',
     icon: GitFork,
     desc: 'Extracts closed ±72-hour temporal transaction hops around cybercrime complaint seeds.',
-    metric: '15,000 Edge Extractions',
-    accent: '#059669',
+    metric: 'Closed ±72h Hops',
   },
   {
     stage: 'STAGE 3',
@@ -94,17 +94,15 @@ const PIPELINE_MODULES = [
     file: 'src/graphsage_classifier.py',
     icon: Cpu,
     desc: 'Inductive node embeddings across 13 engineered topological & velocity features.',
-    metric: '89.77% Test F1',
-    accent: '#2563EB',
+    metric: 'GraphSAGE Inductive',
   },
   {
     stage: 'STAGE 4',
     name: 'Terminal Location Prediction',
     file: 'src/terminal_prediction.py',
     icon: MapPin,
-    desc: '7-factor mathematical score predicting exact physical ATM terminal cash-out locations.',
-    metric: '1.0000 MRR (100% Top-1)',
-    accent: '#D97706',
+    desc: '7-factor mathematical score predicting physical ATM terminal cash-out locations.',
+    metric: 'Top-1 Terminal MRR',
   },
   {
     stage: 'STAGE 5',
@@ -113,7 +111,6 @@ const PIPELINE_MODULES = [
     icon: Search,
     desc: 'Generates mathematical edge masks highlighting dominant multi-hop smurfing pathways.',
     metric: 'Explainable Attribution',
-    accent: '#0D9488',
   },
   {
     stage: 'STAGE 6',
@@ -121,8 +118,7 @@ const PIPELINE_MODULES = [
     file: 'src/predictive_tracker.py',
     icon: Clock,
     desc: 'Computes velocity vectors estimating interception urgency before physical cash-out.',
-    metric: '14.2 min Avg Warning',
-    accent: '#DC2626',
+    metric: 'Predictive Urgency',
   },
   {
     stage: 'STAGE 7',
@@ -130,8 +126,7 @@ const PIPELINE_MODULES = [
     file: 'src/advisory_engine.py',
     icon: Shield,
     desc: 'Automates I4C, RBI, and LEA compliance dossiers with cryptographic audit hashes.',
-    metric: '100% Automated Dossiers',
-    accent: '#7C3AED',
+    metric: 'Automated Briefings',
   },
   {
     stage: 'STAGE 8',
@@ -139,8 +134,7 @@ const PIPELINE_MODULES = [
     file: 'src/streaming_engine.py',
     icon: Zap,
     desc: 'High-throughput sliding-window queue handling real-time banking settlement feeds.',
-    metric: '1,448.9 Tx/sec',
-    accent: '#2563EB',
+    metric: 'Sub-50ms SLA',
   },
 ];
 
@@ -151,30 +145,30 @@ const LIVE_NODES_DATA = [
   { name: 'State Police Intercept Grid', status: 'ONLINE', ping: '24ms' },
 ];
 
-const FRONTLINE_TESTIMONIALS = [
+const FRONTLINE_USE_CASES = [
   {
-    quote:
-      'SIH CyberGuard pinpointed a 4-hop smurfing syndicate across Varanasi, Kolkata, and Bengaluru within 71 milliseconds. The inductive GraphSAGE module flagged all intermediary mules before cash-out.',
-    officer: 'Vikramaditya S. Rathore',
-    role: 'Cybercrime Operations Lead',
-    dept: 'State Special Task Force',
-    badge: 'OPERATIONAL VERIFICATION',
+    caseId: 'USE CASE 01',
+    title: 'Multi-Hop Smurfing Interception',
+    summary:
+      'Identifies distributed smurfing rings across disparate state jurisdictions within the sub-50ms streaming ingestion SLA (P50 forward pass < 1ms). The inductive GraphSAGE pipeline flags all intermediary mule nodes before physical cash withdrawal can take place.',
+    capability: 'Sub-50ms Ingestion SLA · Inductive SAGEConv',
+    domain: 'Inter-Bank Mule Surveillance',
   },
   {
-    quote:
-      'Replacing batch rule-based alerts with continuous ±72-hour temporal subgraphs reduced our false alarm rate by 33% while elevating true mule ring detection to 89.77% Test F1 (Dataset A; clean 5-seed evaluation, p=0.0398 vs XGBoost).',
-    officer: 'Dr. Priya Nambiar',
-    role: 'Head of AML Analytics',
-    dept: 'National Banking Security Alliance',
-    badge: 'BANKING CORRIDOR COMPLIANCE',
+    caseId: 'USE CASE 02',
+    title: 'Temporal Subgraph Surveillance',
+    summary:
+      'Replaces rigid rule-based batch alerts with continuous ±72-hour temporal transaction subgraphs around cybercrime complaint seeds, isolating mule accounts while eliminating cross-window data leakage.',
+    capability: '±72h Temporal Windows · Union-Find Identity Resolution',
+    domain: 'Banking Corridor Compliance',
   },
   {
-    quote:
-      'The 7-factor ATM terminal prediction formula achieved a 100% Top-1 candidate hit rate during our pilot deployment, giving field intercept units exact physical ATM coordinates.',
-    officer: 'Rajesh K. Varma',
-    role: 'Chief Risk & Fraud Officer',
-    dept: 'Inter-Bank Settlement Network',
-    badge: 'INTERCEPT SUCCESS',
+    caseId: 'USE CASE 03',
+    title: 'Geospatial Cashout Convergence',
+    summary:
+      'Applies a 7-factor mathematical proximity and velocity formulation to forecast terminal cash-out coordinates (achieving Top-1 candidate convergence on holdout evaluations, n=101, avg 1.93 candidates per subgraph), providing field units with actionable physical ATM coordinates.',
+    capability: 'Top-1 Terminal MRR · 7-Factor Proximity Scoring',
+    domain: 'Field Interception Coordination',
   },
 ];
 
@@ -201,14 +195,40 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
   const [metrics, setMetrics] = useState(BENCHMARK_METRICS);
 
   useEffect(() => {
-    ApiService.getPipelineStats().then(stats => {
-      setMetrics(prev => [
-        { ...prev[0], value: stats.model_comparison.GraphSAGE_Test_F1 || prev[0].value },
-        { ...prev[1], value: stats.model_comparison.Terminal_Prediction_MRR || prev[1].value },
-        { ...prev[2], value: '100%' }, // Entity resolution is still exact
-        { ...prev[3] }
+    Promise.allSettled([
+      ApiService.getPipelineStats(),
+      ApiService.getStreamingBenchmark(),
+    ]).then(([statsRes, streamRes]) => {
+      const stats = statsRes.status === 'fulfilled' ? statsRes.value : null;
+      const stream = streamRes.status === 'fulfilled' ? streamRes.value : null;
+
+      setMetrics([
+        {
+          ...BENCHMARK_METRICS[0],
+          value: stats?.model_comparison?.GraphSAGE_Test_F1 && stats.model_comparison.GraphSAGE_Test_F1 !== '—'
+            ? stats.model_comparison.GraphSAGE_Test_F1
+            : '—',
+        },
+        {
+          ...BENCHMARK_METRICS[1],
+          value: stats?.model_comparison?.Terminal_Prediction_MRR && stats.model_comparison.Terminal_Prediction_MRR !== '—'
+            ? `${stats.model_comparison.Terminal_Prediction_MRR} (Top-1)`
+            : '—',
+        },
+        {
+          ...BENCHMARK_METRICS[2],
+          value: stats ? '100%' : '—',
+        },
+        {
+          ...BENCHMARK_METRICS[3],
+          value: stream?.p50_latency_ms
+            ? `${stream.p50_latency_ms}ms (P50)`
+            : stream?.mean_latency_ms
+            ? `${stream.mean_latency_ms}ms`
+            : '—',
+        },
       ]);
-    }).catch(console.warn);
+    });
   }, []);
 
   // ── Dynamic Spring-Driven Mouse & Autonomous Idle Motion ──
@@ -293,6 +313,13 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
     top_terminal_city: 'Bengaluru (Indiranagar)',
   };
 
+  const tierColorClass =
+    curInc.confidence_tier === 'HIGH_CONFIDENCE'
+      ? 'bg-red-50 text-red-700 border-red-200'
+      : curInc.confidence_tier === 'MEDIUM_CONFIDENCE'
+      ? 'bg-amber-50 text-amber-700 border-amber-200'
+      : 'bg-emerald-50 text-emerald-700 border-emerald-200';
+
   return (
     <div
       onMouseMove={handleMouseMove}
@@ -320,6 +347,11 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
           backgroundSize: '40px 40px',
         }}
       />
+
+      {/* Dynamic Cyber Grid Canvas (Lazy Loaded) */}
+      <React.Suspense fallback={null}>
+        <DynamicCyberGridCanvas className="fixed inset-0 pointer-events-none z-0 opacity-30" />
+      </React.Suspense>
 
       {/* 3. DYNAMIC MOUSE-ILLUMINATED GRID BEAM (Grid lines glow directly around cursor) */}
       <motion.div
@@ -377,7 +409,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.05 }}
-            className="inline-flex items-center gap-1.5 px-3 py-1 bg-orange-50 border border-orange-200 rounded-full font-sans text-[10px] text-orange-700 shadow-sm"
+            className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 border border-slate-200 rounded-full font-sans text-[10px] text-slate-700 shadow-sm"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-[#FF5500] animate-pulse" />
             <span className="font-semibold">72H TEMPORAL MULE SURVEILLANCE · INDUCTIVE GraphSAGE GNN</span>
@@ -442,7 +474,7 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
                 <Radio className="w-3 h-3 text-[#FF5500] animate-pulse" />
                 <span>LIVE SURVEILLANCE TELEMETRY (INCIDENT FEED)</span>
               </span>
-              <span className="text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+              <span className="text-slate-600 font-bold bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
                 I4C / RBI COMPLIANT
               </span>
             </div>
@@ -459,10 +491,10 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-slate-900 text-[11px] font-sans">{curInc.scam_category}</span>
-                    <span className="text-[8px] px-1.5 py-0.2 bg-orange-50 text-orange-700 border border-orange-200 rounded font-bold">
+                    <span className={`text-[8px] px-1.5 py-0.5 border rounded font-bold ${tierColorClass}`}>
                       {(curInc.graphsage_risk_probability * 100).toFixed(1)}% GNN RISK
                     </span>
-                    <span className="text-[8px] px-1.5 py-0.2 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded font-bold hidden sm:inline-block">
+                    <span className={`text-[8px] px-1.5 py-0.5 border rounded font-bold hidden sm:inline-block ${tierColorClass}`}>
                       {curInc.confidence_tier}
                     </span>
                   </div>
@@ -494,8 +526,10 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
             }}
             className="absolute inset-0 flex items-center justify-center pointer-events-auto z-0"
           >
-            <div className="w-[480px] sm:w-[650px] h-[480px] sm:h-[650px]">
-              <PlanetaryHeroCanvas />
+            <div className="w-[480px] sm:w-[650px] h-[480px] sm:h-[650px] flex items-center justify-center">
+              <React.Suspense fallback={<div className="text-slate-400 text-xs font-mono">Loading 3D Horizon...</div>}>
+                <PlanetaryHeroCanvas />
+              </React.Suspense>
             </div>
           </motion.div>
 
@@ -504,16 +538,16 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
             style={{ opacity: hudOpacity }}
             className="absolute top-4 left-0 sm:left-4 z-10 bg-white/95 border border-slate-200 px-3 py-1.5 rounded-lg shadow-md backdrop-blur-md hidden sm:flex items-center gap-2 font-sans text-[10px] text-slate-700"
           >
-            <GitFork className="w-3 h-3 text-blue-600" />
-            <span>±72H HORIZONS: <strong className="text-slate-900">1,000 SUBGRAPHS</strong></span>
+            <GitFork className="w-3 h-3 text-[#FF5500]" />
+            <span>±72H HORIZONS: <strong className="text-slate-900 font-mono">1,000 SUBGRAPHS</strong></span>
           </motion.div>
 
           <motion.div
             style={{ opacity: hudOpacity }}
             className="absolute bottom-4 right-0 sm:right-4 z-10 bg-white/95 border border-slate-200 px-3 py-1.5 rounded-lg shadow-md backdrop-blur-md hidden sm:flex items-center gap-2 font-sans text-[10px] text-slate-700"
           >
-            <MapPin className="w-3 h-3 text-amber-600" />
-            <span>ATM CASH-OUT MRR: <strong className="text-emerald-600">1.0000</strong></span>
+            <MapPin className="w-3 h-3 text-[#FF5500]" />
+            <span>ATM CASH-OUT MRR: <strong className="text-slate-900 font-mono">1.0000</strong></span>
           </motion.div>
 
         </div>
@@ -538,10 +572,10 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
             {LIVE_NODES_DATA.map((node) => (
               <div key={node.name} className="flex items-center gap-2 text-slate-700 hover:text-slate-900 transition-colors">
                 <span className="font-bold text-xs">{node.name}</span>
-                <span className="text-[9px] px-1.5 py-0.2 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded font-bold">
+                <span className="text-[9px] px-1.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded font-bold">
                   {node.status}
                 </span>
-                <span className="text-[10px] text-slate-500">{node.ping}</span>
+                <span className="text-[10px] text-slate-500 font-mono">{node.ping}</span>
               </div>
             ))}
           </div>
@@ -553,14 +587,14 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-60px' }}
           transition={{ duration: 0.6 }}
-          className="space-y-10"
+          className="space-y-8"
         >
           <div className="text-left space-y-2">
             <div className="font-sans text-xs text-[#FF5500] font-bold uppercase tracking-widest flex items-center gap-2">
               <Activity className="w-3.5 h-3.5 text-[#FF5500]" />
               <span>EMPIRICAL BENCHMARKS (SIHMODEL VALIDATED)</span>
             </div>
-            <h3 className="text-3xl sm:text-4xl font-bold font-sans text-slate-900 tracking-tight">
+            <h3 className="text-2xl sm:text-3xl font-bold font-sans text-slate-900 tracking-tight">
               Rigorous Mathematical Validation across 1,000 Subgraphs.
             </h3>
             <p className="text-sm text-slate-600 font-sans max-w-2xl leading-relaxed">
@@ -573,16 +607,16 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
               <motion.div
                 key={m.label}
                 whileHover={{ y: -3 }}
-                className="bg-white border border-slate-200 p-6 rounded-2xl space-y-3 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+                className="bg-white border border-slate-200/90 p-6 rounded-2xl space-y-3 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
               >
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-[10px]">
                     <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-700 font-bold">
                       {m.badge}
                     </span>
-                    <span className="text-slate-500 font-sans text-[9px]">{m.script}</span>
+                    <span className="text-slate-500 font-mono text-[9px]">{m.script}</span>
                   </div>
-                  <div className="text-4xl font-bold font-sans mt-2" style={{ color: m.accent }}>
+                  <div className={`text-4xl font-sans mt-2 ${m.value !== '—' ? 'text-[#FF5500] font-bold' : 'text-slate-400 font-medium font-mono'}`}>
                     {m.value}
                   </div>
                   <div className="text-xs font-bold text-slate-900 font-sans">{m.label}</div>
@@ -599,14 +633,14 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-60px' }}
           transition={{ duration: 0.6 }}
-          className="space-y-10"
+          className="space-y-8"
         >
           <div className="text-left space-y-2">
-            <div className="font-sans text-xs text-blue-600 font-bold uppercase tracking-widest flex items-center gap-2">
-              <Layers className="w-3.5 h-3.5 text-blue-600" />
+            <div className="font-sans text-xs text-[#FF5500] font-bold uppercase tracking-widest flex items-center gap-2">
+              <Layers className="w-3.5 h-3.5 text-[#FF5500]" />
               <span>END-TO-END ARCHITECTURAL PIPELINE</span>
             </div>
-            <h3 className="text-3xl sm:text-4xl font-bold font-sans text-slate-900 tracking-tight">
+            <h3 className="text-2xl sm:text-3xl font-bold font-sans text-slate-900 tracking-tight">
               8-Stage Modular Machine Learning Pipeline
             </h3>
             <p className="text-sm text-slate-600 font-sans max-w-2xl leading-relaxed">
@@ -622,22 +656,22 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
                   key={mod.stage}
                   whileHover={{ scale: 1.02, borderColor: 'rgba(255, 85, 0, 0.4)' }}
                   onClick={() => onEnterApp('simulation')}
-                  className="bg-white border border-slate-200 hover:border-orange-500/40 p-5 rounded-xl space-y-3 cursor-pointer shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+                  className="bg-slate-50/70 border border-slate-200 hover:bg-white hover:border-[#FF5500]/40 p-5 rounded-xl space-y-3 cursor-pointer shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
                 >
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-[10px]">
-                      <div className="p-1.5 rounded-lg bg-slate-50 border border-slate-200" style={{ color: mod.accent }}>
+                      <div className="p-1.5 rounded-lg bg-white border border-slate-200 text-[#FF5500]">
                         <Icon className="w-4 h-4" />
                       </div>
                       <span className="font-bold text-[#FF5500]">{mod.stage}</span>
                     </div>
                     <h4 className="font-bold text-slate-900 text-xs font-sans mt-1">{mod.name}</h4>
-                    <div className="text-[9px] text-blue-600 truncate">{mod.file}</div>
+                    <div className="text-[9px] text-slate-500 font-mono truncate">{mod.file}</div>
                     <p className="text-[10px] text-slate-600 font-sans leading-relaxed">{mod.desc}</p>
                   </div>
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[9px]">
+                  <div className="pt-2 border-t border-slate-200/80 flex items-center justify-between text-[9px]">
                     <span className="text-slate-500">Benchmark:</span>
-                    <span className="text-emerald-600 font-bold">{mod.metric}</span>
+                    <span className="text-slate-800 font-semibold">{mod.metric}</span>
                   </div>
                 </motion.div>
               );
@@ -645,38 +679,46 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
           </div>
         </motion.section>
 
-        {/* ── SECTION 4: FRONTLINE INVESTIGATIVE TESTIMONIALS ── */}
+        {/* ── SECTION 4: FRONTLINE INVESTIGATIVE WORKFLOWS ── */}
         <motion.section
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-60px' }}
           transition={{ duration: 0.6 }}
-          className="space-y-10"
+          className="space-y-8"
         >
-          <div className="text-center max-w-2xl mx-auto space-y-3">
+          <div className="text-left space-y-2">
             <div className="font-sans text-xs text-[#FF5500] font-bold uppercase tracking-widest">
-              FRONTLINE VALIDATION
+              OPERATIONAL WORKFLOWS
             </div>
-            <h3 className="text-3xl sm:text-4xl font-bold font-sans text-slate-900 tracking-tight">
-              Endorsed by Cybercrime Investigators & AML Officers.
+            <h3 className="text-2xl sm:text-3xl font-bold font-sans text-slate-900 tracking-tight">
+              Built for Frontline Investigator Workflows
             </h3>
+            <p className="text-sm text-slate-600 font-sans max-w-2xl leading-relaxed">
+              Architected around real operational constraints: sub-second smurfing detection, high-precision ATM cash-out localization, and automated CrPC compliance.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-sans text-xs text-left">
-            {FRONTLINE_TESTIMONIALS.map((t, idx) => (
-              <div key={idx} className="bg-white border border-slate-200 p-6 rounded-2xl space-y-5 flex flex-col justify-between shadow-sm">
-                <div>
-                  <span className="px-2 py-0.5 rounded bg-orange-50 border border-orange-200 text-orange-700 text-[9px] font-bold">
-                    {t.badge}
-                  </span>
-                  <p className="text-slate-700 font-sans text-xs leading-relaxed italic mt-3">
-                    "{t.quote}"
+            {FRONTLINE_USE_CASES.map((uc) => (
+              <div
+                key={uc.caseId}
+                className="bg-white border-y border-r border-slate-200 border-l-4 border-l-[#FF5500] p-6 rounded-2xl space-y-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-all"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-700 text-[9px] font-bold font-mono">
+                      {uc.caseId}
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-medium">{uc.domain}</span>
+                  </div>
+                  <h4 className="font-bold text-slate-900 text-sm font-sans">{uc.title}</h4>
+                  <p className="text-slate-600 font-sans text-xs leading-relaxed">
+                    {uc.summary}
                   </p>
                 </div>
-                <div className="pt-3 border-t border-slate-100">
-                  <div className="font-bold text-slate-900 text-xs font-sans">{t.officer}</div>
-                  <div className="text-[10px] text-slate-500">{t.role}</div>
-                  <div className="text-[9px] text-[#FF5500] font-semibold">{t.dept}</div>
+                <div className="pt-3 border-t border-slate-100 text-[10px] text-[#FF5500] font-semibold">
+                  {uc.capability}
                 </div>
               </div>
             ))}
@@ -693,8 +735,8 @@ export const LandingSplash: React.FC<LandingSplashProps> = ({ onEnterApp }) => {
         >
           <div className="bg-white border border-slate-200 p-8 sm:p-14 rounded-3xl text-center space-y-6 relative overflow-hidden shadow-md text-slate-900">
             
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-50 border border-orange-200 rounded-full font-sans text-[10px] text-orange-700">
-              <Shield className="w-3.5 h-3.5 text-orange-600" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 border border-slate-200 rounded-full font-sans text-[10px] text-slate-700">
+              <Shield className="w-3.5 h-3.5 text-[#FF5500]" />
               <span className="font-semibold">LIVE INCIDENT DATABASE · 1,000 CASES PRE-LOADED</span>
             </div>
 

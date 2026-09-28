@@ -22,6 +22,7 @@ import { ApiService } from '../../services/api';
 import { EntityLocation, ConfidenceTier } from '../../types';
 import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
 import { LottieLoader } from '../ui/LottieLoader';
+import { EmptyState } from '../ui/EmptyState';
 
 interface CashOutMapProps {
   targetEntityId?: string | null;
@@ -37,7 +38,7 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
   const corridorsLayerRef = useRef<L.LayerGroup | null>(null);
 
-  const { status: fetchStatus, error: fetchError, run: runFetch } = useAsyncState<void>();
+  const { status: fetchStatus, error: fetchError, isOffline, run: runFetch, retry: retryFetch } = useAsyncState<void>();
   const [locations, setLocations] = useState<EntityLocation[]>([]);
   const [corridors, setCorridors] = useState<any[]>([]);
   const [selectedEntity, setSelectedEntity] = useState<EntityLocation | null>(null);
@@ -45,13 +46,13 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
   const [typeFilter, setTypeFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  // Fetch Entity Locations
-  useEffect(() => {
+  const loadData = () => {
     runFetch(async () => {
-      const data = await ApiService.getEntityLocations();
+      const [data, corridorsData] = await Promise.all([
+        ApiService.getEntityLocations(),
+        ApiService.getCorridors(),
+      ]);
       setLocations(data);
-      
-      const corridorsData = await ApiService.getCorridors();
       setCorridors(corridorsData);
 
       // Check if targetEntityId was passed
@@ -65,8 +66,13 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
       } else if (data.length > 0) {
         setSelectedEntity(data[0]);
       }
-    });
-  }, [targetEntityId]);
+    }).catch(() => {});
+  };
+
+  // Fetch Entity Locations
+  useEffect(() => {
+    loadData();
+  }, [targetEntityId, activeDataset]);
 
   // Initialize Leaflet Map
   useEffect(() => {
@@ -276,6 +282,15 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
   const isHighRisk = selectedEntity?.confidence_tier === 'HIGH_CONFIDENCE';
   const isATM = selectedEntity?.entity_type === 'ATM_TERMINAL';
 
+  const filteredLocations = locations
+    .filter((l) => typeFilter === 'ALL' || l.entity_type === typeFilter)
+    .filter(
+      (l) =>
+        !searchQuery ||
+        l.entity_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        l.city?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 h-[calc(100dvh-6.5rem)] font-sans text-xs overflow-y-auto">
       
@@ -324,47 +339,60 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
         <div className="flex-1 overflow-y-auto space-y-1.5 pr-1">
           {fetchStatus === AsyncStatus.LOADING ? (
             <div className="p-4 flex justify-center items-center h-48">
-              <LottieLoader status={fetchStatus} />
+              <LottieLoader status={fetchStatus} label="Locating terminals & mule nodes..." />
+            </div>
+          ) : fetchStatus === AsyncStatus.ERROR ? (
+            <div className="p-4">
+              <EmptyState
+                variant={isOffline ? 'offline' : 'empty'}
+                title={isOffline ? 'Server Unreachable' : 'Location Data Error'}
+                description={fetchError || 'Unable to fetch entity locations.'}
+                onRetry={loadData}
+              />
+            </div>
+          ) : filteredLocations.length === 0 ? (
+            <div className="p-4">
+              <EmptyState
+                title="No Entities Found"
+                description={searchQuery ? `No matches for "${searchQuery}".` : 'No geographic locations recorded for this category.'}
+              />
             </div>
           ) : (
-            locations
-              .filter(l => typeFilter === 'ALL' || l.entity_type === typeFilter)
-              .filter(l => !searchQuery || l.entity_id.toLowerCase().includes(searchQuery.toLowerCase()) || l.city?.toLowerCase().includes(searchQuery.toLowerCase()))
-              .map((loc) => {
-                const isSelected = selectedEntity?.entity_id === loc.entity_id;
-                const isLocATM = loc.entity_type === 'ATM_TERMINAL';
-                const isLocHigh = loc.confidence_tier === 'HIGH_CONFIDENCE';
+            filteredLocations.map((loc) => {
+              const isSelected = selectedEntity?.entity_id === loc.entity_id;
+              const isLocATM = loc.entity_type === 'ATM_TERMINAL';
+              const isLocHigh = loc.confidence_tier === 'HIGH_CONFIDENCE';
 
-                return (
-                  <div
-                    key={loc.entity_id}
-                    onClick={() => handleSelectFromList(loc)}
-                    className={`p-2 rounded border cursor-pointer transition-all ${
-                      isSelected
-                        ? 'bg-slate-100 border-white/30 text-slate-900'
-                        : 'bg-slate-50 border-slate-100 text-slate-500 hover:border-white/15'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between text-[11px] font-bold">
-                      <span className={isLocATM ? 'text-amber-400' : 'text-[#38BDF8]'}>
-                        {loc.entity_id}
-                      </span>
-                      <span className={`text-[9px] px-1 py-0.2 rounded border font-bold ${
-                        isLocHigh ? 'bg-[#FF5500]/15 text-[#FF5500] border-[#FF5500]/30' : 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
-                      }`}>
-                        {(loc.risk_probability * 100).toFixed(0)}%
-                      </span>
-                    </div>
-                    <div className="text-[10px] text-slate-700 truncate mt-0.5">
-                      {loc.holder_name}
-                    </div>
-                    <div className="flex justify-between items-center text-[9px] text-slate-500 mt-1">
-                      <span>{loc.city}, {loc.state}</span>
-                      <span className="text-slate-900 font-sans font-bold">₹{(loc.flagged_amount || 0).toLocaleString('en-IN')}</span>
-                    </div>
+              return (
+                <div
+                  key={loc.entity_id}
+                  onClick={() => handleSelectFromList(loc)}
+                  className={`p-2 rounded border cursor-pointer transition-all ${
+                    isSelected
+                      ? 'bg-slate-100 border-white/30 text-slate-900'
+                      : 'bg-slate-50 border-slate-100 text-slate-500 hover:border-white/15'
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-[11px] font-bold">
+                    <span className={isLocATM ? 'text-amber-400' : 'text-[#38BDF8]'}>
+                      {loc.entity_id}
+                    </span>
+                    <span className={`text-[9px] px-1 py-0.2 rounded border font-bold ${
+                      isLocHigh ? 'bg-[#FF5500]/15 text-[#FF5500] border-[#FF5500]/30' : 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                    }`}>
+                      {(loc.risk_probability * 100).toFixed(0)}%
+                    </span>
                   </div>
-                );
-              })
+                  <div className="text-[10px] text-slate-700 truncate mt-0.5">
+                    {loc.holder_name}
+                  </div>
+                  <div className="flex justify-between items-center text-[9px] text-slate-500 mt-1">
+                    <span>{loc.city}, {loc.state}</span>
+                    <span className="text-slate-900 font-sans font-bold">₹{(loc.flagged_amount || 0).toLocaleString('en-IN')}</span>
+                  </div>
+                </div>
+              );
+            })
           )}
         </div>
       </div>
@@ -373,8 +401,14 @@ export const CashOutMap: React.FC<CashOutMapProps> = ({ targetEntityId, onNaviga
       <div className="lg:col-span-6 bg-white border border-slate-200 rounded-2xl overflow-hidden relative shadow-sm flex flex-col">
         
       {fetchStatus === AsyncStatus.ERROR && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-red-50 text-red-600 px-4 py-2 rounded-lg border border-red-200 font-bold shadow-lg flex items-center gap-2">
-          <span>⚠ {fetchError || "Map Data Unavailable"}</span>
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-red-50 text-red-700 px-4 py-2 rounded-xl border border-red-200 font-bold shadow-lg flex items-center gap-3">
+          <span>⚠ {isOffline ? 'Backend Offline — Map Data Unavailable' : (fetchError || "Map Data Unavailable")}</span>
+          <button
+            onClick={loadData}
+            className="px-2 py-0.5 bg-white border border-red-200 rounded text-[10px] font-bold text-red-700 hover:bg-red-50 shadow-xs"
+          >
+            Retry
+          </button>
         </div>
       )}
 

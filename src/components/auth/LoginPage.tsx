@@ -23,6 +23,7 @@ import {
 import { useAuth, PERSONA_PRESETS } from '../../context/AuthContext';
 import { UserRole } from '../../types';
 import { TrinetraLogo } from '../ui/TrinetraLogo';
+import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
 
 export const LoginPage: React.FC<{
   onLoginSuccess?: () => void;
@@ -39,6 +40,7 @@ export const LoginPage: React.FC<{
   });
 
   const { loginStaff, loginCitizen, isLoading } = useAuth();
+  const { status: authStatus, error: asyncAuthError, isOffline, run: runAuth, setError: setAuthError } = useAsyncState<void>();
   const [mode, setMode] = useState<'STAFF' | 'CITIZEN'>('STAFF');
   const [employeeId, setEmployeeId] = useState('CYBER001');
   const [password, setPassword] = useState('OfficerPassword123!');
@@ -47,8 +49,11 @@ export const LoginPage: React.FC<{
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  const isSubmitting = isLoading || authStatus === AsyncStatus.LOADING;
+
   const notifySuccess = () => {
     setErrorMsg(null);
+    setAuthError(null);
     setIsSessionExpired(false);
     sessionStorage.removeItem('sih_session_expired');
     sessionStorage.removeItem('sih_session_expired_msg');
@@ -60,10 +65,12 @@ export const LoginPage: React.FC<{
     e.preventDefault();
     setErrorMsg(null);
     try {
-      await loginStaff(employeeId, password);
+      await runAuth(async () => {
+        await loginStaff(employeeId, password);
+      });
       notifySuccess();
-    } catch (err) {
-      setErrorMsg("Invalid Employee ID or Password. Please try again.");
+    } catch (err: any) {
+      setErrorMsg(isOffline ? "Backend server is unreachable. Please verify network connectivity." : (err?.message || "Invalid Employee ID or Password. Please try again."));
     }
   };
 
@@ -71,31 +78,35 @@ export const LoginPage: React.FC<{
     e.preventDefault();
     setErrorMsg(null);
     try {
-      const token = `mock:citizen_01:Demo Citizen:citizen@test.com:${phone}`;
-      await loginCitizen('MOCK', token);
+      await runAuth(async () => {
+        const token = `mock:citizen_01:Demo Citizen:citizen@test.com:${phone}`;
+        await loginCitizen('MOCK', token);
+      });
       notifySuccess();
-    } catch (err) {
-      setErrorMsg("Failed to verify OTP. Please try again.");
+    } catch (err: any) {
+      setErrorMsg(isOffline ? "Backend server is unreachable. Please verify network connectivity." : (err?.message || "Failed to verify OTP. Please try again."));
     }
   };
 
   const handlePersonaSelect = async (role: UserRole) => {
     setErrorMsg(null);
     try {
-      if (role === 'CYBER_OFFICER') {
-        await loginStaff('CYBER001', 'OfficerPassword123!');
-      } else if (role === 'POLICE') {
-        await loginStaff('POLICE001', 'PolicePassword123!');
-      } else if (role === 'BANK_MANAGER') {
-        await loginStaff('BANK001', 'BankPassword123!');
-      } else if (role === 'ADMIN') {
-        await loginStaff('ADMIN001', 'AdminPassword123!');
-      } else if (role === 'COMPLAINANT') {
-        await loginCitizen('MOCK', 'mock:citizen_01:Demo Citizen:citizen@test.com:+919876543210');
-      }
+      await runAuth(async () => {
+        if (role === 'CYBER_OFFICER') {
+          await loginStaff('CYBER001', 'OfficerPassword123!');
+        } else if (role === 'POLICE') {
+          await loginStaff('POLICE001', 'PolicePassword123!');
+        } else if (role === 'BANK_MANAGER') {
+          await loginStaff('BANK001', 'BankPassword123!');
+        } else if (role === 'ADMIN') {
+          await loginStaff('ADMIN001', 'AdminPassword123!');
+        } else if (role === 'COMPLAINANT') {
+          await loginCitizen('MOCK', 'mock:citizen_01:Demo Citizen:citizen@test.com:+919876543210');
+        }
+      });
       notifySuccess();
-    } catch (err) {
-      setErrorMsg("Authentication failed. Ensure backend is running and credentials are valid.");
+    } catch (err: any) {
+      setErrorMsg(isOffline ? "Backend server is unreachable. Please verify network connectivity." : "Authentication failed. Ensure backend is running and credentials are valid.");
     }
   };
   // -- Dynamic Spring-Driven Mouse & Autonomous Idle Motion --
@@ -249,6 +260,30 @@ export const LoginPage: React.FC<{
                 sessionStorage.removeItem('sih_session_expired_msg');
               }}
               className="text-amber-700 hover:text-amber-950 font-bold text-xs px-2.5 py-1 bg-amber-200/60 hover:bg-amber-200 rounded-lg transition-colors cursor-pointer"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
+
+        {/* Authentication Error Alert Banner */}
+        {(errorMsg || asyncAuthError) && (
+          <div className="bg-red-50 border border-red-300 rounded-2xl p-4 text-xs text-red-900 flex items-start gap-3 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="p-2 bg-red-100 rounded-xl text-red-700 flex-shrink-0 mt-0.5">
+              <ShieldAlert className="w-5 h-5 text-red-700" />
+            </div>
+            <div className="flex-1">
+              <div className="font-bold text-sm text-red-950">Authentication Error</div>
+              <p className="text-xs text-red-800 mt-1 leading-relaxed">
+                {errorMsg || asyncAuthError}
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                setErrorMsg(null);
+                setAuthError(null);
+              }}
+              className="text-red-700 hover:text-red-950 font-bold text-xs px-2.5 py-1 bg-red-200/60 hover:bg-red-200 rounded-lg transition-colors cursor-pointer"
             >
               Dismiss
             </button>
@@ -417,10 +452,10 @@ export const LoginPage: React.FC<{
 
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isSubmitting}
                 className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#FF7A1A] to-[#EA580C] hover:from-orange-500 hover:to-orange-600 text-white font-bold text-xs tracking-wide shadow-md shadow-orange-500/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
               >
-                {isLoading ? 'Authenticating...' : <>Authenticate Securely <ArrowRight className="w-4 h-4" /></>}
+                {isSubmitting ? 'Authenticating...' : <>Authenticate Securely <ArrowRight className="w-4 h-4" /></>}
               </button>
             </form>
           ) : (
@@ -456,10 +491,10 @@ export const LoginPage: React.FC<{
 
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isSubmitting}
                 className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs tracking-wide shadow-md shadow-purple-600/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
               >
-                {isLoading ? 'Verifying OTP...' : <>Verify & Access Portal <ArrowRight className="w-4 h-4" /></>}
+                {isSubmitting ? 'Verifying OTP...' : <>Verify & Access Portal <ArrowRight className="w-4 h-4" /></>}
               </button>
             </form>
           )}
