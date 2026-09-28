@@ -265,84 +265,84 @@ export const LoginPage: React.FC<{
             <span className="text-[10px] uppercase font-bold text-slate-400">SELECT OPERATIONAL CLEARANCE</span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             {/* Cyber Officer */}
             <button
               onClick={() => handlePersonaSelect('CYBER_OFFICER')}
-              className="group p-3 rounded-2xl bg-slate-50/80 hover:bg-orange-50/60 border border-slate-200/80 hover:border-orange-300 transition-all text-left flex flex-col justify-between space-y-2 shadow-sm hover:shadow"
+              className="group p-3 rounded-2xl bg-slate-50/80 hover:bg-orange-50/60 border border-slate-200/80 hover:border-orange-300 transition-all text-left flex items-center gap-3 shadow-xs hover:shadow-sm cursor-pointer"
             >
-              <div className="p-2 rounded-xl bg-orange-100/80 text-[#FF5500] w-fit group-hover:scale-105 transition-transform">
+              <div className="p-2.5 rounded-xl bg-orange-100/80 text-[#FF5500] flex-shrink-0 group-hover:scale-105 transition-transform">
                 <ShieldAlert className="w-4 h-4" />
               </div>
-              <div>
-                <div className="text-xs font-bold text-slate-900 group-hover:text-[#FF5500] transition-colors">
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-slate-900 group-hover:text-[#FF5500] transition-colors truncate">
                   Cyber Officer
                 </div>
-                <div className="text-[10px] text-slate-500 font-medium">GNN & Macro Rings</div>
+                <div className="text-[10px] text-slate-500 font-medium truncate">GNN & Macro Rings</div>
               </div>
             </button>
 
             {/* Police Station */}
             <button
               onClick={() => handlePersonaSelect('POLICE')}
-              className="group p-3 rounded-2xl bg-slate-50/80 hover:bg-blue-50/60 border border-slate-200/80 hover:border-blue-300 transition-all text-left flex flex-col justify-between space-y-2 shadow-sm hover:shadow"
+              className="group p-3 rounded-2xl bg-slate-50/80 hover:bg-blue-50/60 border border-slate-200/80 hover:border-blue-300 transition-all text-left flex items-center gap-3 shadow-xs hover:shadow-sm cursor-pointer"
             >
-              <div className="p-2 rounded-xl bg-blue-100/80 text-blue-700 w-fit group-hover:scale-105 transition-transform">
+              <div className="p-2.5 rounded-xl bg-blue-100/80 text-blue-700 flex-shrink-0 group-hover:scale-105 transition-transform">
                 <ShieldCheck className="w-4 h-4" />
               </div>
-              <div>
-                <div className="text-xs font-bold text-slate-900 group-hover:text-blue-700 transition-colors">
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-slate-900 group-hover:text-blue-700 transition-colors truncate">
                   Police SHO
                 </div>
-                <div className="text-[10px] text-slate-500 font-medium">Station Queue & FIR</div>
+                <div className="text-[10px] text-slate-500 font-medium truncate">Station Queue & FIR</div>
               </div>
             </button>
 
             {/* Bank Nodal Desk */}
             <button
               onClick={() => handlePersonaSelect('BANK_MANAGER')}
-              className="group p-3 rounded-2xl bg-slate-50/80 hover:bg-emerald-50/60 border border-slate-200/80 hover:border-emerald-300 transition-all text-left flex flex-col justify-between space-y-2 shadow-sm hover:shadow"
+              className="group p-3 rounded-2xl bg-slate-50/80 hover:bg-emerald-50/60 border border-slate-200/80 hover:border-emerald-300 transition-all text-left flex items-center gap-3 shadow-xs hover:shadow-sm cursor-pointer"
             >
-              <div className="p-2 rounded-xl bg-emerald-100/80 text-emerald-700 w-fit group-hover:scale-105 transition-transform">
+              <div className="p-2.5 rounded-xl bg-emerald-100/80 text-emerald-700 flex-shrink-0 group-hover:scale-105 transition-transform">
                 <Building2 className="w-4 h-4" />
               </div>
-              <div>
-                <div className="text-xs font-bold text-slate-900 group-hover:text-emerald-700 transition-colors">
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-slate-900 group-hover:text-emerald-700 transition-colors truncate">
                   Bank Nodal Mgr
                 </div>
-                <div className="text-[10px] text-slate-500 font-medium">Freeze Inbox & SLA</div>
+                <div className="text-[10px] text-slate-500 font-medium truncate">Freeze Inbox & SLA</div>
               </div>
             </button>
 
             {/* Citizen Complainant */}
             <button
               onClick={() => handlePersonaSelect('COMPLAINANT')}
-              className="group p-3 rounded-2xl bg-slate-50/80 hover:bg-purple-50/60 border border-slate-200/80 hover:border-purple-300 transition-all text-left flex flex-col justify-between space-y-2 shadow-sm hover:shadow"
+              className="group p-3 rounded-2xl bg-slate-50/80 hover:bg-purple-50/60 border border-slate-200/80 hover:border-purple-300 transition-all text-left flex items-center gap-3 shadow-xs hover:shadow-sm cursor-pointer"
             >
-              <div className="p-2 rounded-xl bg-purple-100/80 text-purple-700 w-fit group-hover:scale-105 transition-transform">
+              <div className="p-2.5 rounded-xl bg-purple-100/80 text-purple-700 flex-shrink-0 group-hover:scale-105 transition-transform">
                 <UserCheck className="w-4 h-4" />
               </div>
-              <div>
-                <div className="text-xs font-bold text-slate-900 group-hover:text-purple-700 transition-colors">
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-slate-900 group-hover:text-purple-700 transition-colors truncate">
                   Citizen Portal
                 </div>
-                <div className="text-[10px] text-slate-500 font-medium">File & Track Fraud</div>
+                <div className="text-[10px] text-slate-500 font-medium truncate">File & Track Fraud</div>
               </div>
             </button>
 
             {/* Admin */}
             <button
               onClick={() => handlePersonaSelect('ADMIN')}
-              className="group p-3 rounded-2xl bg-slate-50/80 hover:bg-amber-50/60 border border-slate-200/80 hover:border-amber-300 transition-all text-left flex flex-col justify-between space-y-2 shadow-sm hover:shadow col-span-2 sm:col-span-1"
+              className="group p-3 rounded-2xl bg-slate-50/80 hover:bg-amber-50/60 border border-slate-200/80 hover:border-amber-300 transition-all text-left flex items-center gap-3 shadow-xs hover:shadow-sm col-span-1 sm:col-span-2 cursor-pointer"
             >
-              <div className="p-2 rounded-xl bg-amber-100/80 text-amber-700 w-fit group-hover:scale-105 transition-transform">
+              <div className="p-2.5 rounded-xl bg-amber-100/80 text-amber-700 flex-shrink-0 group-hover:scale-105 transition-transform">
                 <Settings className="w-4 h-4" />
               </div>
-              <div>
-                <div className="text-xs font-bold text-slate-900 group-hover:text-amber-700 transition-colors">
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-slate-900 group-hover:text-amber-700 transition-colors truncate">
                   System Admin
                 </div>
-                <div className="text-[10px] text-slate-500 font-medium">Registry & MLOps</div>
+                <div className="text-[10px] text-slate-500 font-medium truncate">Registry & MLOps Governance</div>
               </div>
             </button>
           </div>

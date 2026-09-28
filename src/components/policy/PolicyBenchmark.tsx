@@ -56,7 +56,7 @@ export const PolicyBenchmark: React.FC<{ activeDataset?: string }> = ({ activeDa
           allPoints.map(async (t) => {
             const res = await ApiService.tunePolicy(t, activeDataset);
             return {
-              threshold: `τ=${t.toFixed(2)}`,
+              rawThreshold: t,
               precision: Number(res.precision_percent.toFixed(1)),
               recall: Number(res.recall_percent.toFixed(1)),
               f1: Number(res.f1_score_percent.toFixed(1)),
@@ -104,7 +104,7 @@ export const PolicyBenchmark: React.FC<{ activeDataset?: string }> = ({ activeDa
                 OPERATIONAL THRESHOLD POLICY CONSOLE (τ)
               </div>
               <div className="text-[9px] text-slate-500">
-                DYNAMIC TRIAGE CALIBRATION & WORKLOAD IMPACT
+                DYNAMIC TRIAGE CALIBRATION & WORKLOAD IMPACT (SIMULATED SWEEP)
               </div>
             </div>
           </div>
@@ -169,21 +169,29 @@ export const PolicyBenchmark: React.FC<{ activeDataset?: string }> = ({ activeDa
             <div className="text-xl font-bold font-mono text-slate-800">
               {policyData ? `${policyData.false_positives} / ${policyData.total_eval_samples || 200}` : '--'}
             </div>
-            <div className="text-[9px] text-slate-400 mt-1">ESTIMATED HUMAN TRIAGE</div>
+            <div className="text-[9px] text-amber-600 font-bold mt-1">SIMULATED FP ESTIMATE</div>
           </div>
         </div>
 
         {/* Precision / Recall Trade-off Chart */}
         <div className="h-64 w-full bg-white p-3 border border-slate-200 rounded-xl shadow-xs">
           <div className="text-[10px] text-slate-500 mb-2 font-bold flex items-center justify-between">
-            <span className="uppercase tracking-wider">Precision / Recall / F1 Tradeoff Curve</span>
+            <span className="uppercase tracking-wider">Precision / Recall / F1 Tradeoff Curve (Simulated Policy Sweep)</span>
             <span className="font-mono text-[#FF5500] font-bold">ACTIVE τ = {threshold.toFixed(2)}</span>
           </div>
 
           <ResponsiveContainer width="100%" height="88%">
             <LineChart data={chartData} margin={{ top: 10, right: 20, left: -10, bottom: 0 }}>
               <CartesianGrid stroke="#E2E8F0" vertical={false} />
-              <XAxis dataKey="threshold" stroke="#64748B" tick={{ fill: '#64748B', fontSize: 10 }} axisLine={{ stroke: '#CBD5E1' }} />
+              <XAxis
+                type="number"
+                dataKey="rawThreshold"
+                domain={[0.1, 0.9]}
+                stroke="#64748B"
+                tick={{ fill: '#64748B', fontSize: 10 }}
+                tickFormatter={(val) => `τ=${Number(val).toFixed(2)}`}
+                axisLine={{ stroke: '#CBD5E1' }}
+              />
               <YAxis stroke="#64748B" tick={{ fill: '#64748B', fontSize: 10 }} domain={[0, 100]} unit="%" axisLine={{ stroke: '#CBD5E1' }} />
               <Tooltip
                 content={({ active, payload, label }) => {
@@ -192,7 +200,7 @@ export const PolicyBenchmark: React.FC<{ activeDataset?: string }> = ({ activeDa
                     <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-lg text-xs space-y-1.5 min-w-[150px]">
                       <div className="font-bold text-slate-800 font-mono border-b border-slate-100 pb-1 flex items-center justify-between">
                         <span>Threshold</span>
-                        <span className="text-[#FF5500]">{label}</span>
+                        <span className="text-[#FF5500]">τ={typeof label === 'number' ? label.toFixed(2) : label}</span>
                       </div>
                       {payload.map((entry, idx) => (
                         <div key={idx} className="flex items-center justify-between gap-3 text-[11px]">
@@ -209,7 +217,7 @@ export const PolicyBenchmark: React.FC<{ activeDataset?: string }> = ({ activeDa
               />
               <Legend verticalAlign="top" align="right" height={24} iconType="circle" wrapperStyle={{ fontSize: 11, color: '#64748B' }} />
               <ReferenceLine
-                x={`τ=${threshold.toFixed(2)}`}
+                x={threshold}
                 stroke="#FF5500"
                 strokeDasharray="3 3"
                 strokeWidth={1.5}

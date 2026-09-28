@@ -165,20 +165,19 @@ export class ApiService {
     const isSpringHealthy = springHealth?.status?.toUpperCase() === 'UP' || springHealth?.status?.toUpperCase() === 'HEALTHY';
     const isOperational = isModelHealthy || isSpringHealthy;
 
-    const isDbConnected = Boolean(
-      modelHealth?.database_connected ||
-      springHealth?.database_connected ||
-      (springHealth && springHealth.status?.toUpperCase() === 'UP')
-    );
+    const isSqliteConnected = Boolean(modelHealth?.database_connected);
+    const isSpringDbConnected = Boolean(springHealth?.database_connected || (springHealth && springHealth.status?.toUpperCase() === 'UP'));
 
     return {
       status: isOperational ? 'HEALTHY' : 'DEGRADED',
       timestamp: modelHealth?.timestamp || springHealth?.timestamp || new Date().toISOString(),
       graphsage_model_loaded: modelHealth?.graphsage_model_loaded ?? true,
       xgboost_model_loaded: modelHealth?.xgboost_model_loaded ?? true,
-      database_connected: isDbConnected,
-      streaming_graph_nodes: modelHealth?.streaming_graph_nodes ?? 750,
-      streaming_graph_edges: modelHealth?.streaming_graph_edges ?? 5000
+      database_connected: isSqliteConnected && isSpringDbConnected,
+      sqlite_connected: isSqliteConnected,
+      spring_db_connected: isSpringDbConnected,
+      streaming_graph_nodes: modelHealth?.streaming_graph_nodes ?? 263,
+      streaming_graph_edges: modelHealth?.streaming_graph_edges ?? 500
     };
   }
 

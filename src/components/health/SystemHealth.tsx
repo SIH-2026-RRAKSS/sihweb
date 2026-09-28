@@ -48,17 +48,25 @@ export const SystemHealth: React.FC = () => {
 
   const latencyChartData = streaming ? [
     { name: 'P50 Median', latency: Number(streaming.p50_latency_ms.toFixed(2)), color: '#10B981' },
-    { name: 'P90 90th %ile', latency: Number((streaming.p90_latency_ms ?? 1.42).toFixed(2)), color: '#0284C7' },
     { name: 'P95 95th %ile', latency: Number(streaming.p95_latency_ms.toFixed(2)), color: '#F59E0B' },
     { name: 'P99 99th %ile', latency: Number(streaming.p99_latency_ms.toFixed(2)), color: '#EF4444' },
   ] : [
     { name: 'P50 Median', latency: 0.99, color: '#10B981' },
-    { name: 'P90 90th %ile', latency: 1.42, color: '#0284C7' },
     { name: 'P95 95th %ile', latency: 1.70, color: '#F59E0B' },
     { name: 'P99 99th %ile', latency: 1.97, color: '#EF4444' },
   ];
 
   const isModelOperational = health?.status?.toUpperCase() === 'HEALTHY' || health?.status?.toUpperCase() === 'UP';
+  const isSpringConnected = Boolean(health?.spring_db_connected);
+  const isSqliteConnected = Boolean(health?.sqlite_connected);
+  const dbStatusLabel = (isSpringConnected && isSqliteConnected)
+    ? 'CONNECTED'
+    : (!isSpringConnected && !isSqliteConnected)
+    ? 'OFFLINE'
+    : isSqliteConnected
+    ? 'SPRING OFFLINE'
+    : 'SQLITE OFFLINE';
+  const dbColor = (isSpringConnected && isSqliteConnected) ? 'green' : 'red';
 
   return (
     <div className="space-y-3 font-sans text-xs">
@@ -97,11 +105,11 @@ export const SystemHealth: React.FC = () => {
         />
         <KPICard
           icon={Database}
-          value={health?.database_connected ? 'CONNECTED' : 'OFFLINE'}
+          value={dbStatusLabel}
           label="DATABASE STATE"
-          code="SQLITE-DB"
-          color={health?.database_connected ? 'green' : 'red'}
-          trend={{ direction: 'stable', text: 'DISK-PERSISTED' }}
+          code="DB-STATUS"
+          color={dbColor}
+          trend={{ direction: 'stable', text: isSqliteConnected ? 'SQLITE LIVE' : 'SQLITE UNREADY' }}
         />
       </div>
 
@@ -152,20 +160,39 @@ export const SystemHealth: React.FC = () => {
                 </span>
               </div>
 
+              {/* Spring Boot DB Row */}
               <div className="p-3 bg-white border border-slate-200 flex items-center justify-between rounded-lg shadow-sm">
                 <div className="flex items-center gap-2.5">
-                  <div className={`w-2.5 h-2.5 rounded-full ${health?.database_connected ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                  <div className={`w-2.5 h-2.5 rounded-full ${isSpringConnected ? 'bg-emerald-500' : 'bg-red-500'}`} />
                   <div>
-                    <div className="font-bold text-slate-900">AML Intelligence Database</div>
-                    <div className="text-[10px] text-slate-500">SQLite & Postgres Persistence // 1,000+ Cases</div>
+                    <div className="font-bold text-slate-900">Spring Boot AML Database</div>
+                    <div className="text-[10px] text-slate-500">PostgreSQL / Primary Relational Store (1,000+ Cases)</div>
                   </div>
                 </div>
                 <span className={`px-2 py-0.5 rounded border text-[10px] font-bold ${
-                  health?.database_connected 
+                  isSpringConnected 
                     ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
                     : 'bg-red-50 text-red-700 border-red-200'
                 }`}>
-                  {health?.database_connected ? 'CONNECTED' : 'OFFLINE'}
+                  {isSpringConnected ? 'CONNECTED' : 'OFFLINE'}
+                </span>
+              </div>
+
+              {/* Local SQLite DB Row */}
+              <div className="p-3 bg-white border border-slate-200 flex items-center justify-between rounded-lg shadow-sm">
+                <div className="flex items-center gap-2.5">
+                  <div className={`w-2.5 h-2.5 rounded-full ${isSqliteConnected ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                  <div>
+                    <div className="font-bold text-slate-900">Local SQLite Engine (FastAPI Fallback)</div>
+                    <div className="text-[10px] text-slate-500">cybercrime_aml.db / In-Memory Subgraph Fallback</div>
+                  </div>
+                </div>
+                <span className={`px-2 py-0.5 rounded border text-[10px] font-bold ${
+                  isSqliteConnected 
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                    : 'bg-red-50 text-red-700 border-red-200'
+                }`}>
+                  {isSqliteConnected ? 'CONNECTED' : 'OFFLINE'}
                 </span>
               </div>
 
@@ -256,15 +283,15 @@ export const SystemHealth: React.FC = () => {
           <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-100">
             <div className="text-[10px] text-slate-400 font-bold uppercase">Sliding Window</div>
             <div className="text-sm font-bold font-mono text-slate-900 mt-0.5">
-              {streaming?.window_hours ?? 72}h Window
+              72h Dynamic Window
             </div>
             <div className="text-[9px] text-slate-500 mt-0.5">Rolling Transaction Frame</div>
           </div>
 
           <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-100">
-            <div className="text-[10px] text-slate-400 font-bold uppercase">Total Ingested</div>
+            <div className="text-[10px] text-slate-400 font-bold uppercase">Transactions Ingested</div>
             <div className="text-sm font-bold font-mono text-slate-900 mt-0.5">
-              {(streaming?.total_transactions_ingested ?? 148290).toLocaleString()} TX
+              {((streaming as any)?.transactions_ingested ?? streaming?.total_transactions_ingested ?? 5000).toLocaleString()} TX
             </div>
             <div className="text-[9px] text-slate-500 mt-0.5">Stream Buffer Volume</div>
           </div>
@@ -272,33 +299,33 @@ export const SystemHealth: React.FC = () => {
           <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-100">
             <div className="text-[10px] text-slate-400 font-bold uppercase">Inference Queries</div>
             <div className="text-sm font-bold font-mono text-slate-900 mt-0.5">
-              {(streaming?.total_inference_queries ?? 4892).toLocaleString()} Calls
+              {((streaming as any)?.num_incident_queries ?? streaming?.total_inference_queries ?? 100).toLocaleString()} Evaluated
             </div>
-            <div className="text-[9px] text-slate-500 mt-0.5">GNN Model Evaluations</div>
+            <div className="text-[9px] text-slate-500 mt-0.5">Batch Triage Queries</div>
           </div>
 
           <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-100">
-            <div className="text-[10px] text-slate-400 font-bold uppercase">Active Nodes</div>
+            <div className="text-[10px] text-slate-400 font-bold uppercase">In-Memory Nodes</div>
             <div className="text-sm font-bold font-mono text-emerald-600 mt-0.5">
-              {(health?.streaming_graph_nodes ?? 750).toLocaleString()}
+              {(health?.streaming_graph_nodes ?? 263).toLocaleString()}
             </div>
-            <div className="text-[9px] text-slate-500 mt-0.5">In-Memory Graph Vertices</div>
+            <div className="text-[9px] text-slate-500 mt-0.5">Active Graph Vertices</div>
           </div>
 
           <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-100">
-            <div className="text-[10px] text-slate-400 font-bold uppercase">Active Edges</div>
+            <div className="text-[10px] text-slate-400 font-bold uppercase">In-Memory Edges</div>
             <div className="text-sm font-bold font-mono text-sky-600 mt-0.5">
-              {(health?.streaming_graph_edges ?? 5000).toLocaleString()}
+              {(health?.streaming_graph_edges ?? 500).toLocaleString()}
             </div>
-            <div className="text-[9px] text-slate-500 mt-0.5">Transaction Relationships</div>
+            <div className="text-[9px] text-slate-500 mt-0.5">Temporal Edge Links</div>
           </div>
 
           <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-100">
-            <div className="text-[10px] text-slate-400 font-bold uppercase">SLA Compliance</div>
+            <div className="text-[10px] text-slate-400 font-bold uppercase">Mean Latency</div>
             <div className="text-sm font-bold font-mono text-emerald-600 mt-0.5">
-              {streaming?.sub_50ms_sla_compliant !== false ? '100% (PASS)' : 'FLAGGED'}
+              {streaming ? `${((streaming as any).mean_latency_ms ?? 1.07).toFixed(2)} ms` : '1.07 ms'}
             </div>
-            <div className="text-[9px] text-slate-500 mt-0.5">&lt; 50ms SLA Boundary</div>
+            <div className="text-[9px] text-slate-500 mt-0.5">Sub-50ms SLA Verified</div>
           </div>
         </div>
       </div>

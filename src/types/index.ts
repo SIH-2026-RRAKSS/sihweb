@@ -138,6 +138,8 @@ export interface HealthResponse {
   graphsage_model_loaded: boolean;
   xgboost_model_loaded: boolean;
   database_connected: boolean;
+  sqlite_connected?: boolean;
+  spring_db_connected?: boolean;
   streaming_graph_nodes: number;
   streaming_graph_edges: number;
 }
