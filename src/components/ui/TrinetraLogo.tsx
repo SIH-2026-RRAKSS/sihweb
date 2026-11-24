@@ -23,7 +23,7 @@ export const REGIONAL_TRI_LANGUAGES: RegionalLanguageOption[] = [
 ];
 
 interface TrinetraLogoProps {
-  size?: 'sm' | 'md' | 'lg' | 'hero' | 'footer';
+  size?: 'sm' | 'md' | 'lg' | 'hero' | 'brand' | 'footer';
   layout?: 'inline' | 'stacked';
   showIcon?: boolean;
   showSuffix?: boolean;
@@ -32,16 +32,19 @@ interface TrinetraLogoProps {
   intervalMs?: number;
   interactive?: boolean;
   theme?: 'light' | 'dark';
+  badgePrefix?: string;
 }
 
 export const TrinetraLogo: React.FC<TrinetraLogoProps> = ({
   size = 'md',
+  layout = 'inline',
   showIcon = true,
   showSuffix = true,
   showLangBadge = false,
   className = '',
   intervalMs = 2600,
   interactive = true,
+  badgePrefix = '',
 }) => {
   const [langIdx, setLangIdx] = useState(0);
 
@@ -152,7 +155,16 @@ export const TrinetraLogo: React.FC<TrinetraLogoProps> = ({
       badgeSize: 'text-xs px-3 py-1',
       gap: 'gap-3.5',
     },
-  }[size as 'sm' | 'md' | 'lg' | 'hero'] || {
+    brand: {
+      boxClass: 'w-24 h-24 p-3 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-orange-500/50 transition-colors',
+      imgPx: 80,
+      imgClass: 'w-20 h-20',
+      textSize: 'text-[40px] sm:text-[48px] xl:text-[56px] leading-[1.05]',
+      prefixSize: 'text-[40px] sm:text-[48px] xl:text-[56px] font-black',
+      badgeSize: 'text-[13px] px-3 py-1 font-semibold',
+      gap: 'gap-5',
+    },
+  }[size as 'sm' | 'md' | 'lg' | 'hero' | 'brand'] || {
     boxClass: 'w-9 h-9 p-1.5',
     imgPx: 24,
     imgClass: 'w-6 h-6',
@@ -164,7 +176,7 @@ export const TrinetraLogo: React.FC<TrinetraLogoProps> = ({
 
   return (
     <div
-      className={`inline-flex items-center ${sizeConfig.gap} select-none ${className}`}
+      className={`${layout === 'stacked' ? 'flex flex-col items-start' : 'inline-flex items-center'} ${sizeConfig.gap} select-none ${className}`}
       onClick={interactive ? () => setLangIdx((prev) => (prev + 1) % REGIONAL_TRI_LANGUAGES.length) : undefined}
       title={interactive ? `Team Trinetra (Active: ${current.lang}) - Click to switch script` : undefined}
       style={{ cursor: interactive ? 'pointer' : 'default' }}
@@ -217,7 +229,7 @@ export const TrinetraLogo: React.FC<TrinetraLogoProps> = ({
         </div>
 
         {showLangBadge && (
-          <div className="mt-1 flex items-center gap-1.5">
+          <div className="mt-2 flex items-center gap-1.5">
             <AnimatePresence mode="wait">
               <motion.span
                 key={current.script}
@@ -225,9 +237,9 @@ export const TrinetraLogo: React.FC<TrinetraLogoProps> = ({
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 3 }}
                 transition={{ duration: 0.2 }}
-                className={`rounded bg-orange-50 border border-orange-200 text-orange-700 font-sans font-semibold ${sizeConfig.badgeSize}`}
+                className={`rounded-full bg-orange-100/70 border border-orange-200/80 text-orange-700 font-sans font-semibold ${sizeConfig.badgeSize}`}
               >
-                {current.lang} ({current.code})
+                {badgePrefix ? `${badgePrefix}${current.lang} (${current.code})` : `${current.lang} (${current.code})`}
               </motion.span>
             </AnimatePresence>
           </div>

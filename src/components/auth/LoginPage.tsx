@@ -21,6 +21,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { UserRole } from '../../types';
 import { useAsyncState, AsyncStatus } from '../../hooks/useAsyncState';
+import { TrinetraLogo } from '../ui/TrinetraLogo';
 
 export const LoginPage: React.FC<{
   onLoginSuccess?: () => void;
@@ -233,26 +234,18 @@ export const LoginPage: React.FC<{
             </div>
           </div>
 
-          {/* Logo at ~96px Box (Emblem at 80px) */}
-          <div className="w-24 h-24 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-center p-3 mb-5 hover:border-orange-500/50 transition-colors">
-            <img
-              src="/trinetra_logo.png"
-              alt="Team Trinetra Emblem"
-              className="w-20 h-20 max-w-full max-h-full object-contain drop-shadow-sm"
-              style={{ width: '80px', height: '80px' }}
+          {/* Animated Multi-Lingual Trinetra Logo & Wordmark (Cycles dynamically through all Indian scripts like Landing Page) */}
+          <div className="mb-6">
+            <TrinetraLogo
+              size="brand"
+              layout="stacked"
+              showIcon={true}
+              showSuffix={true}
+              showLangBadge={true}
+              intervalMs={2400}
+              theme="light"
+              badgePrefix="Script: "
             />
-          </div>
-
-          {/* "ত্রিNETRAA" Wordmark at 56px with Malayalam Badge Beneath */}
-          <div className="space-y-2 mb-6">
-            <h1 className="text-[40px] sm:text-[48px] xl:text-[56px] font-black tracking-tight text-slate-900 leading-[1.05]">
-              <span className="text-[#FF5500]">ত্রি</span>NETRAA
-            </h1>
-            <div>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-100/70 border border-orange-200/80 text-orange-700 font-sans text-[13px] font-semibold">
-                Script: Malayalam (ML) · ത്രിNETRAA
-              </span>
-            </div>
           </div>
 
           {/* Tagline at 18px (max-width 460px) */}
